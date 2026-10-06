@@ -1,0 +1,73 @@
+# ==============================================================================
+# macOS & General
+# ==============================================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+*.swp
+*~.nib
+
+# ==============================================================================
+# Xcode / Swift / iOS (numelyra_app_ios)
+# ==============================================================================
+build/
+DerivedData/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+# Keep Xcode project's Package.resolved if desired, or ignore user state:
+*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/swiftpm/configuration/
+
+# CocoaPods & Carthage
+Pods/
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Signing & Local Secrets
+*.p8
+*.p12
+*.key
+*.jks
+*.pem
+*.mobileprovision
+Secrets.xcconfig
+*.local.xcconfig
+
+# ==============================================================================
+# React Native Reference Project (Excluded from iOS repo)
+# ==============================================================================
+numelyra_app/
+
+# Environment variables
+.env
+.env*.local

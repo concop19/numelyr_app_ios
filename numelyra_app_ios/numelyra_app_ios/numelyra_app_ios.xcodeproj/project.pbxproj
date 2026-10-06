@@ -1,0 +1,499 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 110;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A300000130748B7A000D25BD /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = A300000230748B7A000D25BD /* ComposableArchitecture */; };
+		A300000330748B7A000D25BD /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A300000430748B7A000D25BD /* Supabase */; };
+		A300000730748B7A000D25BD /* AstronomyKit in Frameworks */ = {isa = PBXBuildFile; productRef = A300000830748B7A000D25BD /* AstronomyKit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B300001030748B7A000D25BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03C792D030748B7A000D25BD /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 03C792D730748B7A000D25BD;
+			remoteInfo = numelyra_app_ios;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		03C792D830748B7A000D25BD /* numelyra_app_ios.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = numelyra_app_ios.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B300001130748B7A000D25BD /* numelyra_app_iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = numelyra_app_iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		03C792DA30748B7A000D25BD /* numelyra_app_ios */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = numelyra_app_ios;
+			sourceTree = "<group>";
+		};
+		B300001230748B7A000D25BD /* numelyra_app_iosTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = numelyra_app_iosTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		03C792D530748B7A000D25BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				A300000130748B7A000D25BD /* ComposableArchitecture in Frameworks */,
+				A300000330748B7A000D25BD /* Supabase in Frameworks */,
+				A300000730748B7A000D25BD /* AstronomyKit in Frameworks */,
+			);
+		};
+		B300001330748B7A000D25BD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+			);
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03C792CF30748B7A000D25BD = {
+			isa = PBXGroup;
+			children = (
+				03C792DA30748B7A000D25BD /* numelyra_app_ios */,
+				B300001230748B7A000D25BD /* numelyra_app_iosTests */,
+				03C792D930748B7A000D25BD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		03C792D930748B7A000D25BD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				03C792D830748B7A000D25BD /* numelyra_app_ios.app */,
+				B300001130748B7A000D25BD /* numelyra_app_iosTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		03C792D730748B7A000D25BD /* numelyra_app_ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03C792E330748B7B000D25BD /* Build configuration list for PBXNativeTarget "numelyra_app_ios" */;
+			buildPhases = (
+				03C792D430748B7A000D25BD /* Sources */,
+				03C792D530748B7A000D25BD /* Frameworks */,
+				03C792D630748B7A000D25BD /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				03C792DA30748B7A000D25BD /* numelyra_app_ios */,
+			);
+			name = numelyra_app_ios;
+			packageProductDependencies = (
+				A300000230748B7A000D25BD /* ComposableArchitecture */,
+				A300000430748B7A000D25BD /* Supabase */,
+				A300000830748B7A000D25BD /* AstronomyKit */,
+			);
+			productName = numelyra_app_ios;
+			productReference = 03C792D830748B7A000D25BD /* numelyra_app_ios.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B300001430748B7A000D25BD /* numelyra_app_iosTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B300001A30748B7A000D25BD /* Build configuration list for PBXNativeTarget "numelyra_app_iosTests" */;
+			buildPhases = (
+				B300001530748B7A000D25BD /* Sources */,
+				B300001330748B7A000D25BD /* Frameworks */,
+				B300001630748B7A000D25BD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B300001730748B7A000D25BD /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				B300001230748B7A000D25BD /* numelyra_app_iosTests */,
+			);
+			name = numelyra_app_iosTests;
+			packageProductDependencies = (
+			);
+			productName = numelyra_app_iosTests;
+			productReference = B300001130748B7A000D25BD /* numelyra_app_iosTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		03C792D030748B7A000D25BD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					03C792D730748B7A000D25BD = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					B300001430748B7A000D25BD = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 03C792D730748B7A000D25BD;
+					};
+				};
+			};
+			buildConfigurationList = 03C792D330748B7A000D25BD /* Build configuration list for PBXProject "numelyra_app_ios" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 03C792CF30748B7A000D25BD;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A300000530748B7A000D25BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				A300000630748B7A000D25BD /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				A300000930748B7A000D25BD /* XCRemoteSwiftPackageReference "AstronomyKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 03C792D930748B7A000D25BD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				03C792D730748B7A000D25BD /* numelyra_app_ios */,
+				B300001430748B7A000D25BD /* numelyra_app_iosTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		03C792D630748B7A000D25BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+		B300001630748B7A000D25BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03C792D430748B7A000D25BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+		B300001530748B7A000D25BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B300001730748B7A000D25BD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 03C792D730748B7A000D25BD /* numelyra_app_ios */;
+			targetProxy = B300001030748B7A000D25BD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		03C792E130748B7B000D25BD /* Debug configuration for PBXProject "numelyra_app_ios" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		03C792E230748B7B000D25BD /* Release configuration for PBXProject "numelyra_app_ios" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		03C792E430748B7B000D25BD /* Debug configuration for PBXNativeTarget "numelyra_app_ios" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.numelyra.app.numelyra-app-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		03C792E530748B7B000D25BD /* Release configuration for PBXNativeTarget "numelyra_app_ios" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.numelyra.app.numelyra-app-ios";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B300001830748B7A000D25BD /* Debug configuration for PBXNativeTarget "numelyra_app_iosTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.numelyra.app.numelyra-app-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/numelyra_app_ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/numelyra_app_ios";
+			};
+			name = Debug;
+		};
+		B300001930748B7A000D25BD /* Release configuration for PBXNativeTarget "numelyra_app_iosTests" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.numelyra.app.numelyra-app-iosTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/numelyra_app_ios.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/numelyra_app_ios";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03C792D330748B7A000D25BD /* Build configuration list for PBXProject "numelyra_app_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03C792E130748B7B000D25BD /* Debug configuration for PBXProject "numelyra_app_ios" */,
+				03C792E230748B7B000D25BD /* Release configuration for PBXProject "numelyra_app_ios" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		03C792E330748B7B000D25BD /* Build configuration list for PBXNativeTarget "numelyra_app_ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03C792E430748B7B000D25BD /* Debug configuration for PBXNativeTarget "numelyra_app_ios" */,
+				03C792E530748B7B000D25BD /* Release configuration for PBXNativeTarget "numelyra_app_ios" */,
+			);
+			defaultConfigurationName = Release;
+		};
+		B300001A30748B7A000D25BD /* Build configuration list for PBXNativeTarget "numelyra_app_iosTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B300001830748B7A000D25BD /* Debug configuration for PBXNativeTarget "numelyra_app_iosTests" */,
+				B300001930748B7A000D25BD /* Release configuration for PBXNativeTarget "numelyra_app_iosTests" */,
+			);
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A300000530748B7A000D25BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.15.0;
+			};
+		};
+		A300000630748B7A000D25BD /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+		A300000930748B7A000D25BD /* XCRemoteSwiftPackageReference "AstronomyKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/heirloomlogic/AstronomyKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A300000230748B7A000D25BD /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A300000530748B7A000D25BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		A300000430748B7A000D25BD /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A300000630748B7A000D25BD /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		A300000830748B7A000D25BD /* AstronomyKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A300000930748B7A000D25BD /* XCRemoteSwiftPackageReference "AstronomyKit" */;
+			productName = AstronomyKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 03C792D030748B7A000D25BD /* Project object */;
+	validationLevel = 1;
+}
