@@ -1,6 +1,6 @@
 import Foundation
 
-public struct LunarDate: Codable, Equatable, Hashable, Sendable {
+public nonisolated struct LunarDate: Codable, Equatable, Hashable, Sendable {
     public var day: Int
     public var month: Int
     public var year: Int
@@ -14,7 +14,7 @@ public struct LunarDate: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public struct LunarHourInfo: Identifiable, Codable, Equatable, Sendable {
+public nonisolated struct LunarHourInfo: Identifiable, Codable, Equatable, Sendable {
     public var id: String { name }
     public var name: String // Tý, Sửu, Dần...
     public var canChi: String // Giáp Tý, Ất Sửu...
@@ -52,7 +52,7 @@ public struct LunarHourInfo: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-public struct DayHoangDaoStatus: Codable, Equatable, Sendable {
+public nonisolated struct DayHoangDaoStatus: Codable, Equatable, Sendable {
     public var isHoangDao: Bool
     public var label: String
 
@@ -62,7 +62,7 @@ public struct DayHoangDaoStatus: Codable, Equatable, Sendable {
     }
 }
 
-public struct CalendarDayItem: Identifiable, Equatable, Sendable {
+public nonisolated struct CalendarDayItem: Identifiable, Equatable, Sendable {
     public var id: Date { date }
     public var date: Date
     public var dayNumber: Int
@@ -85,7 +85,7 @@ public struct CalendarDayItem: Identifiable, Equatable, Sendable {
     }
 }
 
-public struct CalendarWeekInfo: Equatable, Sendable {
+public nonisolated struct CalendarWeekInfo: Equatable, Sendable {
     public var weekNumber: Int
     public var days: [CalendarDayItem]
 
@@ -95,7 +95,7 @@ public struct CalendarWeekInfo: Equatable, Sendable {
     }
 }
 
-public struct CaDaoRecord: Identifiable, Codable, Equatable, Sendable {
+public nonisolated struct CaDaoRecord: Identifiable, Codable, Equatable, Sendable {
     public var id: Int
     public var title: String
     public var content: String
@@ -111,7 +111,7 @@ public struct CaDaoRecord: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-public struct DayDirection: Codable, Equatable, Hashable, Sendable {
+public nonisolated struct DayDirection: Codable, Equatable, Hashable, Sendable {
     public var huong: String
     public var than: String
     public var hyThan: String
@@ -133,7 +133,7 @@ public struct DayDirection: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public struct DayActivities: Codable, Equatable, Hashable, Sendable {
+public nonisolated struct DayActivities: Codable, Equatable, Hashable, Sendable {
     public var trucName: String
     public var trucQuality: String
     public var yi: [String]
@@ -152,12 +152,12 @@ public struct DayActivities: Codable, Equatable, Hashable, Sendable {
     }
 }
 
-public enum CalendarDateUnit: String, Codable, CaseIterable, Equatable, Sendable {
+public nonisolated enum CalendarDateUnit: String, Codable, CaseIterable, Equatable, Sendable {
     case day
     case month
 }
 
-public struct LunarDaySnapshot: Equatable, Sendable {
+public nonisolated struct LunarDaySnapshot: Equatable, Sendable {
     public var solarDate: Date
     public var day: Int
     public var month: Int
@@ -257,4 +257,3 @@ public struct LunarDaySnapshot: Equatable, Sendable {
         self.userNguHanhEmoji = userNguHanhEmoji
     }
 }
-

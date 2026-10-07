@@ -67,11 +67,16 @@ extension LunarClient: DependencyKey {
             LunarService.solarToLunar(day: day, month: month, year: year)
         },
         daySnapshot: { date, birthDateString, currentHour in
-            let resolvedHour = currentHour ?? LunarService.defaultCalendar.component(.hour, from: Date())
+            let now = Date()
+            let nowComponents = LunarService.defaultCalendar.dateComponents([.hour, .minute], from: now)
+            let resolvedHour = currentHour ?? (nowComponents.hour ?? 0)
+            let resolvedMinute = currentHour == nil ? (nowComponents.minute ?? 0) : 0
             return LunarService.makeDaySnapshot(
                 for: date,
                 birthDateString: birthDateString,
-                currentHour: resolvedHour
+                currentHour: resolvedHour,
+                currentMinute: resolvedMinute,
+                referenceDate: now
             )
         },
         moveDate: { date, amount, unit in

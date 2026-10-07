@@ -4,27 +4,33 @@ import Foundation
 @DependencyClient
 nonisolated struct AstrologyClient {
     var generateVector: @Sendable (_ input: AstroBirthInput, _ currentDate: Date) throws -> AstroVectorResult
+    // từ astrobirthinput + ngày hiện tại chúng ta sẽ có dc result
+    // tương đương 32 chiều đó tính từ hiện tại và quá khứ
+    
+    // vector 32 chiều để thể hiện feature ai dánhd giá
     var natalContext: @Sendable (_ input: AstroBirthInput) async throws -> AstroNatalContext?
+    var cachedDailyFortune: @Sendable (_ query: AstroDailyFortuneQuery) async -> AstroFortuneSlip? = { _ in nil }
     var dailyFortune: @Sendable (
+        // dữ liệu lúc sinh của người dùng
         _ query: AstroDailyFortuneQuery,
         _ cachePolicy: AstroFortuneCachePolicy
     ) async throws -> AstroFortuneSlip
+    // gọi AI để nhận phản hồi
+    
 }
 
 extension AstrologyClient: DependencyKey {
     static var liveValue: Self {
         @Dependency(\.supabaseClient) var supabaseClient
         @Dependency(\.birthLocationClient) var birthLocationClient
+        @Dependency(\.caDaoClient) var caDaoClient
         let cache = AstrologyFortuneCache()
 
-        return Self(
-            generateVector: { input, currentDate in
-                try AstrologyEngine.generateVector(input: input, currentDate: currentDate)
-            },
-            natalContext: { input in
-                try AstrologyEngine.makeNatalSnapshot(input: input, fingerprint: "direct").context
-            },
-            dailyFortune: { query, cachePolicy in
+        @Sendable func resolveCachedFortune(_ query: AstroDailyFortuneQuery) async -> AstroFortuneSlip? {
+            guard var cached = await cache.load(date: query.date, profile: query.profile) else {
+                return nil
+            }
+            if cached.astroMetadata == nil {
                 var resolvedLocation: ResolvedBirthLocation?
                 if query.profile?.effectiveBirthTimeAccuracy == .exact,
                    let placeID = query.profile?.birthLocation?.placeID
@@ -38,19 +44,48 @@ extension AstrologyClient: DependencyKey {
                     birthTimeAccuracy: query.profile?.effectiveBirthTimeAccuracy ?? .unknown,
                     resolvedBirthLocation: resolvedLocation
                 )
+                if let metadata = try? AstrologyEngine.generateVector(
+                    input: input,
+                    currentDate: query.date
+                ).metadata {
+                    cached.astroMetadata = metadata
+                    try? await cache.save(cached, date: query.date, profile: query.profile)
+                }
+            }
+            return cached
+        }
 
+        return Self(
+            generateVector: { input, currentDate in
+                try AstrologyEngine.generateVector(input: input, currentDate: currentDate)
+            },
+            natalContext: { input in
+                try AstrologyEngine.makeNatalSnapshot(input: input, fingerprint: "direct").context
+            },
+            cachedDailyFortune: { query in
+                await resolveCachedFortune(query)
+            },
+            dailyFortune: { query, cachePolicy in
                 if cachePolicy == .useCache,
-                   var cached = await cache.load(date: query.date, profile: query.profile)
+                   let cached = await resolveCachedFortune(query)
                 {
-                    if cached.astroMetadata == nil {
-                        cached.astroMetadata = try AstrologyEngine.generateVector(
-                            input: input,
-                            currentDate: query.date
-                        ).metadata
-                        try? await cache.save(cached, date: query.date, profile: query.profile)
-                    }
                     return cached
                 }
+
+                var resolvedLocation: ResolvedBirthLocation?
+                if query.profile?.effectiveBirthTimeAccuracy == .exact,
+                   let placeID = query.profile?.birthLocation?.placeID
+                {
+                    resolvedLocation = try? await birthLocationClient.refresh(placeID)
+                    // ? đánh dấu là nếu mất mạng hay ko chạy dc tiếp tục code tiếp ko break
+                }
+                let input = AstroBirthInput(
+                    birthDate: query.profile?.birthDate ?? "1998-10-20",
+                    birthTime: query.profile?.birthTime,
+                    fullName: query.profile?.fullName ?? "Đương số",
+                    birthTimeAccuracy: query.profile?.effectiveBirthTimeAccuracy ?? .unknown,
+                    resolvedBirthLocation: resolvedLocation
+                )
 
                 let fingerprint = AstrologyCacheKey.profileFingerprint(query.profile)
                 let natalSnapshot: AstroNatalSnapshot
@@ -77,7 +112,10 @@ extension AstrologyClient: DependencyKey {
                     date: query.date,
                     profile: query.profile
                 )
-                let anchor = query.anchorCaDao ?? Self.fallbackAnchor
+                let anchor = Self.resolveAnchorCaDao(
+                    explicit: query.anchorCaDao,
+                    dailyRecord: caDaoClient.dailyCaDao(query.date)
+                )
                 let payload = Self.makeRequest(
                     metadata: metadata,
                     anchor: anchor,
@@ -89,6 +127,7 @@ extension AstrologyClient: DependencyKey {
                 fortune.anchorCaDao = anchor
                 fortune.astroMetadata = metadata
                 try? await cache.save(fortune, date: query.date, profile: query.profile)
+                // có nên chạy 1 luồng khác ko
                 return fortune
             }
         )
@@ -102,13 +141,24 @@ extension AstrologyClient: DependencyKey {
         natalContext: { input in
             try AstrologyEngine.makeNatalSnapshot(input: input, fingerprint: "preview").context
         },
+        cachedDailyFortune: { _ in nil },
         dailyFortune: { query, _ in
-            AstroFortuneSlip(
+            let input = AstroBirthInput(
+                birthDate: query.profile?.birthDate ?? "1998-10-20",
+                birthTime: query.profile?.birthTime,
+                fullName: query.profile?.fullName ?? "Đương số"
+            )
+            let metadata = try? AstrologyEngine.generateVector(
+                input: input,
+                currentDate: query.date
+            ).metadata
+            return AstroFortuneSlip(
                 title: "Quẻ bình an",
                 verse: "Trăng lên soi bóng mặt hồ\nGiữ tâm trong sáng, cơ đồ hanh thông",
                 mirror: "Nhịp ngày phù hợp để quan sát trước khi quyết định.",
                 advice: "Chọn một việc quan trọng và hoàn thành thật gọn.",
-                anchorCaDao: query.anchorCaDao ?? fallbackAnchor
+                anchorCaDao: query.anchorCaDao ?? fallbackAnchor,
+                astroMetadata: metadata
             )
         }
     )
@@ -140,6 +190,33 @@ extension AstrologyClient {
         content: "Cái cò cái vạc cái nông\nBa con cùng béo vặt lông con nào\nVặt lông con cốc cho tao\nTao nấu tao nướng tao xào tao ăn",
         category: "Dân gian"
     )
+
+    nonisolated static func resolveAnchorCaDao(
+        explicit: AnchorCaDao?,
+        dailyRecord: CaDaoRecord?
+    ) -> AnchorCaDao {
+        if let explicit,
+           !explicit.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        {
+            return AnchorCaDao(
+                content: explicit.content,
+                category: explicit.category?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false
+                    ? explicit.category
+                    : "Dân gian"
+            )
+        }
+        if let dailyRecord {
+            let trimmedContent = dailyRecord.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmedContent.isEmpty {
+                let trimmedCategory = dailyRecord.category.trimmingCharacters(in: .whitespacesAndNewlines)
+                return AnchorCaDao(
+                    content: dailyRecord.content,
+                    category: trimmedCategory.isEmpty ? "Dân gian" : dailyRecord.category
+                )
+            }
+        }
+        return fallbackAnchor
+    }
 
     nonisolated static func makeRequest(
         metadata: AstroFeatureMetadata,

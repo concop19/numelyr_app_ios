@@ -10,6 +10,7 @@
 		A300000130748B7A000D25BD /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = A300000230748B7A000D25BD /* ComposableArchitecture */; };
 		A300000330748B7A000D25BD /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A300000430748B7A000D25BD /* Supabase */; };
 		A300000730748B7A000D25BD /* AstronomyKit in Frameworks */ = {isa = PBXBuildFile; productRef = A300000830748B7A000D25BD /* AstronomyKit */; };
+		A300000C30748B7A000D25BD /* SVGPath in Frameworks */ = {isa = PBXBuildFile; productRef = A300000B30748B7A000D25BD /* SVGPath */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 				A300000130748B7A000D25BD /* ComposableArchitecture in Frameworks */,
 				A300000330748B7A000D25BD /* Supabase in Frameworks */,
 				A300000730748B7A000D25BD /* AstronomyKit in Frameworks */,
+				A300000C30748B7A000D25BD /* SVGPath in Frameworks */,
 			);
 		};
 		B300001330748B7A000D25BD /* Frameworks */ = {
@@ -96,6 +98,7 @@
 				A300000230748B7A000D25BD /* ComposableArchitecture */,
 				A300000430748B7A000D25BD /* Supabase */,
 				A300000830748B7A000D25BD /* AstronomyKit */,
+				A300000B30748B7A000D25BD /* SVGPath */,
 			);
 			productName = numelyra_app_ios;
 			productReference = 03C792D830748B7A000D25BD /* numelyra_app_ios.app */;
@@ -118,8 +121,6 @@
 				B300001230748B7A000D25BD /* numelyra_app_iosTests */,
 			);
 			name = numelyra_app_iosTests;
-			packageProductDependencies = (
-			);
 			productName = numelyra_app_iosTests;
 			productReference = B300001130748B7A000D25BD /* numelyra_app_iosTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -156,6 +157,7 @@
 				A300000530748B7A000D25BD /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				A300000630748B7A000D25BD /* XCRemoteSwiftPackageReference "supabase-swift" */,
 				A300000930748B7A000D25BD /* XCRemoteSwiftPackageReference "AstronomyKit" */,
+				A300000A30748B7A000D25BD /* XCRemoteSwiftPackageReference "SVGPath" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 03C792D930748B7A000D25BD /* Products */;
@@ -331,6 +333,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Numelyra dùng vị trí hiện tại để gợi ý địa điểm phù hợp ở gần bạn.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Numelyra chuyển lời nói tiếng Việt của bạn thành nội dung câu hỏi.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -362,6 +368,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Numelyra dùng vị trí hiện tại để gợi ý địa điểm phù hợp ở gần bạn.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Numelyra chuyển lời nói tiếng Việt của bạn thành nội dung câu hỏi.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -474,6 +484,14 @@
 				minimumVersion = 3.0.0;
 			};
 		};
+		A300000A30748B7A000D25BD /* XCRemoteSwiftPackageReference "SVGPath" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nicklockwood/SVGPath";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 1.3.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -491,6 +509,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A300000930748B7A000D25BD /* XCRemoteSwiftPackageReference "AstronomyKit" */;
 			productName = AstronomyKit;
+		};
+		A300000B30748B7A000D25BD /* SVGPath */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A300000A30748B7A000D25BD /* XCRemoteSwiftPackageReference "SVGPath" */;
+			productName = SVGPath;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -226,7 +226,7 @@ let star = twelveDayStars[starOffset]
 
 Không phải cứ Giờ Hoàng Đạo nào cũng tốt như nhau cho mọi người. Để chọn ra **1 khung giờ tốt nhất sắp tới trong ngày** cho người dùng, hàm `getBestDepartureHour` kết hợp thêm 2 bộ lọc:
 
-1. **Tránh giờ xung khắc (`tuHanhXung`)**:
+1. **Tránh giờ xung khắc trực tiếp (`lucXung`)**:
    Trên vòng tròn 12 con giáp, 2 con giáp đứng đối diện nhau (cách nhau 6 vị trí) sẽ xung khắc trực tiếp với nhau (`Tý-Ngọ, Sửu-Mùi, Dần-Thân, Mão-Dậu, Thìn-Tuất, Tỵ-Hợi`).
    - `isClash`: Giờ xung với **tuổi của người dùng** (ví dụ người tuổi Tý tránh giờ Ngọ).
    - `isDayClash`: Giờ xung với **con giáp của chính ngày hôm đó** (ví dụ ngày Tý tránh giờ Ngọ).
@@ -235,7 +235,8 @@ Không phải cứ Giờ Hoàng Đạo nào cũng tốt như nhau cho mọi ngư
    - 3 trạng thái **Tốt**: `0: Đại An` (bình an), `2: Tốc Hỷ` (niềm vui nhanh), `4: Tiểu Cát` (may mắn).
    - 3 trạng thái **Xấu**: `1: Lưu Niên` (chậm trễ), `3: Xích Khẩu` (dễ cãi vã), `5: Không Vong` (hao công tốn sức).
 3. **Thứ tự ưu tiên chọn giờ**:
-   - Đầu tiên, sắp xếp 12 khung giờ theo đúng thứ tự đồng hồ từ sáng đến đêm (`01h Sửu -> 03h Dần -> ... -> 21h Hợi -> 23h Tý`) để ban ngày luôn gợi ý giờ sáng/chiều sắp tới (tránh lỗi bản cũ lấy nhầm Giờ Tý 23h đêm vì Giờ Tý nằm ở vị trí đầu mảng).
+   - Mỗi giờ được xét như một **khoảng hai tiếng**, không chỉ theo giờ bắt đầu. Riêng giờ Tý được tách thành `00:00-01:00` và `23:00-24:00` trong ngày dân dụng.
+   - Nếu tất cả giờ phù hợp đã qua, hàm trả về `nil`, không quay lại gợi ý một giờ trong quá khứ.
    - **Ưu tiên 1 (Tốt nhất)**: Giờ Hoàng Đạo + Không xung tuổi + Không xung ngày + Trúng cung Lý Thuần Phong tốt (`Đại An, Tốc Hỷ, Tiểu Cát`).
    - **Ưu tiên 2**: Giờ Hoàng Đạo + Không xung tuổi + Không xung ngày.
    - **Ưu tiên 3**: Giờ Hoàng Đạo + Không xung tuổi.
@@ -324,10 +325,12 @@ default:             return nil
 
 ### 8.1. 12 Trực của ngày (`thapNhiKienTru`)
 Để biết một ngày thích hợp làm việc gì (khai trương, cưới hỏi, ký kết hay dọn dẹp, nghỉ ngơi), Lịch Vạn Niên dùng vòng **12 Trực** (`Kiến, Trừ, Mãn, Bình, Định, Chấp, Phá, Nguy, Thành, Thu, Khai, Bế`):
-- Trong mỗi tháng Âm lịch, ngày nào có **con giáp của Ngày trùng với con giáp của Tháng** (ví dụ: ngày Dần trong tháng Giêng) thì ngày đó bắt đầu ở vị trí số `0` (**Trực Kiến**).
+- 12 Trực dùng **tháng tiết khí (nguyệt kiến)**, không đổi theo ngày mùng 1 âm lịch: tháng Dần bắt đầu từ Lập Xuân, tháng Mão từ Kinh Trập, ..., tháng Sửu từ Tiểu Hàn.
+- Ngày có **Địa Chi ngày trùng Địa Chi tháng tiết khí** bắt đầu ở vị trí số `0` (**Trực Kiến**).
+- `getSolarMonthDiaChiIndex` xét kinh độ Mặt Trời ở cuối ngày địa phương để ngày nhập tiết là ngày đầu tháng tiết; nhờ vậy Trực của ngày nhập tiết lặp lại ngày trước đó theo quy tắc Kiến Trừ.
 - Các ngày tiếp theo chỉ việc đếm tiến lên theo công thức:
   ```swift
-  let monthChiIdx = positiveMod(lunar.month + 1, 12) // Con giáp của tháng Âm lịch
+  let monthChiIdx = getSolarMonthDiaChiIndex(day: dd, month: mm, year: yy)
   let trucIdx = positiveMod(dayChiIdx - monthChiIdx, 12)
   let truc = thapNhiKienTru[trucIdx]
   ```
@@ -346,6 +349,6 @@ Ngoài 12 Trực, dân gian Việt Nam kiêng khởi sự lớn vào 2 nhóm ng�
 | :--- | :--- | :--- |
 | **Mệnh Ngũ Hành năm sinh** | Chỉ lấy theo chữ đầu của năm (`Giáp/Ất -> Mộc`), dẫn đến sai mệnh | Tra đúng bảng **30 cặp mệnh** theo chu kỳ 60 năm (ví dụ 1998 Mậu Dần $\rightarrow$ *Thành Đầu Thổ*) |
 | **Tên sao của 12 Giờ** | Gán tên sao cố định từ Giờ Tý khiến 10/12 ngày bị lệch tên sao | Đặt sao **Thanh Long** đúng giờ theo con giáp của ngày rồi xoay vòng 12 sao |
-| **Giờ xuất hành tốt nhất** | Duyệt từ đầu mảng khiến Giờ Tý (`23h` đêm) bị chọn nhầm vào buổi sáng | Sắp xếp giờ từ sáng đến tối và lọc theo 3 mức ưu tiên (Hoàng Đạo + Không xung tuổi/ngày + Cung tốt) |
+| **Giờ xuất hành tốt nhất** | Duyệt từ đầu mảng khiến Giờ Tý (`23h` đêm) bị chọn nhầm vào buổi sáng | Xét đúng khoảng 2 tiếng, tách hai phần giờ Tý, lọc theo 3 mức ưu tiên và không trả giờ đã qua |
 | **Hướng xuất hành** | Chia dư giả lập `jd % 8` | Tra đúng **Hướng Hỷ Thần**, **Hướng Tài Thần** (theo Can ngày) và **Hướng xấu Hạc Thần** (theo 60 ngày) |
-| **Việc nên / không nên làm** | Chia dư giả lập `jd % 6` | Tính theo **12 Trực** từ độ lệch giữa con giáp Ngày và con giáp Tháng |
+| **Việc nên / không nên làm** | Chia dư giả lập `jd % 6` | Tính theo **12 Trực** từ độ lệch giữa Địa Chi ngày và tháng tiết khí (nguyệt kiến) |

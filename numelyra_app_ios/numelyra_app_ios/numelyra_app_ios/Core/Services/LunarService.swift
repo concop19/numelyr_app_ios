@@ -5,7 +5,7 @@ import Foundation
 ///
 /// Đối chiếu 1:1 với `numelyra_app/src/services/lunarService.ts`,
 /// `numelyra_app/src/store/userProfile.ts` và `numelyra_app/src/screens/CalendarScreen.tsx`.
-public enum LunarService {
+public nonisolated enum LunarService {
 
     // MARK: - 1. Constants
 
@@ -85,12 +85,15 @@ public enum LunarService {
         .init(name: "Hợi", range: "21h-23h", startHour: 21),
     ]
 
-    /// Tứ Hành Xung: mỗi con giáp xung với con giáp đối diện (cách 6 vị trí)
-    public static let tuHanhXung: [String: String] = [
+    /// Lục Xung: mỗi Địa Chi xung trực tiếp với Địa Chi đối diện (cách 6 vị trí).
+    public static let lucXung: [String: String] = [
         "Tý": "Ngọ", "Sửu": "Mùi", "Dần": "Thân", "Mão": "Dậu",
         "Thìn": "Tuất", "Tỵ": "Hợi", "Ngọ": "Tý", "Mùi": "Sửu",
         "Thân": "Dần", "Dậu": "Mão", "Tuất": "Thìn", "Hợi": "Tỵ"
     ]
+
+    @available(*, deprecated, renamed: "lucXung")
+    public static let tuHanhXung = lucXung
 //  các con giáp được đặt trên 1 vòng quay đối diện với con còn lại được gọi xung khắc để tìm các giờ ko bị xung khắc
     // giowf tốt hoặc hướng
     /// Giờ khởi sao Thanh Long (sao đầu tiên trong 12 sao Hoàng/Hắc đạo) theo Địa Chi của ngày:
@@ -149,7 +152,7 @@ public enum LunarService {
         "Tây Bắc",   // 9: Quý
     ]
 
-    /// Thập Nhị Kiến Trừ (12 Trực) tính theo tương quan Địa Chi ngày và Địa Chi tháng âm lịch.
+    /// Thập Nhị Kiến Trừ (12 Trực) tính theo tương quan Địa Chi ngày và nguyệt kiến của tháng tiết khí.
     private struct TrucDefinition: Sendable {
         let name: String
         let quality: String
@@ -326,6 +329,28 @@ public enum LunarService {
     @inline(__always)
     private static func positiveMod(_ value: Int, _ modulus: Int) -> Int {
         ((value % modulus) + modulus) % modulus
+    }
+
+    @inline(__always)
+    private static func normalizedDegrees(_ value: Double) -> Double {
+        let remainder = value.truncatingRemainder(dividingBy: 360.0)
+        return remainder >= 0 ? remainder : remainder + 360.0
+    }
+
+    private static func isValidGregorianDate(day: Int, month: Int, year: Int) -> Bool {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = vietnamTimeZone
+        var components = DateComponents()
+        components.calendar = calendar
+        components.timeZone = vietnamTimeZone
+        components.year = year
+        components.month = month
+        components.day = day
+        components.hour = 12
+
+        guard let date = calendar.date(from: components) else { return false }
+        let resolved = calendar.dateComponents([.day, .month, .year], from: date)
+        return resolved.day == day && resolved.month == month && resolved.year == year
     }
 
     // MARK: - 2. Thuật toán Âm Lịch (Hồ Ngọc Đức)
@@ -534,7 +559,8 @@ public enum LunarService {
         if dashParts.count == 3,
            let year = Int(dashParts[0]), year > 1800, year < 2200,
            let month = Int(dashParts[1]), (1...12).contains(month),
-           let day = Int(dashParts[2]), (1...31).contains(day) {
+           let day = Int(dashParts[2]), (1...31).contains(day),
+           isValidGregorianDate(day: day, month: month, year: year) {
             return solarToLunar(day: day, month: month, year: year).year
         }
 
@@ -543,7 +569,8 @@ public enum LunarService {
         if slashParts.count == 3,
            let day = Int(slashParts[0]), (1...31).contains(day),
            let month = Int(slashParts[1]), (1...12).contains(month),
-           let year = Int(slashParts[2].prefix(4)), year > 1800, year < 2200 {
+           let year = Int(slashParts[2].prefix(4)), year > 1800, year < 2200,
+           isValidGregorianDate(day: day, month: month, year: year) {
             return solarToLunar(day: day, month: month, year: year).year
         }
 
@@ -611,18 +638,19 @@ public enum LunarService {
         day dd: Int,
         month mm: Int,
         year yy: Int,
-        zodiac: String? = nil
+        zodiac: String? = nil,
+        timeZone: Double = defaultTimeZoneOffset
     ) -> [LunarHourInfo] {
-        let lunar = solarToLunar(day: dd, month: mm, year: yy)
+        let lunar = solarToLunar(day: dd, month: mm, year: yy, timeZone: timeZone)
         let dayCanIdx = getDayThienCan(day: dd, month: mm, year: yy)
         let dayChiIdx = getDayDiaChi(day: dd, month: mm, year: yy)
         let thanhLongStart = thanhLongStartHourByDayChi[dayChiIdx] ?? 0
 
         let userClashHour: String? = {
             guard let zodiac, !zodiac.isEmpty else { return nil }
-            return tuHanhXung[zodiac]
+            return lucXung[zodiac]
         }()
-        let dayClashHour = tuHanhXung[diaChi[dayChiIdx]]
+        let dayClashHour = lucXung[diaChi[dayChiIdx]]
 
         return gioInfo.enumerated().map { idx, gio in
             let starOffset = positiveMod(idx - thanhLongStart, 12)
@@ -656,40 +684,79 @@ public enum LunarService {
         month mm: Int,
         year yy: Int,
         zodiac: String,
-        currentHour: Int
+        currentHour: Int,
+        currentMinute: Int = 0,
+        timeZone: Double = defaultTimeZoneOffset
     ) -> LunarHourInfo? {
-        let hours = getHoangDaoHours(day: dd, month: mm, year: yy, zodiac: zodiac)
-        // Sắp xếp theo thứ tự thời gian thực trong ngày (01h Sửu -> 21h Hợi -> 23h Tý)
-        // để tránh lỗi Giờ Tý (startHour = 23, index 0) bị chọn nhầm vào buổi sáng/chiều.
-        let chronologicalHours = hours.sorted { $0.startHour < $1.startHour }
-        let baseCandidates = chronologicalHours.filter { $0.isHoangDao && !$0.isClash }
+        guard (0...23).contains(currentHour), (0...59).contains(currentMinute) else {
+            return nil
+        }
+
+        let hours = getHoangDaoHours(
+            day: dd,
+            month: mm,
+            year: yy,
+            zodiac: zodiac,
+            timeZone: timeZone
+        )
+        let baseCandidates = hours.filter { $0.isHoangDao && !$0.isClash }
         guard !baseCandidates.isEmpty else { return nil }
 
         let tier1 = baseCandidates.filter { !$0.isDayClash && $0.isLyThuanPhongGood }
         let tier2 = baseCandidates.filter { !$0.isDayClash }
         let tiers = [tier1, tier2, baseCandidates]
 
+        let currentMinuteOfDay = currentHour * 60 + currentMinute
+
+        func nextOccurrence(of hour: LunarHourInfo) -> Int? {
+            let intervals: [(start: Int, end: Int)]
+            if hour.name == "Tý" {
+                // Giờ Tý thuộc hai đầu của cùng ngày dân dụng: 00:00-01:00 và 23:00-24:00.
+                intervals = [(0, 60), (23 * 60, 24 * 60)]
+            } else {
+                let start = hour.startHour * 60
+                intervals = [(start, start + 120)]
+            }
+
+            if intervals.contains(where: { currentMinuteOfDay >= $0.start && currentMinuteOfDay < $0.end }) {
+                return currentMinuteOfDay
+            }
+            return intervals.lazy.map(\.start).first(where: { $0 >= currentMinuteOfDay })
+        }
+
         for tier in tiers where !tier.isEmpty {
-            if let upcoming = tier.first(where: { $0.startHour >= currentHour }) {
-                return upcoming
+            let upcoming = tier.compactMap { hour -> (hour: LunarHourInfo, minute: Int)? in
+                guard let minute = nextOccurrence(of: hour) else { return nil }
+                return (hour, minute)
+            }
+            .min { lhs, rhs in lhs.minute < rhs.minute }
+
+            if let upcoming {
+                return upcoming.hour
             }
         }
 
-        // Nếu mọi giờ tốt trong ngày đều đã qua, trả về giờ tốt nhất đầu tiên của ngày
-        for tier in tiers where !tier.isEmpty {
-            return tier.first
-        }
-        return baseCandidates.first
+        // Không trả về một giờ đã qua; caller có thể chuyển sang ngày kế tiếp nếu cần.
+        return nil
     }
 
     // MARK: - 5. Việc Nên / Kiêng, Ngày Kỵ & Hướng Xuất Hành
 
     /// Tính Trực của ngày theo Thập Nhị Kiến Trừ (Kiến, Trừ, Mãn, Bình, Định, Chấp, Phá, Nguy, Thành, Thu, Khai, Bế)
     /// và trả về danh sách việc nên làm (`yi`) / kiêng kỵ (`ji`).
-    public static func getDayActivities(day dd: Int, month mm: Int, year yy: Int) -> DayActivities {
-        let lunar = solarToLunar(day: dd, month: mm, year: yy)
+    public static func getDayActivities(
+        day dd: Int,
+        month mm: Int,
+        year yy: Int,
+        timeZone: Double = defaultTimeZoneOffset
+    ) -> DayActivities {
         let dayChiIdx = getDayDiaChi(day: dd, month: mm, year: yy)
-        let monthChiIdx = positiveMod(lunar.month + 1, 12) // Tháng Giêng = Dần (2)
+        let monthChiIdx = getSolarMonthDiaChiIndex(
+            day: dd,
+            month: mm,
+            year: yy,
+            timeZone: timeZone
+        )
         let trucIdx = positiveMod(dayChiIdx - monthChiIdx, 12)
         let truc = thapNhiKienTru[trucIdx]
         return DayActivities(
@@ -793,13 +860,35 @@ public enum LunarService {
         return DayHoangDaoStatus(isHoangDao: sao.isHoangDao, label: label)
     }
 
-    public static func getSolarTerm(day dd: Int, month mm: Int, year yy: Int) -> String {
+    /// Địa Chi của tháng tiết khí dùng cho 12 Trực: Dần bắt đầu từ Lập Xuân,
+    /// Mão từ Kinh Trập, ..., Sửu từ Tiểu Hàn.
+    ///
+    /// Dùng kinh độ Mặt Trời ở cuối ngày địa phương để ngày nhập tiết được tính
+    /// là ngày đầu tháng tiết; nhờ đó Trực của ngày nhập tiết lặp lại ngày trước đó.
+    public static func getSolarMonthDiaChiIndex(
+        day dd: Int,
+        month mm: Int,
+        year yy: Int,
+        timeZone: Double = defaultTimeZoneOffset
+    ) -> Int {
         let jdn = jdFromDate(day: dd, month: mm, year: yy)
-        let rad = sunLongitude(Double(jdn) - 0.5 - defaultTimeZoneOffset / 24.0)
-        var deg = (rad * 180.0 / Double.pi).truncatingRemainder(dividingBy: 360.0)
-        if deg < 0 {
-            deg += 360.0
-        }
+        let endOfLocalDay = Double(jdn) + 0.5 - timeZone / 24.0 - 1.0e-9
+        let degrees = normalizedDegrees(sunLongitude(endOfLocalDay) * 180.0 / Double.pi)
+        let degreesAfterLapXuan = normalizedDegrees(degrees - 315.0)
+        let solarMonthOffset = Int(floor(degreesAfterLapXuan / 30.0))
+        return positiveMod(2 + solarMonthOffset, 12)
+    }
+
+    public static func getSolarTerm(
+        day dd: Int,
+        month mm: Int,
+        year yy: Int,
+        timeZone: Double = defaultTimeZoneOffset
+    ) -> String {
+        let jdn = jdFromDate(day: dd, month: mm, year: yy)
+        let endOfLocalDay = Double(jdn) + 0.5 - timeZone / 24.0 - 1.0e-9
+        let rad = sunLongitude(endOfLocalDay)
+        let deg = normalizedDegrees(rad * 180.0 / Double.pi)
         let idx = positiveMod(Int(floor(deg / 15.0)), 24)
         return tietKhi[idx]
     }
@@ -808,19 +897,30 @@ public enum LunarService {
         day dd: Int,
         month mm: Int,
         year yy: Int,
-        lunarMonth: Int,
-        lunarYear: Int
+        timeZone: Double = defaultTimeZoneOffset
     ) -> Bool {
         let dayNumber = jdFromDate(day: dd, month: mm, year: yy)
         let k = Int(floor((Double(dayNumber) - 2415021.076998695) / 29.530588853))
-        let nm1 = getNewMoonDay(k: k, timeZone: defaultTimeZoneOffset)
-        let nm2 = getNewMoonDay(k: k + 1, timeZone: defaultTimeZoneOffset)
-        let nm3 = getNewMoonDay(k: k + 2, timeZone: defaultTimeZoneOffset)
+        let nm1 = getNewMoonDay(k: k, timeZone: timeZone)
+        let nm2 = getNewMoonDay(k: k + 1, timeZone: timeZone)
+        let nm3 = getNewMoonDay(k: k + 2, timeZone: timeZone)
 
         if dayNumber >= nm2 {
             return (nm3 - nm2) >= 30
         }
         return (nm2 - nm1) >= 30
+    }
+
+    @available(*, deprecated, message: "lunarMonth/lunarYear are derived from the solar date and are no longer required")
+    public static func isLunarMonthFull(
+        day dd: Int,
+        month mm: Int,
+        year yy: Int,
+        lunarMonth _: Int,
+        lunarYear _: Int,
+        timeZone: Double = defaultTimeZoneOffset
+    ) -> Bool {
+        isLunarMonthFull(day: dd, month: mm, year: yy, timeZone: timeZone)
     }
 
     // MARK: - 7. Định dạng Chuỗi & Lịch Tuần / Tháng
@@ -836,7 +936,8 @@ public enum LunarService {
     }
 
     public static func formatHeroLunarText(_ lunar: LunarDate) -> String {
-        "\(lunar.day) tháng \(getLunarMonthNameVi(lunar.month)) · Âm lịch"
+        let leapText = lunar.leap ? " nhuận" : ""
+        return "\(lunar.day) tháng \(getLunarMonthNameVi(lunar.month))\(leapText) · Âm lịch"
     }
 
     public static func getMonthVi(_ month: Int) -> String {
@@ -987,14 +1088,17 @@ public enum LunarService {
         for date: Date,
         birthDateString: String? = nil,
         currentHour: Int? = nil,
+        currentMinute: Int? = nil,
+        referenceDate: Date? = nil,
         calendar: Calendar = defaultCalendar,
         timeZone: Double = defaultTimeZoneOffset
     ) -> LunarDaySnapshot {
-        let comps = calendar.dateComponents([.day, .month, .year, .hour], from: date)
+        let comps = calendar.dateComponents([.day, .month, .year, .hour, .minute], from: date)
         let day = comps.day ?? 1
         let month = comps.month ?? 1
         let year = comps.year ?? 2026
         let resolvedHour = currentHour ?? (comps.hour ?? 0)
+        let resolvedMinute = currentMinute ?? (comps.minute ?? 0)
 
         let birthYear = extractBirthYear(from: birthDateString)
         let zodiac = getZodiac(birthYear: birthYear)
@@ -1015,25 +1119,54 @@ public enum LunarService {
             year: year,
             lunarMonth: lunar.month
         )
-        let solarTerm = getSolarTerm(day: day, month: month, year: year)
-        let hours = getHoangDaoHours(day: day, month: month, year: year, zodiac: zodiac)
-        let bestHour = getBestDepartureHour(
+        let solarTerm = getSolarTerm(day: day, month: month, year: year, timeZone: timeZone)
+        let hours = getHoangDaoHours(
             day: day,
             month: month,
             year: year,
             zodiac: zodiac,
-            currentHour: resolvedHour
+            timeZone: timeZone
         )
+
+        let bestHour: LunarHourInfo?
+        if let referenceDate {
+            let selectedDay = calendar.startOfDay(for: date)
+            let referenceDay = calendar.startOfDay(for: referenceDate)
+            if selectedDay < referenceDay {
+                bestHour = nil
+            } else {
+                let notBeforeHour = selectedDay > referenceDay ? 0 : resolvedHour
+                let notBeforeMinute = selectedDay > referenceDay ? 0 : resolvedMinute
+                bestHour = getBestDepartureHour(
+                    day: day,
+                    month: month,
+                    year: year,
+                    zodiac: zodiac,
+                    currentHour: notBeforeHour,
+                    currentMinute: notBeforeMinute,
+                    timeZone: timeZone
+                )
+            }
+        } else {
+            bestHour = getBestDepartureHour(
+                day: day,
+                month: month,
+                year: year,
+                zodiac: zodiac,
+                currentHour: resolvedHour,
+                currentMinute: resolvedMinute,
+                timeZone: timeZone
+            )
+        }
         let direction = getDayDirection(day: day, month: month, year: year)
-        let activities = getDayActivities(day: day, month: month, year: year)
+        let activities = getDayActivities(day: day, month: month, year: year, timeZone: timeZone)
         let warning = getDayWarning(lunarDay: lunar.day)
         let weekInfo = getWeekInfo(for: date, calendar: calendar)
         let monthFull = isLunarMonthFull(
             day: day,
             month: month,
             year: year,
-            lunarMonth: lunar.month,
-            lunarYear: lunar.year
+            timeZone: timeZone
         )
 
         return LunarDaySnapshot(

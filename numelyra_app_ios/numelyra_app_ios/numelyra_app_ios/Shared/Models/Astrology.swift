@@ -113,6 +113,7 @@ public nonisolated struct AstroPlanetaryChart: Codable, Equatable, Sendable {
     /// Đánh dấu giờ sinh có phải là ước lượng hay không (true nếu dùng Noon Chart 12:00:00 UTC do thiếu giờ sinh).
     public var isTimeEstimated: Bool
     /// Bảng từ điển tra cứu nhanh vị trí các hành tinh theo tên (key ví dụ: "Sun", "Moon", ...).
+    /// // Tọa độ vị trí hoàng đạo của một thiên thể / hành tinh tại thời điểm khảo sát.
     public var planets: [String: AstroPlanetPosition]
     /// Danh sách tuần tự 10 hành tinh để duyệt lặp và tính toán phân bổ thống kê.
     public var planetList: [AstroPlanetPosition]
@@ -251,7 +252,11 @@ public nonisolated struct AstroAngles: Codable, Equatable, Sendable {
         self.midheaven = midheaven
         self.imumCoeli = imumCoeli
     }
-}
+}/*Thuộc tính    Viết tắt    Tên tiếng Việt    Tọa độ thiên văn    Ý nghĩa chiêm tinh
+  ascendant    AC / Asc    Điểm Mọc / Cung Mọc    Điểm giao giữa đường hoàng đạo và đường chân trời phía Đông tại thời điểm sinh.    Đỉnh Nhà 1 (Cusp 1): Đại diện cho bản ngã bên ngoài, ngoại hình, phong thái, chiếc "mặt nạ" giao tiếp xã hội và cách một người khởi đầu các trải nghiệm mới.
+  descendant    DC / Desc    Điểm Lặn / Cung Lặn    Điểm giao ở chân trời phía Tây, đối đỉnh chính xác 180° với Ascendant ((asc + 180°) % 360°).    Đỉnh Nhà 7 (Cusp 7): Đại diện cho các mối quan hệ đối tác 1-1, hôn nhân, tình cảm cam kết, cách ta tương tác với người khác và những phẩm chất ta tìm kiếm ở bạn đời.
+  midheaven    MC (Medium Coeli)    Thiên Đỉnh    Điểm cao nhất của hoàng đạo cắt kinh tuyến trên (Meridian) tại nơi sinh.    Đỉnh Nhà 10 (Cusp 10): Đại diện cho sự nghiệp, danh vọng, địa vị xã hội, mục tiêu cuộc đời, thành tựu lớn nhất và hình ảnh trong mắt công chúng.
+  imumCoeli    IC (Imum Coeli)    Thiên Đế / Đáy Trời    Điểm thấp nhất cắt kinh tuyến dưới (Nadir), đối đỉnh chính xác 180° với Midheaven ((mc + 180°) % 360°).    Đỉnh Nhà 4 (Cusp 4): Đại diện cho gốc rễ, gia đình, cội nguồn tổ tiên, tuổi thơ, thế giới nội tâm sâu kín nhất và cảm giác an toàn cơ bản.*/
 
 public nonisolated struct AstroNatalContext: Codable, Equatable, Sendable {
     public var birthUTC: Date
@@ -286,7 +291,37 @@ public nonisolated struct AstroNatalSnapshot: Codable, Equatable, Sendable {
     public var engineVersion: String
     public var chart: AstroPlanetaryChart
     public var context: AstroNatalContext?
+/*    chart: AstroPlanetaryChart    context: AstroNatalContext?
+ Trả lời    "Hành tinh đang ở cung nào?"    "Hành tinh đang ở nhà nào, và hướng bầu trời ra sao?"
+ Thông tin    Tọa độ 10 hành tinh trên vòng hoàng đạo    Nhà, ASC, MC, 12 đỉnh nhà
+ Cần dữ liệu gì    Chỉ ngày sinh (giờ có thì chính xác hơn)    Phải có giờ sinh + nơi sinh
+ Có ? không    Không, luôn có    Có, có thể nil*/
+    /*Nhà (house) là cách chiêm tinh chia bầu trời thành 12 phần, mỗi phần đại diện cho một lĩnh vực đời sống. Nó không liên quan đến căn nhà để ở.
+     
+     So sánh với "cung" để khỏi nhầm
+         Cung (sign)    Nhà (house)
+     Là gì    12 phần của vòng hoàng đạo, cố định theo vị trí sao    12 phần của bầu trời tại chỗ bạn sinh, đổi theo giờ + nơi sinh
+     Trả lời    Hành tinh mang phong cách gì? (Lửa, Đất...)    Phong cách đó biểu hiện ở lĩnh vực nào?
+     Ví dụ    Sao Hỏa ở Bạch Dương: hành động nhanh, mạnh    Sao Hỏa ở nhà 10: năng lượng đó dồn vào sự nghiệp
 
+     Một cách nhớ: hành tinh là diễn viên, cung là cách diễn, nhà là sân khấu.
+
+     12 nhà là gì
+     Nhà    Lĩnh vực
+     1    Bản thân, vẻ ngoài
+     2    Tiền bạc, tài sản
+     3    Giao tiếp, anh chị em
+     4    Gia đình, nhà cửa, gốc rễ
+     5    Tình yêu, sáng tạo, vui chơi
+     6    Công việc hằng ngày, sức khỏe
+     7    Hôn nhân, đối tác
+     8    Chia sẻ tài chính, chuyển hóa
+     9    Học vấn, du lịch, triết lý
+     10    Sự nghiệp, danh tiếng
+     11    Bạn bè, cộng đồng, mục tiêu
+     12    Nội tâm, điều ẩn giấu
+
+     Đây là các chủ đề thường dùng; chuỗi chủ đề thật (topicVi) nằm trong AstrologyEngine mà mình chưa thấy.*/
     public init(
         fingerprint: String,
         engineVersion: String,
@@ -363,8 +398,10 @@ public nonisolated struct AstroBirthInput: Codable, Equatable, Sendable {
     public var birthTime: String?
     public var fullName: String?
     public var birthTimeAccuracy: BirthTimeAccuracy
+    // thể hiện giờ sinh này là tự gen hoặc chĩnhs xác
     public var resolvedBirthLocation: ResolvedBirthLocation?
-
+   /// reslvedBirthLocation là việc. ánh xạ dc từ tên nơi ngừoi đó sinh ra thành place id với longtitude và ladtitude
+    /// du lieu nay 
     public init(
         birthDate: String,
         birthTime: String? = nil,

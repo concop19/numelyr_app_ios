@@ -2,8 +2,8 @@ import AstronomyKit
 import Foundation
 
 nonisolated enum AstrologyEngine {
-    static let engineVersion = "astrology-v2-porphyry-1"
-
+    static let engineVersion = "astrology-v3-porphyry-1"
+//thong bao phien ban
     enum EngineError: LocalizedError, Equatable {
         case invalidBirthDate(String)
         case invalidBirthTime(String)
@@ -23,6 +23,7 @@ nonisolated enum AstrologyEngine {
             }
         }
     }
+    //: localLizeError, equatable. danh dau day la th dc xa ra ẽxception va co the so sanh
 
     struct ResolvedBirthDate: Equatable, Sendable {
         var date: Date
@@ -30,7 +31,7 @@ nonisolated enum AstrologyEngine {
         var precision: AstroBirthDataPrecision
         var isLocalTimeAmbiguous: Bool
     }
-
+//cau truc cua birthdate. sau khi da dc result,-> ngay, giờ ước tính,gio dia ph co mo ho ko
     static let zodiacSigns = [
         "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
         "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
@@ -320,8 +321,8 @@ nonisolated enum AstrologyEngine {
         let midheaven = radiansToDegrees(atan2(sin(sidereal), cos(sidereal) * cos(obliquity)))
         let ascendant = radiansToDegrees(
             atan2(
-                -cos(sidereal),
-                sin(sidereal) * cos(obliquity) + tan(latitudeRadians) * sin(obliquity)
+                cos(sidereal),
+                -(sin(sidereal) * cos(obliquity) + tan(latitudeRadians) * sin(obliquity))
             )
         )
         let asc = positiveModulo(ascendant, divisor: 360)
@@ -449,7 +450,12 @@ nonisolated enum AstrologyEngine {
             fastPlanetActivity: scores.fastPlanetActivity
         )
     }
-
+/*aspects    Danh sách đã xếp hạng    Tất cả góc chiếu tìm được hôm nay, quan trọng nhất đứng đầu
+ topAspect    aspects.first    Góc nổi bật nhất ngày hôm nay
+ tensionScore    scores.tension    Mức căng thẳng, thử thách
+ harmonyScore    scores.harmony    Mức hài hòa, thuận lợi
+ conjunctionIntensity    scores.conjunction    Mức hội tụ năng lượng
+ fastPlanetActivity    scores.fastPlanetActivity    Mức hoạt động của hành tinh nhanh*/
     static func calculateAspectScores(_ aspects: [DetectedAstroAspect]) -> AstroScoreMetadata {
         var weightedTension = 0.0
         var weightedHarmony = 0.0

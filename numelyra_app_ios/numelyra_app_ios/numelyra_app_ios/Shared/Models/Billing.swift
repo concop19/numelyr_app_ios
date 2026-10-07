@@ -1,16 +1,16 @@
 import Foundation
 
-public enum BillingPlan: String, Codable, Equatable, Sendable {
+public nonisolated enum BillingPlan: String, Codable, Equatable, Sendable {
     case free
     case pro
 }
 
-public enum BillingProvider: String, Codable, Equatable, Sendable {
+public nonisolated enum BillingProvider: String, Codable, Equatable, Sendable {
     case payos
     case paypal
 }
 
-public struct SubscriptionDetail: Codable, Equatable, Sendable {
+public nonisolated struct SubscriptionDetail: Codable, Equatable, Sendable {
     public var provider: BillingProvider?
     public var status: String?
     public var currentPeriodEnd: String?
@@ -35,7 +35,7 @@ public struct SubscriptionDetail: Codable, Equatable, Sendable {
     }
 }
 
-public struct BillingStatus: Codable, Equatable, Sendable {
+public nonisolated struct BillingStatus: Codable, Equatable, Sendable {
     public var authenticated: Bool
     public var plan: BillingPlan
     public var canManageBilling: Bool?
@@ -57,7 +57,7 @@ public struct BillingStatus: Codable, Equatable, Sendable {
     }
 }
 
-public struct DailyReminderSettings: Codable, Equatable, Sendable {
+public nonisolated struct DailyReminderSettings: Codable, Equatable, Sendable {
     public var enabled: Bool
     public var hour: Int // 0 - 23, default 20
     public var minute: Int // 0 - 59, default 0

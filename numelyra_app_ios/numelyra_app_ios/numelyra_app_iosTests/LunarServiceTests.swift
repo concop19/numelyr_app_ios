@@ -3,6 +3,21 @@ import XCTest
 @testable import numelyra_app_ios
 
 final class LunarServiceTests: XCTestCase {
+    func testSolarToLunarGoldenDatesAndLeapMonth() {
+        XCTAssertEqual(
+            LunarService.solarToLunar(day: 10, month: 2, year: 2024),
+            LunarDate(day: 1, month: 1, year: 2024)
+        )
+        XCTAssertEqual(
+            LunarService.solarToLunar(day: 17, month: 2, year: 2026),
+            LunarDate(day: 1, month: 1, year: 2026)
+        )
+        XCTAssertEqual(
+            LunarService.solarToLunar(day: 22, month: 3, year: 2023),
+            LunarDate(day: 1, month: 2, year: 2023, leap: true)
+        )
+    }
+
     func testCanChiHourNguThuDonFormula() {
         // Ngày Giáp (0) và Kỷ (5) khởi giờ Tý là Giáp Tý
         XCTAssertEqual(LunarService.getCanChiHour(hourChiIdx: 0, dayCanIdx: 0), "Giáp Tý")
@@ -42,6 +57,8 @@ final class LunarServiceTests: XCTestCase {
         XCTAssertEqual(postTetLunarYear, 1998)
         XCTAssertEqual(LunarService.getZodiac(birthYear: postTetLunarYear), "Dần")
         XCTAssertEqual(LunarService.getNapAmYear(birthYear: postTetLunarYear), "Thành Đầu Thổ")
+
+        XCTAssertEqual(LunarService.extractBirthYear(from: "2000-02-30"), 1998)
     }
 
     func testHoangDaoHoursMatchTwelveDayStarsAndThanhLongStart() {
@@ -80,10 +97,40 @@ final class LunarServiceTests: XCTestCase {
             zodiac: "Tý",
             currentHour: 8
         )
-        XCTAssertNotNil(bestMorning)
-        XCTAssertNotEqual(bestMorning?.name, "Tý")
-        XCTAssertGreaterThanOrEqual(bestMorning?.startHour ?? 0, 8)
-        XCTAssertLessThan(bestMorning?.startHour ?? 24, 23)
+        XCTAssertEqual(bestMorning?.name, "Thìn")
+        XCTAssertEqual(bestMorning?.range, "07h-09h")
+    }
+
+    func testBestDepartureHourHandlesBothPartsOfTyHourAndDoesNotReturnPastHour() {
+        let midnightTy = LunarService.getBestDepartureHour(
+            day: 15,
+            month: 2,
+            year: 2026,
+            zodiac: "Tý",
+            currentHour: 0,
+            currentMinute: 30
+        )
+        XCTAssertEqual(midnightTy?.name, "Tý")
+
+        let lateTy = LunarService.getBestDepartureHour(
+            day: 15,
+            month: 2,
+            year: 2026,
+            zodiac: "Tý",
+            currentHour: 23,
+            currentMinute: 30
+        )
+        XCTAssertEqual(lateTy?.name, "Tý")
+
+        let noPastFallback = LunarService.getBestDepartureHour(
+            day: 17,
+            month: 2,
+            year: 2026,
+            zodiac: "Dần",
+            currentHour: 23,
+            currentMinute: 30
+        )
+        XCTAssertNil(noPastFallback)
     }
 
     func testDayDirectionUsesDayThienCanAndHacThanCycle() {
@@ -104,5 +151,64 @@ final class LunarServiceTests: XCTestCase {
         XCTAssertEqual(activities.trucQuality, "Tốt")
         XCTAssertFalse(activities.yi.isEmpty)
         XCTAssertFalse(activities.ji.isEmpty)
+    }
+
+    func testDayActivitiesUsesSolarTermMonthInsteadOfLunarMonth() {
+        // 05/02/2026 vẫn là 18 tháng Chạp nhưng đã qua Lập Xuân ngày 04/02.
+        // Nguyệt kiến đã sang Dần; ngày Canh Tuất vì vậy là Trực Thành, không phải Trực Thu.
+        XCTAssertEqual(
+            LunarService.getSolarMonthDiaChiIndex(day: 5, month: 2, year: 2026),
+            2
+        )
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 3, month: 2, year: 2026), 1)
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 4, month: 2, year: 2026), 2)
+        let activities = LunarService.getDayActivities(day: 5, month: 2, year: 2026)
+        XCTAssertEqual(activities.trucName, "Thành")
+    }
+
+    func testSolarTermLabelMatchesSolarMonthTransition() {
+        // Lập xuân 2025: nhập tiết vào tối 03/02/2025
+        XCTAssertEqual(LunarService.getSolarTerm(day: 2, month: 2, year: 2025), "Đại hàn")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 2, month: 2, year: 2025), 1) // Sửu
+
+        XCTAssertEqual(LunarService.getSolarTerm(day: 3, month: 2, year: 2025), "Lập xuân")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 3, month: 2, year: 2025), 2) // Dần
+
+        XCTAssertEqual(LunarService.getSolarTerm(day: 4, month: 2, year: 2025), "Lập xuân")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 4, month: 2, year: 2025), 2) // Dần
+
+        // Lập xuân 2026: nhập tiết vào 04/02/2026
+        XCTAssertEqual(LunarService.getSolarTerm(day: 3, month: 2, year: 2026), "Đại hàn")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 3, month: 2, year: 2026), 1) // Sửu
+
+        XCTAssertEqual(LunarService.getSolarTerm(day: 4, month: 2, year: 2026), "Lập xuân")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 4, month: 2, year: 2026), 2) // Dần
+
+        XCTAssertEqual(LunarService.getSolarTerm(day: 5, month: 2, year: 2026), "Lập xuân")
+        XCTAssertEqual(LunarService.getSolarMonthDiaChiIndex(day: 5, month: 2, year: 2026), 2) // Dần
+    }
+
+    func testSnapshotDoesNotRecommendDepartureHourForPastDate() throws {
+        let calendar = LunarService.defaultCalendar
+        let selectedDate = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 2, day: 15, hour: 12))
+        )
+        let referenceDate = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 2, day: 17, hour: 8))
+        )
+
+        let snapshot = LunarService.makeDaySnapshot(
+            for: selectedDate,
+            currentHour: 8,
+            referenceDate: referenceDate
+        )
+        XCTAssertNil(snapshot.bestDepartureHour)
+    }
+
+    func testHeroLunarTextShowsLeapMonth() {
+        XCTAssertEqual(
+            LunarService.formatHeroLunarText(LunarDate(day: 1, month: 2, year: 2023, leap: true)),
+            "1 tháng Hai nhuận · Âm lịch"
+        )
     }
 }

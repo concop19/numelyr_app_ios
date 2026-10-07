@@ -190,6 +190,36 @@ final class AstrologyServiceTests: XCTestCase {
         }
     }
 
+    func testAscendantFormulaMatchesAnalyticalGroundTruth() throws {
+        // At J2000.0 (2000-01-01T12:00:00Z), GMST = 280.460618°
+        // We set longitude = (RAMC - GMST) mod 360 so that sidereal == RAMC.
+        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2000-01-01T12:00:00Z"))
+        let gmst = 280.46061837
+        let testCases: [(ramc: Double, lat: Double, expectedMC: Double, expectedASC: Double)] = [
+            (0.0, 0.0, 0.0, 90.0),
+            (0.0, 51.5, 0.0, 116.57),
+            (200.0, 16.05, 201.64, 281.98),
+            (300.0, 40.0, 297.91, 47.34),
+        ]
+
+        for tc in testCases {
+            var lon = (tc.ramc - gmst).truncatingRemainder(dividingBy: 360)
+            if lon < 0 { lon += 360 }
+            if lon > 180 { lon -= 360 }
+
+            let angles = AstrologyEngine.calculateAngles(
+                date: date,
+                latitude: tc.lat,
+                longitude: lon
+            )
+            XCTAssertEqual(angles.midheaven, tc.expectedMC, accuracy: 0.1, "MC mismatch for RAMC \(tc.ramc)")
+            XCTAssertEqual(angles.ascendant, tc.expectedASC, accuracy: 0.1, "ASC mismatch for RAMC \(tc.ramc)")
+            // Verify Descendant is exactly 180° opposite Ascendant
+            let dscDiff = abs((angles.descendant - angles.ascendant).truncatingRemainder(dividingBy: 360))
+            XCTAssertEqual(dscDiff, 180.0, accuracy: 0.0001)
+        }
+    }
+
     func testHouseAssignmentWrapsAtZeroAndDailyContextReturnsAtMostThree() throws {
         let cusps = (0 ..< 12).map {
             AstroHouseCusp(house: $0 + 1, longitude: Double($0 * 30))

@@ -2,111 +2,55 @@ import ComposableArchitecture
 import SwiftUI
 
 struct AppView: View {
-    let store: StoreOf<AppFeature>
+    @Bindable var store: StoreOf<AppFeature>
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                AppScreenBackground()
+        TabView(
+            selection: Binding(
+                get: { store.selectedTab },
+                set: { store.send(.selectedTabChanged($0)) }
+            )
+        ) {
+            ChatView(
+                store: store.scope(state: \.chat, action: \.chat)
+            )
+            .tabItem { Label("Chat", image: AppAsset.tabChat.rawValue) }
+            .tag(AppFeature.Tab.chat)
 
-                ScrollView {
-                    VStack(spacing: AppTheme.Spacing.xLarge) {
-                        Image(appAsset: .authMascot)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 210)
-                            .accessibilityLabel("Linh vật Numelyra")
+            CalendarView(
+                store: store.scope(state: \.calendar, action: \.calendar)
+            )
+            .tabItem { Label("Lịch", systemImage: "calendar") }
+            .tag(AppFeature.Tab.calendar)
 
-                        VStack(spacing: AppTheme.Spacing.small) {
-                            Text("NUMELYRA")
-                                .font(AppTheme.Typography.display)
-                                .foregroundStyle(AppTheme.Colors.primaryBright)
+            AstrologyView(
+                store: store.scope(state: \.astrology, action: \.astrology)
+            )
+            .tabItem { Label("Chiêm tinh", systemImage: "sparkles") }
+            .tag(AppFeature.Tab.astrology)
 
-                            Text("Swift foundation")
-                                .font(AppTheme.Typography.callout)
-                                .foregroundStyle(AppTheme.Colors.secondary)
-                                .textCase(.uppercase)
-                                .tracking(2)
-                        }
+            WallpaperView(
+                store: store.scope(state: \.wallpaper, action: \.wallpaper)
+            )
+            .tabItem { Label("Hình nền", systemImage: "photo.on.rectangle.angled") }
+            .tag(AppFeature.Tab.wallpaper)
 
-                        foundationStatus
-                        navigationAssets
-                    }
-                    .frame(maxWidth: AppTheme.Size.contentMaxWidth)
-                    .padding(.horizontal, AppTheme.Spacing.large)
-                    .padding(.vertical, AppTheme.Spacing.xLarge)
-                    .frame(maxWidth: .infinity)
-                }
-            }
-            .toolbarBackground(AppTheme.Colors.surface.opacity(0.94), for: .navigationBar)
+            SettingsView(
+                store: store.scope(state: \.settings, action: \.settings)
+            )
+            .tabItem { Label("Cài đặt", systemImage: "gearshape") }
+            .tag(AppFeature.Tab.settings)
+
         }
         .tint(AppTheme.Colors.primary)
-        .preferredColorScheme(.dark)
-        .onAppear {
-            store.send(.onAppear)
+        .fullScreenCover(
+            isPresented: Binding(
+                get: { store.isAuthPresented },
+                set: { store.send(.authPresentationChanged($0)) }
+            )
+        ) {
+            AuthView(store: store.scope(state: \.auth, action: \.auth))
         }
-    }
-
-    private var foundationStatus: some View {
-        HStack(spacing: AppTheme.Spacing.medium) {
-            Image(systemName: store.isInitialized ? "checkmark.seal.fill" : "hourglass")
-                .font(.title2)
-                .foregroundStyle(
-                    store.isInitialized ? AppTheme.Colors.success : AppTheme.Colors.warning
-                )
-
-            VStack(alignment: .leading, spacing: AppTheme.Spacing.xSmall) {
-                Text(store.isInitialized ? "Nền tảng đã sẵn sàng" : "Đang khởi tạo")
-                    .font(AppTheme.Typography.headline)
-                    .foregroundStyle(AppTheme.Colors.textPrimary)
-
-                Text("TCA, Supabase, asset catalog và theme dùng chung")
-                    .font(AppTheme.Typography.callout)
-                    .foregroundStyle(AppTheme.Colors.textSecondary)
-            }
-
-            Spacer(minLength: 0)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .appCard()
-    }
-
-    private var navigationAssets: some View {
-        VStack(alignment: .leading, spacing: AppTheme.Spacing.medium) {
-            Text("Asset điều hướng")
-                .font(AppTheme.Typography.headline)
-                .foregroundStyle(AppTheme.Colors.textPrimary)
-
-            HStack(spacing: AppTheme.Spacing.medium) {
-                assetPreview(.tabChat, label: "Chat")
-                assetPreview(.tabCalendar, label: "Lịch")
-                assetPreview(.tabWallpaper, label: "Ảnh")
-                assetPreview(.tabSettings, label: "Cài đặt")
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .appCard()
-    }
-
-    private func assetPreview(_ asset: AppAsset, label: String) -> some View {
-        VStack(spacing: AppTheme.Spacing.small) {
-            Image(appAsset: asset)
-                .resizable()
-                .scaledToFill()
-                .frame(width: AppTheme.Size.tabIcon, height: AppTheme.Size.tabIcon)
-                .clipShape(Circle())
-                .overlay {
-                    Circle().stroke(AppTheme.Colors.primary.opacity(0.6), lineWidth: 1)
-                }
-
-            Text(label)
-                .font(AppTheme.Typography.caption)
-                .foregroundStyle(AppTheme.Colors.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.75)
-        }
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
     }
 }
 
@@ -114,6 +58,22 @@ struct AppView: View {
     AppView(
         store: Store(initialState: AppFeature.State()) {
             AppFeature()
+        } withDependencies: {
+            $0.astrologyClient = .previewValue
+            $0.caDaoClient = .previewValue
+            $0.calendarArtClient = .previewValue
+            $0.wallpaperClient = .previewValue
+            $0.supabaseClient = .previewValue
+            $0.billingClient = .previewValue
+            $0.dailyNotificationClient = .previewValue
+            $0.hapticClient = .testValue
+            $0.chatClient = .testValue
+            $0.chatHistoryClient = .testValue
+            $0.speechClient = .testValue
+            $0.speechRecognitionClient = .testValue
+            $0.placeLocationClient = .testValue
+            $0.externalURLClient = .testValue
+            $0.tuViClient = .previewValue
         }
     )
 }

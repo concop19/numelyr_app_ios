@@ -325,8 +325,8 @@ classDiagram
         +String birthDate
         +Int lifePathNumber
         +Int destinyNumber
-        +Int personalYearNumber
-        +Int personalDayNumber
+        +Int personalYear
+        +Int personalDay
         +String intentionId
         +String styleId
         +String deviceType

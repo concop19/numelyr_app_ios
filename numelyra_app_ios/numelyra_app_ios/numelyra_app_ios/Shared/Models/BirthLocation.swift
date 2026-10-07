@@ -23,9 +23,11 @@ public nonisolated struct ResolvedBirthLocation: Codable, Equatable, Sendable {
     public var latitude: Double
     public var longitude: Double
     public var timeZoneIdentifier: String
+    // time zone dai dien cho khu vuv
     public var resolvedAt: Date
+    // thoi gian du lieu nay dc tao ra de luu vao cachce
     public var expiresAt: Date
-
+    // het han vao. luc nao
     public init(
         placeID: String,
         userLabel: String,

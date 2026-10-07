@@ -1,6 +1,6 @@
 import Foundation
 
-public struct WallpaperItem: Identifiable, Codable, Equatable, Sendable {
+public nonisolated struct WallpaperItem: Identifiable, Codable, Equatable, Sendable {
     public var id: String
     public var imageUrl: String
     public var title: String
@@ -31,7 +31,7 @@ public struct WallpaperItem: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-public struct WallpaperStyleOption: Identifiable, Equatable, Sendable {
+public nonisolated struct WallpaperStyleOption: Identifiable, Equatable, Sendable {
     public var id: String
     public var label: String
 
@@ -50,7 +50,7 @@ public struct WallpaperStyleOption: Identifiable, Equatable, Sendable {
     ]
 }
 
-public struct WallpaperIntentionOption: Identifiable, Equatable, Sendable {
+public nonisolated struct WallpaperIntentionOption: Identifiable, Equatable, Sendable {
     public var id: String
     public var label: String
 

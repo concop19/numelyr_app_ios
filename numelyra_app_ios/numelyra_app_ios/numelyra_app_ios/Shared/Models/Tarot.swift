@@ -1,6 +1,6 @@
 import Foundation
 
-public struct TarotCard: Identifiable, Codable, Equatable, Sendable {
+public nonisolated struct TarotCard: Identifiable, Codable, Equatable, Sendable {
     public var id: String
     public var nameVi: String
     public var nameEn: String
@@ -34,7 +34,7 @@ public struct TarotCard: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-public struct TarotPosition: Identifiable, Codable, Equatable, Sendable {
+public nonisolated struct TarotPosition: Identifiable, Codable, Equatable, Sendable {
     public var id: String
     public var nameVi: String
     public var descVi: String
@@ -46,7 +46,11 @@ public struct TarotPosition: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
-public struct DrawnTarotCard: Codable, Equatable, Sendable {
+public nonisolated struct DrawnTarotCard: Identifiable, Codable, Equatable, Sendable {
+    /// ID ổn định của slot trong một trải bài. Mỗi `TarotPosition.id` là duy nhất
+    /// trong catalog bốn spread, nên không phụ thuộc vào lá được rút ngẫu nhiên.
+    public var id: String { position.id }
+
     public var card: TarotCard
     public var isReversed: Bool
     public var position: TarotPosition
@@ -58,7 +62,7 @@ public struct DrawnTarotCard: Codable, Equatable, Sendable {
     }
 }
 
-public struct TarotSpread: Identifiable, Equatable, Sendable {
+public nonisolated struct TarotSpread: Identifiable, Codable, Equatable, Sendable {
     public var id: TarotSpreadID
     public var nameVi: String
     public var descVi: String

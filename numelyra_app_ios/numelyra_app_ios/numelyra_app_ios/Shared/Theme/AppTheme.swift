@@ -25,10 +25,15 @@ enum AppTheme {
         static let textOnPrimary = Color(hex: 0x24133F)
 
         static let border = Color(hex: 0x6E3A9D)
-        static let divider = Color(hex: 0xB685E7).opacity(0.23)
+        static let cardBorder = Color(hex: 0x995FD2, opacity: 0.62)
+        static let divider = Color(hex: 0xB685E7, opacity: 0.23)
+        static let inputBackground = Color(hex: 0x2B1947)
+        static let inputBorder = Color(hex: 0x8E69C4, opacity: 0.52)
+        static let inputPlaceholder = Color(hex: 0xB6A6CE)
         static let success = Color(hex: 0x4ADE80)
         static let warning = Color(hex: 0xFCD34D)
         static let error = Color(hex: 0xF87171)
+        static let errorSoft = Color(hex: 0xFDA4AF)
         static let scrim = Color.black.opacity(0.72)
     }
 
@@ -45,8 +50,36 @@ enum AppTheme {
             endPoint: .bottomTrailing
         )
 
+        static let goldAction = LinearGradient(
+            colors: [Color(hex: 0xFFE8AA), Color(hex: 0xF5BD55), Color(hex: 0xD98B2E)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
         static let surface = LinearGradient(
             colors: [Color(hex: 0x43236F), Color(hex: 0x28144F)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
+        static let cardElevated = LinearGradient(
+            colors: [Color(hex: 0x321060), Color(hex: 0x291051), Color(hex: 0x210943)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+
+        static let cardOverlay = LinearGradient(
+            colors: [
+                Color(hex: 0xF7C7FF, opacity: 0.12),
+                Color(hex: 0x210C4C, opacity: 0.04),
+                Color(hex: 0x080422, opacity: 0.32)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+
+        static let secondaryAction = LinearGradient(
+            colors: [Color(hex: 0x432078), Color(hex: 0x31165E), Color(hex: 0x211043)],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -95,7 +128,7 @@ enum AppTheme {
 
     enum Shadow {
         static let card = AppShadow(
-            color: Color(hex: 0x1A063A).opacity(0.75),
+            color: Color(hex: 0x1A063A, opacity: 0.75),
             radius: 18,
             x: 0,
             y: 10
@@ -116,12 +149,13 @@ struct AppShadow: Sendable {
     let y: CGFloat
 }
 
-private extension Color {
-    init(hex: UInt32) {
+extension Color {
+    init(hex: UInt32, opacity: Double = 1.0) {
         self.init(
             red: Double((hex >> 16) & 0xFF) / 255,
             green: Double((hex >> 8) & 0xFF) / 255,
-            blue: Double(hex & 0xFF) / 255
+            blue: Double(hex & 0xFF) / 255,
+            opacity: opacity
         )
     }
 }

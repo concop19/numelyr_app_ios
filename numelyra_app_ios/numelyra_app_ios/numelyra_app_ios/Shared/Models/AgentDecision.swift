@@ -1,11 +1,11 @@
 import Foundation
 
-public enum AgentMode: String, Codable, Equatable, Sendable {
+public nonisolated enum AgentMode: String, Codable, Equatable, Sendable {
     case single
     case compatibility
 }
 
-public enum AgentIntent: String, Codable, Equatable, Sendable {
+public nonisolated enum AgentIntent: String, Codable, Equatable, Sendable {
     case loveMatch = "love_match"
     case twoChoices = "two_choices"
     case timingTrajectory = "timing_trajectory"
@@ -17,14 +17,14 @@ public enum AgentIntent: String, Codable, Equatable, Sendable {
     case general = "general"
 }
 
-public enum TarotSpreadID: String, Codable, CaseIterable, Equatable, Sendable {
+public nonisolated enum TarotSpreadID: String, Codable, CaseIterable, Equatable, Sendable {
     case single
     case threeCard = "three-card"
     case twoOptions = "two-options"
     case relationship
 }
 
-public struct AgentDecision: Codable, Equatable, Sendable {
+public nonisolated struct AgentDecision: Codable, Equatable, Sendable {
     public var mode: AgentMode
     public var intent: AgentIntent
     public var needsTarot: Bool

@@ -374,7 +374,7 @@ Tài liệu này lưu trữ inventory chi tiết từng model, cấu trúc dữ 
 - **Payload Request**:
   - `fullName: string`, `birthDate: string`
   - `lifePathNumber: number`, `destinyNumber: number`
-  - `personalYearNumber: number`, `personalDayNumber: number`
+  - `personalYear: number`, `personalDay: number` (key thực tế từ spread `...numbers` trong source)
   - `intentionId: string`, `styleId: string`, `deviceType: 'mobile'`, `customWish: string`, `count: 4`
 - **Payload Response**:
   - `success: boolean`, `imageUrls?: string[]`, `imageUrl?: string`
