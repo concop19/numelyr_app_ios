@@ -67,6 +67,8 @@ Side effects được đặt trong dependency:
 
 ## Validation hiện tại
 
-- `swiftc -parse` toàn bộ app/test và `swiftc -typecheck` pure Chat model/engine subset: đạt ngày 2026-10-07.
-- XCTest sources: có coverage cho intent, spread count, unknown payload round-trip, nested place payload, compatibility v2 offline synthesis, thiếu profile và color/two-profile guard.
+- `swiftc -parse` toàn bộ app/test và `swiftc -typecheck` pure Chat model/engine subset với macOS 26.5 SDK: đạt lại ngày 2026-10-12.
+- Executable regression harness: đạt intent routing, unknown payload round-trip và Zi Wei v2 compatibility xuyên suốt offline synthesis.
+- XCTest sources: có coverage cho intent, spread count, unknown payload round-trip, nested place payload, compatibility v2 offline synthesis, thiếu profile, color/two-profile guard, stale hydration và cleanup transient state khi rời tab.
+- Audit sửa lỗi 2026-10-12: thêm token cho hydration để chặn owner cũ ghi đè state; cleanup request/STT/location/TTS khi rời tab; xử lý interactive dismiss của place/ritual; giữ vùng mascot không bị bubble che, ẩn mascot khi composer focus và cho ritual scroll trên màn hình nhỏ.
 - `xcodebuild`, chạy XCTest, Simulator screenshot và RN comparison: bị chặn trên máy hiện tại vì `xcode-select` trỏ tới `/Library/Developer/CommandLineTools` và không có full Xcode/iOS Simulator SDK.

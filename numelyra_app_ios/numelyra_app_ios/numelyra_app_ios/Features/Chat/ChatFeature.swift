@@ -133,6 +133,7 @@ struct ChatFeature {
         var ownerID = "guest"; var isHydrated = false; var messages: [ChatMessage] = []; var showAllHistory = false
         var draft = ""; var selectedProfiles: [UserProfile] = []; var isLoading = false; var isListening = false
         var errorMessage: String?; var pending: PendingTurn?; var mascotState = "idle"; var mascotCategory = "default"
+        var hydrationID: UUID?
         @Presents var profilePicker: ChatProfilePickerFeature.State?
         @Presents var placePicker: ChatPlacePickerFeature.State?
         @Presents var ritual: ChatReadingRitualFeature.State?
@@ -141,7 +142,7 @@ struct ChatFeature {
         var visibleMessages: [ChatMessage] { showAllHistory ? messages : Array(messages.suffix(messages.last?.sender == .mascot ? 2 : 1)) }
     }
     enum Action: Equatable {
-        case onAppear, onDisappear, hydrated(String, [UserProfile], [ChatMessage]), ownerChanged(String)
+        case onAppear, onDisappear, hydrated(UUID, String, [UserProfile], [ChatMessage]), ownerChanged(String)
         case draftChanged(String), sendTapped, classified(Result<AgentDecision, ChatError>), response(Result<ChatAnswer, ChatError>)
         case historyToggleTapped, profileTapped, mascotTapped, microphoneTapped, transcriptReceived(String), listeningEnded, listeningFailed(String)
         case messageTypingFinished(String), messageTapped(String), mapTapped(String), errorDismissed, gameHubTapped
@@ -160,27 +161,50 @@ struct ChatFeature {
     @Dependency(\.speechRecognitionClient) var recognition; @Dependency(\.placeLocationClient) var location
     @Dependency(\.externalURLClient) var externalURL; @Dependency(\.date.now) var now; @Dependency(\.uuid) var uuid
     @Dependency(\.tuViClient) var tuViClient
-    private enum CancelID: Hashable { case load, request, recognition, location }
+    private nonisolated enum CancelID: Hashable, Sendable { case load, request, recognition, location }
 
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
             case .onAppear:
+                let hydrationID = uuid()
+                state.hydrationID = hydrationID
                 return .run { send in
                     let session = await supabase.currentSession(); let owner = session?.userId ?? "guest"
-                    await send(.hydrated(owner, profilesClient.loadAllProfiles(), await history.load(owner)))
+                    await send(.hydrated(hydrationID, owner, profilesClient.loadAllProfiles(), await history.load(owner)))
                 }.cancellable(id: CancelID.load, cancelInFlight: true)
             case .onDisappear:
+                state.hydrationID = nil
                 state.isListening = false
-                return .merge(.cancel(id: CancelID.load), .cancel(id: CancelID.recognition), .cancel(id: CancelID.request), .cancel(id: CancelID.location), .run { _ in await recognition.stop(); await speech.stop() })
-            case let .hydrated(owner, profiles, messages):
-                state.ownerID = owner; state.messages = messages; state.selectedProfiles = profilesClient.activeProfile().map { [$0] } ?? Array(profiles.prefix(1)); state.isHydrated = true; return .none
+                state.isLoading = false
+                state.pending = nil
+                state.placePicker = nil
+                state.ritual = nil
+                state.mascotState = "idle"
+                return .merge(.cancel(id: CancelID.load), .cancel(id: CancelID.recognition), .cancel(id: CancelID.request), .cancel(id: CancelID.location), .run { _ in await recognition.stop(); await location.cancel(); await speech.stop() })
+            case let .hydrated(hydrationID, owner, profiles, messages):
+                guard state.hydrationID == hydrationID else { return .none }
+                if owner != state.ownerID {
+                    state = State()
+                    state.ownerID = owner
+                    state.hydrationID = hydrationID
+                }
+                state.ownerID = owner
+                state.messages = messages
+                state.selectedProfiles = profilesClient.activeProfile().map { [$0] } ?? Array(profiles.prefix(1))
+                state.isHydrated = true
+                state.hydrationID = nil
+                return .none
             case let .ownerChanged(owner):
-                guard owner != state.ownerID else { return .none }; state = State(ownerID: owner)
+                guard owner != state.ownerID else { return .none }
+                let hydrationID = uuid()
+                state = State()
+                state.ownerID = owner
+                state.hydrationID = hydrationID
                 return .merge(
                     .cancel(id: CancelID.request), .cancel(id: CancelID.recognition), .cancel(id: CancelID.location),
-                    .run { _ in await recognition.stop(); await speech.stop() },
-                    .run { send in await send(.hydrated(owner, profilesClient.loadAllProfiles(), await history.load(owner))) }.cancellable(id: CancelID.load, cancelInFlight: true)
+                    .run { _ in await recognition.stop(); await location.cancel(); await speech.stop() },
+                    .run { send in await send(.hydrated(hydrationID, owner, profilesClient.loadAllProfiles(), await history.load(owner))) }.cancellable(id: CancelID.load, cancelInFlight: true)
                 )
             case let .draftChanged(value): state.draft = value; return .none
             case .sendTapped:
@@ -194,9 +218,13 @@ struct ChatFeature {
                     return .none
                 }
                 state.messages.append(.init(id: "user-\(uuid().uuidString)", sender: .user, text: prompt, time: time(now)))
-                state.messages = Array(state.messages.suffix(100)); state.draft = ""; state.isLoading = true; state.mascotState = "thinking"
+                state.messages = Array(state.messages.suffix(100)); state.showAllHistory = false; state.draft = ""; state.isLoading = true; state.mascotState = "thinking"
                 let profiles = state.selectedProfiles; let snapshot = state.messages; let owner = state.ownerID
-                return .merge(persist(owner, snapshot), .run { send in do { await send(.classified(.success(try await chatClient.classify(.init(message: prompt, profiles: profiles))))) } catch { await send(.classified(.failure(.server(error.localizedDescription)))) } }.cancellable(id: CancelID.request, cancelInFlight: true))
+                return .merge(persist(owner, snapshot), .run { send in
+                    do { await send(.classified(.success(try await chatClient.classify(.init(message: prompt, profiles: profiles))))) }
+                    catch is CancellationError { }
+                    catch { await send(.classified(.failure(.server(error.localizedDescription)))) }
+                }.cancellable(id: CancelID.request, cancelInFlight: true))
             case let .classified(result):
                 guard let user = state.messages.last(where: { $0.sender == .user }) else { return .none }
                 let decision = (try? result.get()) ?? ChatDecisionEngine.evaluate(user.text, profiles: state.selectedProfiles)
@@ -237,12 +265,21 @@ struct ChatFeature {
                 guard let profile = state.selectedProfiles.first else { state.profilePicker = pickerState(state); return .none }
                 state.numerologyCards = .init(activeProfile: profile); return .none
             case .microphoneTapped:
-                if state.isListening { state.isListening = false; return .merge(.cancel(id: CancelID.recognition), .run { _ in await recognition.stop() }) }
+                if state.isListening {
+                    state.isListening = false
+                    state.mascotState = state.messages.last?.sender == .mascot ? "answer" : "idle"
+                    return .merge(.cancel(id: CancelID.recognition), .run { _ in await recognition.stop() })
+                }
                 state.isListening = true
-                return .run { send in do { for try await value in await recognition.start() { await send(.transcriptReceived(value)) }; await send(.listeningEnded) } catch { await send(.listeningFailed(error.localizedDescription)) } }.cancellable(id: CancelID.recognition, cancelInFlight: true)
+                state.mascotState = "thinking"
+                return .run { send in
+                    do { for try await value in await recognition.start() { await send(.transcriptReceived(value)) }; await send(.listeningEnded) }
+                    catch is CancellationError { }
+                    catch { await send(.listeningFailed(error.localizedDescription)) }
+                }.cancellable(id: CancelID.recognition, cancelInFlight: true)
             case let .transcriptReceived(value): state.draft = value; return .none
-            case .listeningEnded: state.isListening = false; return .none
-            case let .listeningFailed(message): state.isListening = false; state.errorMessage = message; return .none
+            case .listeningEnded: state.isListening = false; state.mascotState = state.messages.last?.sender == .mascot ? "answer" : "idle"; return .none
+            case let .listeningFailed(message): state.isListening = false; state.mascotState = state.messages.last?.sender == .mascot ? "answer" : "idle"; state.errorMessage = message; return .none
             case let .messageTypingFinished(id): if let index = state.messages.firstIndex(where: { $0.id == id }) { state.messages[index].isTypingCompleted = true; return persist(state.ownerID, state.messages) }; return .none
             case let .messageTapped(id):
                 guard let index = state.messages.firstIndex(where: { $0.id == id }), state.messages[index].sender == .mascot, state.messages[index].isTypingCompleted else { return .none }
@@ -255,14 +292,25 @@ struct ChatFeature {
             case let .profilePicker(.presented(.delegate(.selected(values)))): state.selectedProfiles = values; state.profilePicker = nil; return .none
             case .profilePicker(.presented(.delegate(.close))): state.profilePicker = nil; return .none
             case let .placePicker(.presented(.delegate(.locate(preferences)))):
-                return .run { send in do { await send(.locationResponse(.success(try await location.locate(preferences)))) } catch { await send(.locationResponse(.failure(.permissionDenied(error.localizedDescription)))) } }.cancellable(id: CancelID.location, cancelInFlight: true)
+                return .run { send in
+                    do { await send(.locationResponse(.success(try await location.locate(preferences)))) }
+                    catch is CancellationError { }
+                    catch { await send(.locationResponse(.failure(.permissionDenied(error.localizedDescription)))) }
+                }.cancellable(id: CancelID.location, cancelInFlight: true)
             case .placePicker(.presented(.delegate(.cancel))):
                 state.placePicker = nil; state.isLoading = false; state.pending = nil
                 appendAssistant("✦ TIỂU LINH MIÊU CẦN VỊ TRÍ HIỆN TẠI:\nĐể lọc địa điểm theo khoảng cách thực tế, bạn hãy cho phép dùng vị trí một lần nhé.", card: nil, to: &state)
-                return persist(state.ownerID, state.messages)
+                return .merge(.cancel(id: CancelID.location), .run { _ in await location.cancel() }, persist(state.ownerID, state.messages))
+            case .placePicker(.dismiss):
+                state.isLoading = false; state.pending = nil
+                appendAssistant("✦ TIỂU LINH MIÊU CẦN VỊ TRÍ HIỆN TẠI:\nĐể lọc địa điểm theo khoảng cách thực tế, bạn hãy cho phép dùng vị trí một lần nhé.", card: nil, to: &state)
+                return .merge(.cancel(id: CancelID.location), .run { _ in await location.cancel() }, persist(state.ownerID, state.messages))
             case .ritual(.presented(.delegate(.revealedAll))):
                 if state.ritual?.status == .ready, let text = state.ritual?.replyText { return finishRitual(&state, text: text) }; return .none
             case .ritual(.presented(.delegate(.close))): state.ritual = nil; state.isLoading = false; state.mascotState = "idle"; return .run { _ in await speech.stop() }
+            case .ritual(.dismiss):
+                state.isLoading = false; state.mascotState = "idle"
+                return .run { _ in await speech.stop() }
             case .numerologyCards(.presented(.delegate(.didClose))), .numerologyCards(.presented(.closeTapped)): state.numerologyCards = nil; return .none
             case .profilePicker, .placePicker, .ritual, .numerologyCards, .detail, .delegate: return .none
             }
@@ -298,7 +346,11 @@ struct ChatFeature {
         state.pending = pending
         if !pending.cards.isEmpty { state.ritual = .init(id: pending.id, question: pending.prompt, cards: pending.cards) }
         let request = ChatAgentRequest(message: pending.prompt, decision: pending.decision, timeZone: TimeZone.current.identifier, profiles: state.selectedProfiles, indicators: .init(profile1: pending.indicators1, profile2: pending.indicators2), tarotCards: pending.cards, colorGuidance: pending.color, tuViBazi: nil, ziWeiCompatibility: pending.ziWeiCompatibility, placeContext: pending.place)
-        return .run { send in do { let value = try await chatClient.answer(request); await send(.response(.success(ChatAnswer(text: value.0, card: value.1)))) } catch { await send(.response(.failure(.server(error.localizedDescription)))) } }.cancellable(id: CancelID.request, cancelInFlight: true)
+        return .run { send in
+            do { let value = try await chatClient.answer(request); await send(.response(.success(ChatAnswer(text: value.0, card: value.1)))) }
+            catch is CancellationError { }
+            catch { await send(.response(.failure(.server(error.localizedDescription)))) }
+        }.cancellable(id: CancelID.request, cancelInFlight: true)
     }
     private func finishRitual(_ state: inout State, text: String) -> Effect<Action> { state.ritual?.status = .revealed; state.isLoading = false; state.mascotState = "answer"; return .run { _ in await speech.speak("detail", text) } }
     private func ziWeiInput(_ profile: UserProfile) -> ZiWeiBirthInput? {

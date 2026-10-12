@@ -193,6 +193,7 @@ private final class RecognitionBox: @unchecked Sendable {
     static let shared = RecognitionBox()
     private let engine = AVAudioEngine()
     private var task: SFSpeechRecognitionTask?
+    private var hasInputTap = false
 
     func stream() -> AsyncThrowingStream<String, Error> {
         AsyncThrowingStream { continuation in
@@ -218,11 +219,15 @@ private final class RecognitionBox: @unchecked Sendable {
         try session.setActive(true, options: .notifyOthersOnDeactivation)
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
+        guard let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "vi-VN")), recognizer.isAvailable else {
+            throw ChatError.server("Nhận dạng giọng nói tiếng Việt hiện không khả dụng.")
+        }
         let node = engine.inputNode
         let format = node.outputFormat(forBus: 0)
         node.installTap(onBus: 0, bufferSize: 1024, format: format) { buffer, _ in request.append(buffer) }
+        hasInputTap = true
         engine.prepare(); try engine.start()
-        task = SFSpeechRecognizer(locale: Locale(identifier: "vi-VN"))?.recognitionTask(with: request) { result, error in
+        task = recognizer.recognitionTask(with: request) { result, error in
             if let text = result?.bestTranscription.formattedString, !text.isEmpty { continuation.yield(text) }
             if let error { continuation.finish(throwing: error) }
             else if result?.isFinal == true { continuation.finish() }
@@ -232,7 +237,7 @@ private final class RecognitionBox: @unchecked Sendable {
     func stop() {
         task?.cancel(); task = nil
         if engine.isRunning { engine.stop() }
-        engine.inputNode.removeTap(onBus: 0)
+        if hasInputTap { engine.inputNode.removeTap(onBus: 0); hasInputTap = false }
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }
@@ -262,12 +267,17 @@ private final class LocationBox: NSObject, CLLocationManagerDelegate, @unchecked
         if let location = manager.location, abs(location.timestamp.timeIntervalSinceNow) <= 300, location.horizontalAccuracy <= 1_000 { return location }
         let status = manager.authorizationStatus
         if status == .denied || status == .restricted { throw ChatError.permissionDenied("Bạn cần cho phép dùng vị trí hiện tại để tìm địa điểm gần bạn.") }
-        return try await withCheckedThrowingContinuation {
-            continuation = $0
-            if status == .notDetermined { manager.requestWhenInUseAuthorization() }
-            else { manager.requestLocation() }
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation {
+                continuation = $0
+                if status == .notDetermined { manager.requestWhenInUseAuthorization() }
+                else { manager.requestLocation() }
+            }
+        } onCancel: {
+            Task { @MainActor in self.cancel() }
         }
     }
+    func cancel() { manager.stopUpdatingLocation(); continuation?.resume(throwing: CancellationError()); continuation = nil }
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         guard continuation != nil else { return }
         switch manager.authorizationStatus {
@@ -284,9 +294,10 @@ private final class LocationBox: NSObject, CLLocationManagerDelegate, @unchecked
 @DependencyClient
 struct PlaceLocationClient: Sendable {
     var locate: @Sendable (_ preferences: PlaceSearchPreferences) async throws -> PlaceSearchContext
+    var cancel: @Sendable () async -> Void = {}
 }
 extension PlaceLocationClient: DependencyKey {
-    static let liveValue = Self(locate: { preferences in let value = try await LocationBox.shared.request(); return .init(preferences: preferences, latitude: value.coordinate.latitude, longitude: value.coordinate.longitude) })
+    static let liveValue = Self(locate: { preferences in let value = try await LocationBox.shared.request(); return .init(preferences: preferences, latitude: value.coordinate.latitude, longitude: value.coordinate.longitude) }, cancel: { await LocationBox.shared.cancel() })
     static let testValue = Self()
 }
 extension DependencyValues { var placeLocationClient: PlaceLocationClient { get { self[PlaceLocationClient.self] } set { self[PlaceLocationClient.self] = newValue } } }

@@ -4,7 +4,7 @@ import XCTest
 @testable import numelyra_app_ios
 
 final class ChatEngineTests: XCTestCase {
-    private let profile = UserProfile(id: "p1", fullName: "Nguyễn An", birthDate: "1998-10-20", gender: .male)
+    private let profile = UserProfile(id: "p1", fullName: "Nguyễn An", birthDate: "1998-10-20", gender: .male, birthTime: "14:30", birthTimeAccuracy: .exact)
 
     func testDecisionEngineCoversPrimaryIntentsAndTrash() {
         XCTAssertEqual(ChatDecisionEngine.evaluate("test", profiles: [profile]).intent, .trash)
@@ -42,12 +42,12 @@ final class ChatEngineTests: XCTestCase {
     }
 
     func testNewZiWeiCompatibilityIsUsedByOfflineSynthesis() throws {
-        let second = UserProfile(id: "p2", fullName: "Minh", birthDate: "2000-01-01", gender: .female, birthTime: "08:30")
+        let second = UserProfile(id: "p2", fullName: "Minh", birthDate: "2000-01-01", gender: .female, birthTime: "08:30", birthTimeAccuracy: .exact)
         let chart1 = try TuViEngine.generateChart(.init(year: 1998, month: 10, day: 20, hour: 12, gender: .male))
         let chart2 = try TuViEngine.generateChart(.init(year: 2000, month: 1, day: 1, hour: 8, minute: 30, gender: .female))
         let analysis = try TuViEngine.evaluateLoveCompatibility(chartA: chart1, chartB: chart2)
         let compatibility = ChatZiWeiCompatibilityPayload(chart1: chart1, chart2: chart2, analysis: analysis)
-        let decision = AgentDecision(mode: .compatibility, intent: .loveMatch)
+        let decision = AgentDecision(mode: .compatibility, intent: .loveMatch, needsTarot: false)
         let result = ChatSynthesisEngine.make(prompt: "Có hợp nhau không?", decision: decision, profiles: [profile, second], indicators: [], cards: [], ziWeiCompatibility: compatibility)
         XCTAssertTrue(result.0.contains("\(analysis.score)/100"))
         XCTAssertEqual(result.1.ziWeiCompatibility, compatibility)
@@ -78,6 +78,47 @@ final class ChatHistoryClientTests: XCTestCase {
 
 @MainActor
 final class ChatReducerTests: XCTestCase {
+    func testStaleHydrationCannotReplaceTheCurrentOwner() async {
+        let currentHydrationID = UUID(uuidString: "00000000-0000-0000-0000-000000000002")!
+        let staleHydrationID = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        var state = ChatFeature.State()
+        state.ownerID = "user-current"
+        state.hydrationID = currentHydrationID
+        let store = TestStore(initialState: state) { ChatFeature() }
+
+        await store.send(.hydrated(staleHydrationID, "user-stale", [], [
+            ChatMessage(id: "stale", sender: .mascot, text: "old")
+        ]))
+
+        XCTAssertEqual(store.state.ownerID, "user-current")
+        XCTAssertTrue(store.state.messages.isEmpty)
+        XCTAssertFalse(store.state.isHydrated)
+    }
+
+    func testLeavingChatClearsTransientWorkInsteadOfLeavingLoadingStuck() async {
+        var state = ChatFeature.State()
+        state.isHydrated = true
+        state.isLoading = true
+        state.isListening = true
+        state.mascotState = "thinking"
+        state.pending = .init(
+            id: "pending",
+            prompt: "Công việc sắp tới ra sao?",
+            decision: .init(mode: .single, intent: .timingTrajectory, needsTarot: true)
+        )
+        state.placePicker = .init()
+        let store = TestStore(initialState: state) { ChatFeature() }
+
+        await store.send(.onDisappear) {
+            $0.isLoading = false
+            $0.isListening = false
+            $0.mascotState = "idle"
+            $0.pending = nil
+            $0.placePicker = nil
+        }
+        await store.finish()
+    }
+
     func testSendWithoutProfilePresentsPickerBeforeAppendingQuestion() async {
         var state = ChatFeature.State()
         state.isHydrated = true
@@ -111,5 +152,50 @@ final class ChatReducerTests: XCTestCase {
         }
         XCTAssertTrue(store.state.messages.isEmpty)
         XCTAssertFalse(store.state.isLoading)
+    }
+
+    func testSpeechRecognitionStreamsPartialFinalAndEnds() async {
+        var state = ChatFeature.State()
+        state.isHydrated = true
+        let store = TestStore(initialState: state) { ChatFeature() } withDependencies: {
+            $0.speechRecognitionClient.start = {
+                AsyncThrowingStream { continuation in
+                    continuation.yield("xin")
+                    continuation.yield("xin chào")
+                    continuation.finish()
+                }
+            }
+        }
+
+        await store.send(.microphoneTapped) {
+            $0.isListening = true
+            $0.mascotState = "thinking"
+        }
+        await store.receive(.transcriptReceived("xin")) { $0.draft = "xin" }
+        await store.receive(.transcriptReceived("xin chào")) { $0.draft = "xin chào" }
+        await store.receive(.listeningEnded) {
+            $0.isListening = false
+            $0.mascotState = "idle"
+        }
+    }
+
+    func testCoupleRequiresExactBirthTimeBeforeAppending() async {
+        let profiles = [
+            UserProfile(id: "a", fullName: "An", birthDate: "1998-10-20", gender: .male),
+            UserProfile(id: "b", fullName: "Bình", birthDate: "2000-01-01", gender: .female, birthTime: "08:30", birthTimeAccuracy: .exact),
+        ]
+        var state = ChatFeature.State()
+        state.isHydrated = true
+        state.selectedProfiles = profiles
+        state.draft = "Chúng tôi có hợp nhau không?"
+        let store = TestStore(initialState: state) { ChatFeature() } withDependencies: {
+            $0.userProfileClient.loadAllProfiles = { profiles }
+        }
+
+        await store.send(.sendTapped) {
+            $0.errorMessage = "Luận tương hợp Tử Vi mới cần giới tính và giờ sinh chính xác của cả hai hồ sơ. Hãy bổ sung hồ sơ trước khi gửi."
+            $0.profilePicker = .init(profiles: profiles, selectedIDs: ["a", "b"], mode: .couple)
+        }
+        XCTAssertTrue(store.state.messages.isEmpty)
     }
 }

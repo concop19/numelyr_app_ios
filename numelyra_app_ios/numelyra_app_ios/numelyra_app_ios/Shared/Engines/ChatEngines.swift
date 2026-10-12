@@ -109,6 +109,18 @@ enum ChatSynthesisEngine {
             text = "✦ KẾT LUẬN NHANH:\nHôm nay bạn có thể ưu tiên \(names).\n\n✦ NÊN LÀM GÌ:\nDùng hai gam màu này làm điểm nhấn và giữ phần còn lại trung tính."
         case .whereToGo:
             text = "✦ CHƯA THỂ TÌM ĐỊA ĐIỂM:\nKết nối đang gián đoạn nên Numelyra không tạo địa điểm giả. Hãy thử lại khi có mạng."
+        case .twoChoices:
+            let first = cards.first.map { $0.isReversed ? $0.card.meaningReversed : $0.card.meaningUpright } ?? "Lựa chọn A cần thêm dữ kiện."
+            let second = cards.dropFirst(2).first.map { $0.isReversed ? $0.card.meaningReversed : $0.card.meaningUpright } ?? "Lựa chọn B cần thêm dữ kiện."
+            text = "✦ SO SÁNH HAI LỰA CHỌN:\nA: \(first)\n\nB: \(second)\n\n✦ NÊN LÀM GÌ:\nƯu tiên phương án phù hợp mục tiêu dài hạn và rủi ro bạn thực sự có thể chịu."
+        case .timingTrajectory:
+            let phases = zip(["Quá khứ", "Hiện tại", "Tương lai gần"], cards).map { label, card in "• \(label): \(card.isReversed ? card.card.meaningReversed : card.card.meaningUpright)" }.joined(separator: "\n")
+            text = "✦ TIẾN TRÌNH:\n\(phases)\n\n✦ NÊN LÀM GÌ:\nTập trung vào hành động đang nằm trong quyền kiểm soát của bạn ở hiện tại."
+        case .dailyGuidance:
+            let guidance = cards.first.map { $0.isReversed ? $0.card.meaningReversed : $0.card.meaningUpright } ?? "Hãy chậm lại và quan sát."
+            text = "✦ THÔNG ĐIỆP HÔM NAY:\n\(guidance)\n\n✦ NÊN LÀM GÌ:\nChọn một việc nhỏ, rõ ràng và hoàn tất nó trước khi mở thêm hướng mới."
+        case .trash:
+            text = ChatDecisionEngine.trashReply
         default:
             if let card = cards.first {
                 let meaning = card.isReversed ? card.card.meaningReversed : card.card.meaningUpright

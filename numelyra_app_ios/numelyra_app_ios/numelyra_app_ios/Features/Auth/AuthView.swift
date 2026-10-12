@@ -29,6 +29,25 @@ struct AuthView: View {
                 }
                 .scrollDismissesKeyboard(.interactively)
             }
+
+            if !store.allowGuest {
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            store.send(.dismissTapped)
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 28))
+                                .foregroundStyle(Color.white.opacity(0.6))
+                                .padding(16)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("Đóng")
+                    }
+                    Spacer()
+                }
+            }
         }
         .preferredColorScheme(.dark)
         .task {

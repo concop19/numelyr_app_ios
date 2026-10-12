@@ -5,6 +5,50 @@ struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
 
     var body: some View {
+        Group {
+            switch store.launchFlow {
+            case .loading:
+                loadingView
+            case .auth:
+                AuthView(store: store.scope(state: \.auth, action: \.auth))
+            case .onboarding:
+                OnboardingView(store: store.scope(state: \.onboarding, action: \.onboarding))
+            case .main:
+                mainTabsView
+            }
+        }
+        .task {
+            store.send(.onAppear)
+        }
+        .onOpenURL { url in
+            store.send(.handleDeepLink(url))
+        }
+    }
+
+    // MARK: - Loading View (Parity with RN App.tsx)
+    private var loadingView: some View {
+        ZStack {
+            Color(hex: 0x0B0B14)
+                .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                Text("🐱")
+                    .font(.system(size: 48))
+
+                ProgressView()
+                    .tint(Color(hex: 0xF5BA5B))
+
+                Text("Tiểu Linh Miêu đang thức dậy...")
+                    .font(.system(size: 14))
+                    .italic()
+                    .foregroundStyle(Color(hex: 0xF5BA5B))
+            }
+        }
+        .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Main 5 Tabs
+    private var mainTabsView: some View {
         TabView(
             selection: Binding(
                 get: { store.selectedTab },
@@ -40,9 +84,13 @@ struct AppView: View {
             )
             .tabItem { Label("Cài đặt", systemImage: "gearshape") }
             .tag(AppFeature.Tab.settings)
-
         }
         .tint(AppTheme.Colors.primary)
+        .fullScreenCover(
+            item: $store.scope(state: \.gameHub, action: \.gameHub)
+        ) { gameHubStore in
+            GameHubView(store: gameHubStore)
+        }
         .fullScreenCover(
             isPresented: Binding(
                 get: { store.isAuthPresented },
@@ -56,7 +104,7 @@ struct AppView: View {
 
 #Preview {
     AppView(
-        store: Store(initialState: AppFeature.State()) {
+        store: Store(initialState: AppFeature.State(launchFlow: .main)) {
             AppFeature()
         } withDependencies: {
             $0.astrologyClient = .previewValue
@@ -74,6 +122,7 @@ struct AppView: View {
             $0.placeLocationClient = .testValue
             $0.externalURLClient = .testValue
             $0.tuViClient = .previewValue
+            $0.gameHubClient = .previewValue
         }
     )
 }

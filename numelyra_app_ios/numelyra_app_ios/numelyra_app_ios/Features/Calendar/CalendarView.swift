@@ -8,15 +8,10 @@ struct CalendarView: View {
         GridItem(.flexible(), spacing: 10),
         GridItem(.flexible(), spacing: 10)
     ]
-    // cột co dãn chia đều phần trống conf lại
 
     var body: some View {
         GeometryReader { proxy in
             let contentWidth = min(max(proxy.size.width - 28, 0), 560)
-            // min 560
-                // lay gia tri lon nhat cua chieu rong man hinh -28
-            // tai sao 28
-            // vi le trai va le phai ban than la 14 va 14
 
             ZStack {
                 CalendarPalette.background.ignoresSafeArea()
@@ -27,7 +22,7 @@ struct CalendarView: View {
                         dateNavigation
 
                         if let snapshot = store.snapshot {
-                            hero(snapshot, contentWidth)
+                            hero(snapshot)
                             quickGrid(snapshot)
                             topicCard
                             weekRail(snapshot.weekInfo)
@@ -50,13 +45,6 @@ struct CalendarView: View {
         }
         .preferredColorScheme(.dark)
         .task { store.send(.onAppear) }
-        /*if let datePickerStore = binding {      // có giá trị
-         showSheet {
-             CalendarDatePickerView(store: datePickerStore)
-         }
-     } else {                                // nil
-         hideSheet()
-     }*/
         .sheet(item: $store.scope(\.datePicker, action: \.datePicker)) { datePickerStore in
             CalendarDatePickerView(store: datePickerStore)
                 .presentationDetents([.height(520)])
@@ -172,12 +160,12 @@ struct CalendarView: View {
         .accessibilityLabel(label)
     }
 
-    private func hero(_ snapshot: LunarDaySnapshot,_ size: CGFloat) -> some View {
+    private func hero(_ snapshot: LunarDaySnapshot) -> some View {
         ZStack(alignment: .leading) {
             Image(appAsset: .calendarHero)
                 .resizable()
                 .scaledToFill()
-                .frame(maxWidth: size, maxHeight: 202)
+                .frame(maxWidth: 400, maxHeight: 202)
                 .clipped()
 
             LinearGradient(
@@ -214,7 +202,7 @@ struct CalendarView: View {
             .padding(.vertical, 15)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
-        .frame(height: .infinity)
+        .frame(height: 202)
         .background(Color(calendarHex: 0x26115D))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {

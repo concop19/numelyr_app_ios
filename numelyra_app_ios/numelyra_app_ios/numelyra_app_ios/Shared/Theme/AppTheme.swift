@@ -8,6 +8,7 @@ import SwiftUI
 enum AppTheme {
     enum Colors {
         static let background = Color(hex: 0x0B0B14)
+        static let backgroundPrimary = background
         static let backgroundElevated = Color(hex: 0x171044)
         static let surface = Color(hex: 0x211052)
         static let surfaceRaised = Color(hex: 0x30195F)
