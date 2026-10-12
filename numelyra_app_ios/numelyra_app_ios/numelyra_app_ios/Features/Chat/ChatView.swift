@@ -65,6 +65,7 @@ struct ChatView: View {
                     VStack(spacing: 8) {
                         Text("Hi, I’m Numelyra").font(.title2.bold()).foregroundStyle(.white)
                         Text("Ask me anything\nor share how you feel.").multilineTextAlignment(.center).foregroundStyle(AppTheme.Colors.textSecondary)
+                        Spacer()
                         Button { store.send(.mascotTapped) } label: { FlameMascotView(state: store.isListening ? "thinking" : "idle", size: 175, reduceMotion: reduceMotion) }.buttonStyle(.plain).accessibilityLabel("Mở 24 lá bài Thần số học")
                     }
                 } else if store.isLoading && !isComposerFocused {

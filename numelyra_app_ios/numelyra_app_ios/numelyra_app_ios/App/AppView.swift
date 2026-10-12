@@ -58,7 +58,7 @@ struct AppView: View {
             ChatView(
                 store: store.scope(state: \.chat, action: \.chat)
             )
-            .tabItem { Label("Chat", image: AppAsset.tabChat.rawValue) }
+            .tabItem { Label("Chat", systemImage: "calendar") }
             .tag(AppFeature.Tab.chat)
 
             CalendarView(

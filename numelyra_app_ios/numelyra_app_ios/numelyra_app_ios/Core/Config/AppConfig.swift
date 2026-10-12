@@ -72,7 +72,7 @@ nonisolated enum AppConfig {
             return url
         }
 #if DEBUG
-        return URL(string: "http://localhost:3200")!
+        return URL(string: "https://numelyra.online")!
 #else
         return URL(string: "https://numelyra.online")!
 #endif
