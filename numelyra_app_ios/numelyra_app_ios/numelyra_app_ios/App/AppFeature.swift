@@ -86,7 +86,10 @@ struct AppFeature {
                 if previousTab != .chat, tab == .chat {
                     return .send(.chat(.onAppear))
                 }
+                // reload du ;ieu ms nhat
                 return .none
+                // vi ban than tab chat nay no co thu am. roi xu li, du lieu,// nang
+                // nen neu ko set up disappear thi no rat co the tien trinh van chay
 
             case let .authPresentationChanged(isPresented):
                 state.isAuthPresented = isPresented
@@ -129,7 +132,7 @@ struct AppFeature {
                     if hasProf {
                         state.launchFlow = .main
                         state.selectedTab = .chat
-                        let syncEffect = synchronizeActiveProfile(active, in: &state)
+                        let syncEffect = synchronizeActiveProfile(active, in: &state) // nay nay chay //xog r ma
                         return .merge(syncEffect, .send(.chat(.ownerChanged("guest"))))
                     } else {
                         state.launchFlow = .onboarding
@@ -216,6 +219,8 @@ struct AppFeature {
     private func synchronizeActiveProfile(_ profile: UserProfile?, in state: inout State) -> Effect<Action> {
         state.calendar.profile = profile
         state.wallpaper.profile = profile
+       
+    
         if let profile {
             state.chat.selectedProfiles = [profile]
         }

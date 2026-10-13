@@ -29,11 +29,14 @@ struct ChatView: View {
 
     private var header: some View {
         HStack {
-            Button { store.send(.gameHubTapped) } label: {
+            Button { store.send(.gameHubTapped) }
+            label: {
                 Image(AppAsset.chatSceneMoon.rawValue).resizable().scaledToFit().frame(width: 48, height: 48).opacity(0.85)
             }.buttonStyle(.plain).accessibilityLabel("Mở Game Hub")
             Spacer()
-            Text("Numelyra").font(.system(size: 23, weight: .heavy, design: .rounded)).foregroundStyle(AppTheme.Colors.textPrimary)
+            Text("Numelyra")
+            .font(.system(size: 23, weight: .heavy, design: .rounded))
+            .foregroundStyle(AppTheme.Colors.textPrimary)
             Spacer()
             Button { store.send(.historyToggleTapped) } label: {
                 Image(systemName: store.showAllHistory ? "clock.arrow.2.circlepath" : "clock").font(.title3.weight(.semibold)).frame(width: 44, height: 44).background(.white.opacity(0.09), in: Circle())
@@ -229,8 +232,7 @@ struct ChatReadingRitualView: View {
                         ProgressView("Tiểu Linh Miêu đang hoàn tất lời giải…").tint(AppTheme.Colors.primaryBright).foregroundStyle(.white)
                     }
                     if store.canShowReading, let reply = store.replyText {
-                        ScrollView { HStack(alignment: .top) { Text(reply).font(.body).foregroundStyle(Color(hex: 0x301934)).frame(maxWidth: .infinity, alignment: .leading); Image(AppAsset.chatDetailQuill.rawValue).resizable().scaledToFit().frame(width: 38).rotationEffect(.degrees(reduceMotion ? 0 : -8)) }.padding(20) }
-                            .frame(maxHeight: 260).background(Image(AppAsset.chatDetailPaper.rawValue).resizable(capInsets: EdgeInsets(top: 30, leading: 30, bottom: 30, trailing: 30)).opacity(0.94)).padding(.horizontal)
+                        RitualReadingPaper(text: reply, reduceMotion: reduceMotion)
                         Button("Hoàn tất") { store.send(.closeTapped) }.buttonStyle(.borderedProminent).tint(AppTheme.Colors.primary)
                     }
                     HStack { ZStack(alignment: .top) { Image(AppAsset.chatDetailCandle.rawValue).resizable().scaledToFit().frame(height: 90); CandleFlameSprite(reduceMotion: reduceMotion).frame(width: 26, height: 28).offset(y: -5) }; Spacer(); Image(AppAsset.chatDetailBook.rawValue).resizable().scaledToFit().frame(height: 90) }.padding(.horizontal, 28)
@@ -248,6 +250,56 @@ private struct RitualIntroText: View {
     let text: String; let reduceMotion: Bool
     @State private var count = 0
     var body: some View { Text(String(text.prefix(count))) .task(id: text) { if reduceMotion { count = text.count; return }; count = 0; while count < text.count { do { try await Task.sleep(for: .milliseconds(26)) } catch { return }; count += 1 } } }
+}
+
+private struct RitualReadingPaper: View {
+    let text: String
+    let reduceMotion: Bool
+
+    @ScaledMetric(relativeTo: .body) private var readingTextSize: CGFloat = 14
+
+    var body: some View {
+        Image(AppAsset.chatDetailPaper.rawValue)
+            .resizable()
+            .aspectRatio(920 / 561, contentMode: .fit)
+            .overlay {
+                GeometryReader { proxy in
+                    ScrollView {
+                        Text(text)
+                            .font(.system(size: readingTextSize, weight: .regular, design: .serif))
+                            .foregroundStyle(Color(hex: 0x503A3B))
+                            .lineSpacing(3)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.vertical, 4)
+                    }
+                    .scrollIndicators(.hidden)
+                    .frame(
+                        width: proxy.size.width * 0.70,
+                        height: proxy.size.height * 0.56
+                    )
+                    .position(
+                        x: proxy.size.width * 0.50,
+                        y: proxy.size.height * 0.52
+                    )
+                    .clipped()
+
+                    Image(AppAsset.chatDetailQuill.rawValue)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: proxy.size.width * 0.13)
+                        .rotationEffect(.degrees(reduceMotion ? 0 : -8))
+                        .position(
+                            x: proxy.size.width * 0.86,
+                            y: proxy.size.height * 0.63
+                        )
+                        .accessibilityHidden(true)
+                        .allowsHitTesting(false)
+                }
+            }
+            .padding(.horizontal, 16)
+            .accessibilityElement(children: .contain)
+    }
 }
 
 private struct RitualFlameCharacter: View {

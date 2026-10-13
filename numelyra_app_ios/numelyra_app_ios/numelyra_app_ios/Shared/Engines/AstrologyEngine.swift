@@ -51,7 +51,7 @@ nonisolated enum AstrologyEngine {
         .init(element: .air, modality: .fixed),
         .init(element: .water, modality: .mutable),
     ]
-
+// cac goc anh huong dc quy dinh  tarrget  may va do lech toi da
     static let majorAspects: [AstroAspectDefinition] = [
         .init(type: .conjunction, symbol: "☌", nameVi: "Trùng tụ", targetAngle: 0, maxOrb: 8, nature: .neutral, baseWeight: 1),
         .init(type: .sextile, symbol: "⚹", nameVi: "Lục hợp", targetAngle: 60, maxOrb: 5, nature: .harmony, baseWeight: 0.7),
@@ -64,9 +64,9 @@ nonisolated enum AstrologyEngine {
         "Sun", "Moon", "Mercury", "Venus", "Mars",
         "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto",
     ]
-
+// toocs do du=i chuyen cua cac hanh tinh
     private static let fastPlanets: Set<String> = ["Sun", "Moon", "Mercury", "Venus", "Mars"]
-
+// trong so tung hanh tinh
     private static let transitActivityWeights: [String: Double] = [
         "Moon": 1,
         "Sun": 0.85,
@@ -79,7 +79,7 @@ nonisolated enum AstrologyEngine {
         "Neptune": 0.25,
         "Pluto": 0.25,
     ]
-
+// giai quyet ngay sinh
     static func resolveBirthDate(
         _ birthDate: String,
         birthTime: String? = nil,
@@ -204,7 +204,7 @@ nonisolated enum AstrologyEngine {
             isLocalTimeAmbiguous: isAmbiguous
         )
     }
-
+// tao do ra cung hoang dao
     static func longitudeToZodiac(_ longitude: Double) -> (sign: String, signIndex: Int, degreeInSign: Double, normalized: Double) {
         let normalizedLongitude = positiveModulo(longitude, divisor: 360)
         let signIndex = Int(floor(normalizedLongitude / 30)) % zodiacSigns.count
@@ -215,7 +215,7 @@ nonisolated enum AstrologyEngine {
             rounded(normalizedLongitude / 360, places: 6)
         )
     }
-
+// tinh toan tao do bieu do hanh tinh dua vao ngay
     static func calculatePlanetaryChart(date: Date, isTimeEstimated: Bool = false) throws -> AstroPlanetaryChart {
         let time = AstronomyKit.AstroTime(date)
         let longitudes: [(String, Double)] = [
@@ -233,11 +233,17 @@ nonisolated enum AstrologyEngine {
         let planetList = longitudes.map { name, longitude in
             let zodiac = longitudeToZodiac(longitude)
             return AstroPlanetPosition(
+                // teen cua hanh tinh
                 name: name,
+                // toa do
                 longitude: longitude,
+                // cung hoang dao tuong ung
                 sign: zodiac.sign,
+                // vi tri trong thu tu cung hoang dao
                 signIndex: zodiac.signIndex,
+                //goc 0->30 troong cung do
                 degreeInSign: zodiac.degreeInSign,
+                // chuan hoa ra 0-1
                 normalized: zodiac.normalized
             )
         }
@@ -248,7 +254,7 @@ nonisolated enum AstrologyEngine {
             planetList: planetList
         )
     }
-
+// tinh toan bieu do ngay sinh
     static func computeNatalChart(_ input: AstroBirthInput) throws -> AstroPlanetaryChart {
         let resolved = try resolveBirthDate(
             input.birthDate,
@@ -258,7 +264,7 @@ nonisolated enum AstrologyEngine {
         )
         return try calculatePlanetaryChart(date: resolved.date, isTimeEstimated: resolved.isTimeEstimated)
     }
-
+// tao astronatal snapshot
     static func makeNatalSnapshot(input: AstroBirthInput, fingerprint: String) throws -> AstroNatalSnapshot {
         let resolved = try resolveBirthDate(
             input.birthDate,
@@ -302,7 +308,7 @@ nonisolated enum AstrologyEngine {
             context: context
         )
     }
-
+// tinh toan goc dua vao ngay toa do va day
     static func calculateAngles(date: Date, latitude: Double, longitude: Double) -> AstroAngles {
         let julianDate = date.timeIntervalSince1970 / 86_400 + 2_440_587.5
         let centuries = (julianDate - 2_451_545.0) / 36_525

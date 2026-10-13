@@ -38,7 +38,7 @@ struct AppView: View {
                 ProgressView()
                     .tint(Color(hex: 0xF5BA5B))
 
-                Text("Tiểu Linh Miêu đang thức dậy...")
+                Text("flame Miêu đang thức dậy...")
                     .font(.system(size: 14))
                     .italic()
                     .foregroundStyle(Color(hex: 0xF5BA5B))
