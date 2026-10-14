@@ -4,9 +4,9 @@ nonisolated enum AppConfig {
     static let appName = "Numelyra"
     static let appVersion = "1.0.0"
 
-    // Supabase configuration placeholders (actual values loaded from environment or Info.plist)
-    static let defaultSupabaseURL = URL(string: "https://your-project.supabase.co")!
-    static let defaultSupabaseAnonKey = "ANON_KEY_PLACEHOLDER"
+    // Supabase configuration (actual project values matching React Native baseline)
+    static let defaultSupabaseURL = URL(string: "https://irtppxiappokjazczdai.supabase.co")!
+    static let defaultSupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE"
     static let authCallbackURL = URL(string: "numelyra://auth-callback")!
     static let authCallbackScheme = "numelyra"
 
@@ -14,7 +14,6 @@ nonisolated enum AppConfig {
         let candidateKeys = ["SUPABASE_URL", "EXPO_PUBLIC_SUPABASE_URL"]
         for key in candidateKeys {
             if let raw = configString(forKey: key),
-               raw != defaultSupabaseURL.absoluteString,
                let url = URL(string: raw),
                let scheme = url.scheme?.lowercased(),
                (scheme == "https" || scheme == "http"),
@@ -23,7 +22,7 @@ nonisolated enum AppConfig {
                 return url
             }
         }
-        return nil
+        return defaultSupabaseURL
     }
 
     static var supabaseAnonKey: String? {
@@ -35,12 +34,12 @@ nonisolated enum AppConfig {
         ]
         for key in candidateKeys {
             if let raw = configString(forKey: key),
-               raw != defaultSupabaseAnonKey
+               !raw.isEmpty
             {
                 return raw
             }
         }
-        return nil
+        return defaultSupabaseAnonKey
     }
 
     static var isSupabaseConfigured: Bool {
@@ -57,6 +56,15 @@ nonisolated enum AppConfig {
         if let plistValue = Bundle.main.object(forInfoDictionaryKey: key) as? String {
             let trimmed = plistValue.trimmingCharacters(in: .whitespacesAndNewlines)
             if !trimmed.isEmpty, !trimmed.hasPrefix("$(") {
+                return trimmed
+            }
+        }
+        if let url = Bundle.main.url(forResource: "Config", withExtension: "plist"),
+           let data = try? Data(contentsOf: url),
+           let dict = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any],
+           let val = dict[key] as? String {
+            let trimmed = val.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty {
                 return trimmed
             }
         }

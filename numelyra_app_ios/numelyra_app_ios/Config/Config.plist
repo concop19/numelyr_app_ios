@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SUPABASE_URL</key>
+	<string>https://irtppxiappokjazczdai.supabase.co</string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE</string>
+	<key>NUMELYRA_API_URL</key>
+	<string>https://numelyra.online</string>
+</dict>
+</plist>
