@@ -23,9 +23,6 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     heroHeader
 
-                    sectionGroupTitle("NHẮC NHỞ HẰNG NGÀY")
-                    dailyReminderCard
-
                     sectionGroupTitle("TÀI KHOẢN")
                     accountCard
 
@@ -127,112 +124,6 @@ struct SettingsView: View {
             .foregroundStyle(AppTheme.Colors.Settings.groupTitleText)
             .padding(.leading, 5)
             .padding(.bottom, 9)
-    }
-
-    // MARK: - Daily Reminder Card (`SettingsScreen.tsx:135-159`)
-
-    private var dailyReminderCard: some View {
-        SettingsCardContainer {
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 12) {
-                    settingIconBadge(
-                        systemName: "bell",
-                        iconColor: AppTheme.Colors.Settings.reminderIconTint,
-                        backgroundColor: AppTheme.Colors.Settings.reminderIconBackground,
-                        borderColor: AppTheme.Colors.Settings.reminderIconBorder
-                    )
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Nhắc chơi mỗi ngày")
-                            .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
-
-                        Text(store.reminderHint)
-                            .font(.system(size: 12))
-                            .lineSpacing(2)
-                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-
-                    Toggle(
-                        "Nhắc chơi mỗi ngày",
-                        isOn: Binding(
-                            get: { store.dailyReminder.enabled },
-                            set: { store.send(.dailyReminderToggled($0)) }
-                        )
-                    )
-                    .labelsHidden()
-                    .tint(AppTheme.Colors.Settings.switchActiveTrack)
-                    .disabled(!store.canUseNativeNotifications)
-                }
-                .frame(minHeight: 58)
-
-                rowDivider
-
-                HStack(spacing: 12) {
-                    settingIconBadge(
-                        systemName: "clock",
-                        iconColor: AppTheme.Colors.Settings.timeIconTint,
-                        backgroundColor: AppTheme.Colors.Settings.timeIconBackground,
-                        borderColor: AppTheme.Colors.Settings.timeIconBorder
-                    )
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Giờ nhắc")
-                            .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
-
-                        Text("Chọn thời điểm phù hợp với bạn")
-                            .font(.system(size: 12))
-                            .lineSpacing(2)
-                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .frame(minHeight: 58)
-
-                HStack(spacing: 8) {
-                    ForEach(SettingsEngine.presetReminderHours, id: \.self) { hour in
-                        let isSelected = store.dailyReminder.hour == hour
-                        let timeLabel = SettingsEngine.formatTime(hour: hour, minute: 0)
-                        Button {
-                            store.send(.dailyReminderHourSelected(hour))
-                        } label: {
-                            Text(timeLabel)
-                                .font(.system(size: 14, weight: .heavy))
-                                .foregroundStyle(
-                                    isSelected
-                                        ? AppTheme.Colors.Settings.timeTextActive
-                                        : AppTheme.Colors.Settings.timeTextInactive
-                                )
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 9)
-                                .background(
-                                    isSelected
-                                        ? AppTheme.Colors.Settings.switchActiveTrack
-                                        : Color.clear
-                                )
-                                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .stroke(
-                                            isSelected
-                                                ? AppTheme.Colors.Settings.switchActiveTrack
-                                                : AppTheme.Colors.Settings.timeButtonBorder,
-                                            lineWidth: 1
-                                        )
-                                }
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(!store.canUseNativeNotifications)
-                        .opacity(store.canUseNativeNotifications ? 1.0 : 0.55)
-                        .accessibilityLabel("Giờ nhắc \(timeLabel)")
-                        .accessibilityAddTraits(isSelected ? .isSelected : [])
-                    }
-                }
-                .padding(.top, 12)
-            }
-        }
     }
 
     // MARK: - Account Card (`SettingsScreen.tsx:161-183`)
@@ -722,7 +613,6 @@ private struct SettingsCardContainer<Content: View>: View {
         } withDependencies: {
             $0.supabaseClient.isConfigured = { true }
             $0.supabaseClient.currentSession = { nil }
-            $0.dailyNotificationClient = .previewValue
             $0.billingClient = .previewValue
             $0.hapticClient = .testValue
         }
@@ -757,7 +647,6 @@ private struct SettingsCardContainer<Content: View>: View {
             SettingsFeature()
         } withDependencies: {
             $0.supabaseClient = .previewValue
-            $0.dailyNotificationClient = .previewValue
             $0.billingClient = .previewValue
             $0.hapticClient = .testValue
         }

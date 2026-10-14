@@ -92,22 +92,6 @@ final class AppFeatureTests: XCTestCase {
         await store.receive(\.chat.onAppear)
     }
 
-    func testChatGameHubTappedPresentsGameHubAndCanBeClosed() async {
-        var state = AppFeature.State()
-        state.launchFlow = .main
-        let store = TestStore(initialState: state) {
-            AppFeature()
-        }
-
-        await store.send(.chat(.delegate(.gameHubTapped))) {
-            $0.gameHub = GameHubFeature.State()
-        }
-
-        await store.send(.gameHub(.presented(.delegate(.close)))) {
-            $0.gameHub = nil
-        }
-    }
-
     func testChatDestinationProfileSelectionSyncsActiveProfile() async {
         var state = AppFeature.State()
         state.launchFlow = .main

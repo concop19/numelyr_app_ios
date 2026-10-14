@@ -305,7 +305,7 @@ public nonisolated enum SupabaseAuthService {
     public static func signInWithGoogle() async throws -> AuthSession {
         let (baseURL, anonKey) = try requireConfiguration()
         let pkce = PKCEChallenge.random()
-
+// code changleange. private code
         var components = URLComponents(
             url: baseURL.appending(path: "auth/v1/authorize"),
             resolvingAgainstBaseURL: false

@@ -11,8 +11,6 @@ struct SettingsFeature {
         var paymentMethod: BillingProvider
         var billing: BillingStatus?
         var billingError: String?
-        var dailyReminder: DailyReminderSettings
-        var canUseNativeNotifications: Bool
 
         @Presents var alert: AlertState<Action.Alert>?
 
@@ -23,8 +21,6 @@ struct SettingsFeature {
             paymentMethod: BillingProvider = .payos,
             billing: BillingStatus? = nil,
             billingError: String? = nil,
-            dailyReminder: DailyReminderSettings = SettingsEngine.defaultReminderSettings,
-            canUseNativeNotifications: Bool = true,
             alert: AlertState<Action.Alert>? = nil
         ) {
             self.session = session
@@ -33,8 +29,6 @@ struct SettingsFeature {
             self.paymentMethod = paymentMethod
             self.billing = billing
             self.billingError = billingError
-            self.dailyReminder = dailyReminder
-            self.canUseNativeNotifications = canUseNativeNotifications
             self.alert = alert
         }
 
@@ -65,13 +59,6 @@ struct SettingsFeature {
             SettingsEngine.guestActionTitle(isConfigured: isConfigured)
         }
 
-        var reminderHint: String {
-            SettingsEngine.reminderHint(
-                settings: dailyReminder,
-                canUseNativeNotifications: canUseNativeNotifications
-            )
-        }
-
         var proHeadlineTitle: String {
             isPro ? "Bạn đang dùng Pro ✦" : "Mở khóa hành trình đầy đủ"
         }
@@ -96,10 +83,6 @@ struct SettingsFeature {
         case onAppear
         case appDidBecomeActive
         case sessionLoaded(AuthSession?)
-        case dailyReminderLoaded(DailyReminderSettings)
-        case dailyReminderToggled(Bool)
-        case dailyReminderHourSelected(Int)
-        case dailyReminderSaved(requestedEnabled: Bool, saved: DailyReminderSettings)
         case requestLoginTapped
         case syncProfilesTapped
         case syncProfilesCompleted
@@ -128,13 +111,11 @@ struct SettingsFeature {
 
     @Dependency(\.supabaseClient) var supabaseClient
     @Dependency(\.billingClient) var billingClient
-    @Dependency(\.dailyNotificationClient) var dailyNotificationClient
     @Dependency(\.hapticClient) var hapticClient
 
     private nonisolated enum CancelID: Hashable, Sendable {
         case billingStatus
         case checkout
-        case reminderSave
         case signOut
         case syncProfiles
     }
@@ -144,12 +125,6 @@ struct SettingsFeature {
             switch action {
             case .onAppear:
                 state.isConfigured = supabaseClient.isConfigured()
-                state.canUseNativeNotifications = dailyNotificationClient.canUseNativeNotifications()
-
-                let reminderEffect: Effect<Action> = .run { send in
-                    let settings = await dailyNotificationClient.loadSettings()
-                    await send(.dailyReminderLoaded(settings))
-                }
 
                 let sessionAndBillingEffect: Effect<Action>
                 if state.session != nil {
@@ -161,7 +136,7 @@ struct SettingsFeature {
                     }
                 }
 
-                return .merge(reminderEffect, sessionAndBillingEffect)
+                return sessionAndBillingEffect
 
             case .appDidBecomeActive:
                 return refreshBilling(&state)
@@ -169,35 +144,6 @@ struct SettingsFeature {
             case let .sessionLoaded(session):
                 state.session = session
                 return refreshBilling(&state)
-
-            case let .dailyReminderLoaded(settings):
-                state.dailyReminder = settings
-                return .none
-
-            case let .dailyReminderToggled(enabled):
-                guard state.canUseNativeNotifications else { return .none }
-                let next = DailyReminderSettings(
-                    enabled: enabled,
-                    hour: state.dailyReminder.hour,
-                    minute: state.dailyReminder.minute
-                )
-                return saveDailyReminder(next)
-
-            case let .dailyReminderHourSelected(hour):
-                guard state.canUseNativeNotifications else { return .none }
-                let next = DailyReminderSettings(
-                    enabled: state.dailyReminder.enabled,
-                    hour: hour,
-                    minute: state.dailyReminder.minute
-                )
-                return saveDailyReminder(next)
-
-            case let .dailyReminderSaved(requestedEnabled, saved):
-                state.dailyReminder = saved
-                if requestedEnabled && !saved.enabled {
-                    state.alert = .notificationPermissionDenied
-                }
-                return .none
 
             case .requestLoginTapped:
                 return .send(.delegate(.didRequestLogin))
@@ -368,13 +314,6 @@ struct SettingsFeature {
         .cancellable(id: CancelID.billingStatus, cancelInFlight: true)
     }
 
-    private func saveDailyReminder(_ next: DailyReminderSettings) -> Effect<Action> {
-        .run { send in
-            let saved = await dailyNotificationClient.saveSettings(next)
-            await send(.dailyReminderSaved(requestedEnabled: next.enabled, saved: saved))
-        }
-        .cancellable(id: CancelID.reminderSave, cancelInFlight: true)
-    }
 }
 
 // MARK: - AlertState Factories (`SettingsScreen.tsx:62, 73, 109`)
@@ -404,15 +343,4 @@ extension AlertState where Action == SettingsFeature.Action.Alert {
         }
     }
 
-    static var notificationPermissionDenied: Self {
-        AlertState {
-            TextState("Chưa bật thông báo")
-        } actions: {
-            ButtonState(action: .dismiss) {
-                TextState("OK")
-            }
-        } message: {
-            TextState("Bạn có thể bật lại quyền thông báo trong Cài đặt thiết bị bất kỳ lúc nào.")
-        }
-    }
 }

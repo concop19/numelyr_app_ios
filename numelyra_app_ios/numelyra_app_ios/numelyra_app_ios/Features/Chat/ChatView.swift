@@ -35,10 +35,9 @@ struct ChatView: View {
 
     private var header: some View {
         HStack {
-            Button { store.send(.gameHubTapped) }
-            label: {
-                Image(AppAsset.chatSceneMoon.rawValue).resizable().scaledToFit().frame(width: 48, height: 48).opacity(0.85)
-            }.buttonStyle(.plain).accessibilityLabel("Mở Game Hub")
+            Color.clear
+                .frame(width: 44, height: 44)
+                .accessibilityHidden(true)
             Spacer()
             Text("Numelyra")
             .font(.system(size: 23, weight: .heavy, design: .rounded))

@@ -496,15 +496,3 @@ public nonisolated struct BillingErrorEnvelope: Codable, Equatable, Sendable {
         self.error = error
     }
 }
-
-public nonisolated struct NotificationPayload: Codable, Equatable, Sendable {
-    public var title: String
-    public var body: String
-    public var url: String
-
-    public init(title: String, body: String, url: String) {
-        self.title = title
-        self.body = body
-        self.url = url
-    }
-}

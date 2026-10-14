@@ -20,9 +20,6 @@ struct AppView: View {
         .task {
             store.send(.onAppear)
         }
-        .onOpenURL { url in
-            store.send(.handleDeepLink(url))
-        }
     }
 
     // MARK: - Loading View (Parity with RN App.tsx)
@@ -87,11 +84,6 @@ struct AppView: View {
         }
         .tint(AppTheme.Colors.primary)
         .fullScreenCover(
-            item: $store.scope(state: \.gameHub, action: \.gameHub)
-        ) { gameHubStore in
-            GameHubView(store: gameHubStore)
-        }
-        .fullScreenCover(
             isPresented: Binding(
                 get: { store.isAuthPresented },
                 set: { store.send(.authPresentationChanged($0)) }
@@ -113,7 +105,6 @@ struct AppView: View {
             $0.wallpaperClient = .previewValue
             $0.supabaseClient = .previewValue
             $0.billingClient = .previewValue
-            $0.dailyNotificationClient = .previewValue
             $0.hapticClient = .testValue
             $0.chatClient = .testValue
             $0.chatHistoryClient = .testValue
@@ -122,7 +113,6 @@ struct AppView: View {
             $0.placeLocationClient = .testValue
             $0.externalURLClient = .testValue
             $0.tuViClient = .previewValue
-            $0.gameHubClient = .previewValue
         }
     )
 }

@@ -109,8 +109,6 @@ nonisolated enum AppConfig {
         apiBaseURL.appending(path: "api/billing/paypal/checkout")
     }
 
-    static let dailyChallengeDeepLinkURL = "numelyra://games/daily"
-
     static var calendarAssetBaseURL: URL {
         if let configured = ProcessInfo.processInfo.environment["NUMELYRA_CALENDAR_ASSET_BASE_URL"]?
             .trimmingCharacters(in: .whitespacesAndNewlines),

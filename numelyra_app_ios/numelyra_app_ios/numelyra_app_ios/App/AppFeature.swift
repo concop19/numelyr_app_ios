@@ -30,7 +30,6 @@ struct AppFeature {
         var settings = SettingsFeature.State()
         var auth = AuthFeature.State()
         var onboarding = OnboardingFeature.State()
-        @Presents var gameHub: GameHubFeature.State?
     }
 
     enum Action: Equatable {
@@ -38,7 +37,6 @@ struct AppFeature {
         case launchLoaded(session: AuthSession?, hasProfile: Bool, activeProfile: UserProfile?)
         case selectedTabChanged(Tab)
         case authPresentationChanged(Bool)
-        case handleDeepLink(URL)
         case chat(ChatFeature.Action)
         case calendar(CalendarFeature.Action)
         case astrology(AstrologyFeature.Action)
@@ -46,7 +44,6 @@ struct AppFeature {
         case settings(SettingsFeature.Action)
         case auth(AuthFeature.Action)
         case onboarding(OnboardingFeature.Action)
-        case gameHub(PresentationAction<GameHubFeature.Action>)
     }
 
     @Dependency(\.userProfileClient) var userProfileClient
@@ -93,14 +90,6 @@ struct AppFeature {
 
             case let .authPresentationChanged(isPresented):
                 state.isAuthPresented = isPresented
-                return .none
-
-            case let .handleDeepLink(url):
-                guard url.scheme == "numelyra" else { return .none }
-                if url.host == "games" || url.path.contains("games") {
-                    let isDaily = url.path.contains("daily")
-                    state.gameHub = GameHubFeature.State(isDailyMode: isDaily)
-                }
                 return .none
 
             case let .auth(.delegate(.didAuthenticate(session))):
@@ -169,14 +158,6 @@ struct AppFeature {
                 state.settings.session = nil
                 return .send(.chat(.ownerChanged("guest")))
 
-            case .chat(.delegate(.gameHubTapped)):
-                state.gameHub = GameHubFeature.State()
-                return .none
-
-            case .gameHub(.presented(.delegate(.close))):
-                state.gameHub = nil
-                return .none
-
             case let .chat(.destination(.presented(.profilePicker(.delegate(.selected(profiles)))))):
                 if let first = profiles.first {
                     userProfileClient.setActiveProfileID(first.id)
@@ -188,12 +169,9 @@ struct AppFeature {
                 userProfileClient.setActiveProfileID(profile.id)
                 return synchronizeActiveProfile(profile, in: &state)
 
-            case .chat, .calendar, .astrology, .wallpaper, .settings, .auth, .onboarding, .gameHub:
+            case .chat, .calendar, .astrology, .wallpaper, .settings, .auth, .onboarding:
                 return .none
             }
-        }
-        .ifLet(\.$gameHub, action: \.gameHub) {
-            GameHubFeature()
         }
         Scope(state: \.chat, action: \.chat) {
             ChatFeature()

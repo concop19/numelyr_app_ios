@@ -5,14 +5,13 @@ import XCTest
 
 @MainActor
 final class SettingsFeatureTests: XCTestCase {
-    func testOnAppearRestoresSessionLoadsReminderAndFetchesBillingStatus() async {
+    func testOnAppearRestoresSessionAndFetchesBillingStatus() async {
         let restoredSession = AuthSession(
             accessToken: "jwt-token-1",
             refreshToken: "refresh-token-1",
             userId: "user-1",
             userEmail: "an.nguyen@numelyra.online"
         )
-        let loadedReminder = DailyReminderSettings(enabled: true, hour: 21, minute: 0)
         let proStatus = BillingStatus(
             authenticated: true,
             plan: .pro,
@@ -31,16 +30,11 @@ final class SettingsFeatureTests: XCTestCase {
         } withDependencies: {
             $0.supabaseClient.isConfigured = { true }
             $0.supabaseClient.currentSession = { restoredSession }
-            $0.dailyNotificationClient.canUseNativeNotifications = { true }
-            $0.dailyNotificationClient.loadSettings = { loadedReminder }
             $0.billingClient.getBillingStatus = { proStatus }
             $0.hapticClient = .testValue
         }
 
         await store.send(.onAppear)
-        await store.receive(.dailyReminderLoaded(loadedReminder)) {
-            $0.dailyReminder = loadedReminder
-        }
         await store.receive(.sessionLoaded(restoredSession)) {
             $0.session = restoredSession
         }
@@ -50,49 +44,6 @@ final class SettingsFeatureTests: XCTestCase {
 
         XCTAssertEqual(store.state.isPro, true)
         XCTAssertEqual(store.state.accountTitle, "an.nguyen@numelyra.online")
-        XCTAssertEqual(store.state.reminderHint, "Lúc 21:00 theo giờ thiết bị")
-    }
-
-    func testDailyReminderPermissionDeniedPresentsAlertAndHourSelectionUpdatesTime() async {
-        let store = TestStore(initialState: SettingsFeature.State()) {
-            SettingsFeature()
-        } withDependencies: {
-            $0.dailyNotificationClient.saveSettings = { requested in
-                // Simulate OS permission denied when trying to enable
-                if requested.enabled && requested.hour == 20 {
-                    return DailyReminderSettings(enabled: false, hour: requested.hour, minute: requested.minute)
-                }
-                return requested
-            }
-        }
-
-        // 1. Permission denied when enabling at 20:00 -> shows alert
-        await store.send(.dailyReminderToggled(true))
-        await store.receive(
-            .dailyReminderSaved(
-                requestedEnabled: true,
-                saved: DailyReminderSettings(enabled: false, hour: 20, minute: 0)
-            )
-        ) {
-            $0.alert = .notificationPermissionDenied
-        }
-
-        await store.send(.alert(.dismiss)) {
-            $0.alert = nil
-        }
-
-        // 2. Selecting 18:00 updates hour
-        await store.send(.dailyReminderHourSelected(18))
-        await store.receive(
-            .dailyReminderSaved(
-                requestedEnabled: false,
-                saved: DailyReminderSettings(enabled: false, hour: 18, minute: 0)
-            )
-        ) {
-            $0.dailyReminder = DailyReminderSettings(enabled: false, hour: 18, minute: 0)
-        }
-
-        XCTAssertEqual(store.state.reminderHint, "Lúc 18:00 theo giờ thiết bị")
     }
 
     func testSyncProfilesAndSignOutFlows() async {
@@ -276,12 +227,7 @@ final class SettingsFeatureTests: XCTestCase {
     }
 
     func testSettingsEnginePureRules() {
-        // 1. Partial/invalid reminder JSON normalization
-        let invalidJSON = #"{"enabled":true,"hour":99,"minute":-5}"#.data(using: .utf8)
-        let normalized = SettingsEngine.decodeReminderSettings(from: invalidJSON)
-        XCTAssertEqual(normalized, DailyReminderSettings(enabled: true, hour: 20, minute: 0))
-
-        // 2. Vietnamese date formatting & Pro summary
+        // 1. Vietnamese date formatting & Pro summary
         let vnTimeZone = TimeZone(secondsFromGMT: 7 * 3600)!
         let proBilling = BillingStatus(
             authenticated: true,
@@ -297,13 +243,13 @@ final class SettingsFeatureTests: XCTestCase {
             "Pro qua VietQR / PayOS · hiệu lực đến 6/11/2026"
         )
 
-        // 3. Auth-required error regex
+        // 2. Auth-required error regex
         XCTAssertTrue(SettingsEngine.isAuthenticationRequiredError("Please sign in to continue"))
         XCTAssertTrue(SettingsEngine.isAuthenticationRequiredError("Vui lòng đăng nhập"))
         XCTAssertTrue(SettingsEngine.isAuthenticationRequiredError("error: NOT_AUTHENTICATED"))
         XCTAssertFalse(SettingsEngine.isAuthenticationRequiredError("Không thể mở trang thanh toán."))
 
-        // 4. Checkout URL resolution
+        // 3. Checkout URL resolution
         let payosResponse = CheckoutResponse(checkoutUrl: "https://pay.payos.vn/web/123")
         let paypalResponse = CheckoutResponse(approvalUrl: "https://www.paypal.com/checkoutnow?token=abc")
         XCTAssertEqual(

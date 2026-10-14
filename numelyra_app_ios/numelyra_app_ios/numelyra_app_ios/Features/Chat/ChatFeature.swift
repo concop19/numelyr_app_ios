@@ -151,12 +151,9 @@ struct ChatFeature {
         case onAppear, onDisappear, hydrated(UUID, String, [UserProfile], [ChatMessage]), ownerChanged(String)
         case draftChanged(String), sendTapped, classified(Result<AgentDecision, ChatError>), response(Result<ChatAnswer, ChatError>)
         case historyToggleTapped, profileTapped, mascotTapped, microphoneTapped, transcriptReceived(String), listeningEnded, listeningFailed(String)
-        case messageTypingFinished(String), messageTapped(String), mapTapped(String), errorDismissed, gameHubTapped
+        case messageTypingFinished(String), messageTapped(String), mapTapped(String), errorDismissed
         case locationResponse(Result<PlaceSearchContext, ChatError>)
         case destination(PresentationAction<Destination.Action>)
-        case delegate(Delegate)
-        enum Delegate: Equatable
-        { case gameHubTapped }
     }
     @Dependency(\.chatClient) var chatClient; @Dependency(\.chatHistoryClient) var history
     @Dependency(\.userProfileClient) var profilesClient; @Dependency(\.supabaseClient) var supabase
@@ -303,7 +300,6 @@ struct ChatFeature {
             case .destination(.presented(.detail(.delegate(.close)))): state.destination = nil; return .none
             case let .destination(.presented(.detail(.delegate(.openMap(raw))))): guard let url = URL(string: raw) else { return .none }; return .run { _ in _ = await externalURL.open(url) }
             case .errorDismissed: state.errorMessage = nil; return .none
-            case .gameHubTapped: return .send(.delegate(.gameHubTapped))
             case let .destination(.presented(.profilePicker(.delegate(.selected(values))))): state.selectedProfiles = values; state.destination = nil; return .none
             case .destination(.presented(.profilePicker(.delegate(.close)))): state.destination = nil; return .none
             case let .destination(.presented(.placePicker(.delegate(.locate(preferences))))):
@@ -336,7 +332,7 @@ struct ChatFeature {
                 return .none
             case .destination(.presented(.ritual(.delegate(.close)))): state.destination = nil; state.isLoading = false; state.mascotState = "idle"; return .run { _ in await speech.stop() }
             case .destination(.presented(.numerologyCards(.delegate(.didClose)))), .destination(.presented(.numerologyCards(.closeTapped))): state.destination = nil; return .none
-            case .destination, .delegate: return .none
+            case .destination: return .none
             }
         }
         .ifLet(\.$destination, action: \.destination)

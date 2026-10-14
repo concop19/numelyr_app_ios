@@ -15,8 +15,6 @@ enum AppAsset: String, CaseIterable, Sendable {
     case chatSceneMountains = "ChatSceneMountains"
     case chatSceneForeground = "ChatSceneForeground"
     case chatSceneStars = "ChatSceneStars"
-    case chatSceneMoon = "ChatSceneMoon"
-
     case chatFlameIdleSprite = "ChatFlameIdleSprite"
     case chatFlameThinkingSprite = "ChatFlameThinkingSprite"
     case chatFlameAnswerSprite = "ChatFlameAnswerSprite"
