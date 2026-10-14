@@ -101,7 +101,14 @@ struct OnboardingFeature {
                     return .run { _ in await hapticClient.mediumImpact() }
                 }
 
-                let birthDate = String(format: "%04d-%02d-%02d", y, m, d)
+                guard let birthDate = DateFormatter.appStorageDateString(
+                    year: y,
+                    month: m,
+                    day: d
+                ) else {
+                    state.errorMessage = "Vui lòng kiểm tra lại ngày/tháng/năm sinh."
+                    return .run { _ in await hapticClient.mediumImpact() }
+                }
                 state.isSaving = true
                 state.errorMessage = nil
 

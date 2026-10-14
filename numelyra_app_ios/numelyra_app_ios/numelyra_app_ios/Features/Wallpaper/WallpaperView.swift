@@ -7,7 +7,7 @@ struct WallpaperView: View {
 
     var body: some View {
         ZStack {
-            WallpaperPalette.background.ignoresSafeArea()
+            AppTheme.Colors.Wallpaper.background.ignoresSafeArea()
 
             if store.step == .input {
                 inputBackground
@@ -79,7 +79,7 @@ struct WallpaperView: View {
             } label: {
                 Image(systemName: "arrow.left")
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundStyle(WallpaperPalette.gold)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                     .frame(width: 44, height: 44)
             }
             .accessibilityLabel("Quay lại")
@@ -92,7 +92,7 @@ struct WallpaperView: View {
             } label: {
                 Image(systemName: "person.crop.circle.badge.magnifyingglass")
                     .font(.system(size: 21, weight: .medium))
-                    .foregroundStyle(WallpaperPalette.gold)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                     .frame(width: 44, height: 44)
             }
             .accessibilityLabel("Chọn hồ sơ")
@@ -124,7 +124,7 @@ struct WallpaperView: View {
 
                         Text("Describe your vibe, mood or what\nyou need right now.")
                             .font(.system(size: 15, weight: .regular, design: .rounded))
-                            .foregroundStyle(WallpaperPalette.mutedText)
+                            .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -152,7 +152,7 @@ struct WallpaperView: View {
             } label: {
                 Image(systemName: "magnifyingglass")
                     .font(.system(size: 19, weight: .medium))
-                    .foregroundStyle(Color(hexValue: 0xC8B9E4))
+                    .foregroundStyle(Color(hex: 0xC8B9E4))
                     .frame(width: 28, height: 40)
             }
             .accessibilityLabel("Chọn hồ sơ")
@@ -171,7 +171,7 @@ struct WallpaperView: View {
                 store.send(.generateTapped)
             }
             .foregroundStyle(.white)
-            .tint(WallpaperPalette.gold)
+            .tint(AppTheme.Colors.Wallpaper.gold)
             .textInputAutocapitalization(.sentences)
             .autocorrectionDisabled()
 
@@ -181,20 +181,20 @@ struct WallpaperView: View {
             } label: {
                 Image(systemName: "arrow.right")
                     .font(.system(size: 18, weight: .bold))
-                    .foregroundStyle(WallpaperPalette.deepPurple)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.deepPurple)
                     .frame(width: 44, height: 44)
-                    .background(WallpaperPalette.goldGradient)
+                    .background(AppTheme.Gradients.Wallpaper.goldGradient)
                     .clipShape(Circle())
-                    .shadow(color: Color(hexValue: 0xE4A039).opacity(0.5), radius: 10, y: 4)
+                    .shadow(color: Color(hex: 0xE4A039).opacity(0.5), radius: 10, y: 4)
             }
             .accessibilityLabel("Tạo hình nền")
         }
         .padding(.leading, 11)
         .padding(.trailing, 5)
         .frame(height: 56)
-        .background(Color(hexValue: 0x38245A).opacity(0.82))
+        .background(Color(hex: 0x38245A).opacity(0.82))
         .clipShape(Capsule())
-        .overlay { Capsule().stroke(Color(hexValue: 0x8E69C4).opacity(0.48), lineWidth: 1.5) }
+        .overlay { Capsule().stroke(Color(hex: 0x8E69C4).opacity(0.48), lineWidth: 1.5) }
         .shadow(color: .black.opacity(0.25), radius: 10, y: 4)
     }
 
@@ -206,7 +206,7 @@ struct WallpaperView: View {
                     .foregroundStyle(.white)
                 Text("Turning your words into a scene ✨")
                     .font(.system(size: 15, design: .rounded))
-                    .foregroundStyle(WallpaperPalette.mutedText)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
             }
             .padding(.horizontal, 24)
             .padding(.top, 12)
@@ -215,15 +215,15 @@ struct WallpaperView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             HStack(spacing: 12) {
-                ProgressView().tint(WallpaperPalette.gold)
+                ProgressView().tint(AppTheme.Colors.Wallpaper.gold)
                 Text("Painting your scene...")
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
                     .foregroundStyle(.white)
             }
             .frame(maxWidth: .infinity, minHeight: 54)
-            .background(Color(hexValue: 0x301E4E).opacity(0.9))
+            .background(Color(hex: 0x301E4E).opacity(0.9))
             .clipShape(Capsule())
-            .overlay { Capsule().stroke(Color(hexValue: 0x8E69C4).opacity(0.36)) }
+            .overlay { Capsule().stroke(Color(hex: 0x8E69C4).opacity(0.36)) }
             .padding(.horizontal, 24)
             .padding(.bottom, 28)
         }
@@ -243,7 +243,7 @@ struct WallpaperView: View {
                     Text("Swipe to explore all 4 variations ✨\nor tap any card to view fullscreen.")
                         .font(.system(size: 14, design: .rounded))
                         .multilineTextAlignment(.center)
-                        .foregroundStyle(WallpaperPalette.mutedText)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                 }
                 .padding(.top, 6)
 
@@ -262,7 +262,7 @@ struct WallpaperView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 26, style: .continuous)
-                                        .stroke(WallpaperPalette.gold.opacity(0.48), lineWidth: 1.5)
+                                        .stroke(AppTheme.Colors.Wallpaper.gold.opacity(0.48), lineWidth: 1.5)
                                 }
                                 .shadow(color: .black.opacity(0.5), radius: 16, y: 10)
                         }
@@ -288,7 +288,7 @@ struct WallpaperView: View {
                             .font(.system(size: 14.5, weight: .semibold, design: .rounded))
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity, minHeight: 54)
-                            .background(WallpaperPalette.secondaryGradient)
+                            .background(AppTheme.Gradients.Wallpaper.secondaryGradient)
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -298,18 +298,18 @@ struct WallpaperView: View {
                     } label: {
                         HStack(spacing: 7) {
                             if store.isSaving {
-                                ProgressView().tint(WallpaperPalette.deepPurple)
+                                ProgressView().tint(AppTheme.Colors.Wallpaper.deepPurple)
                             } else {
                                 Image(systemName: "arrow.down.to.line")
                             }
                             Text(store.isSaving ? "Saving..." : "Save wallpaper")
                         }
                         .font(.system(size: 15, weight: .bold, design: .rounded))
-                        .foregroundStyle(WallpaperPalette.deepPurple)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.deepPurple)
                         .frame(maxWidth: .infinity, minHeight: 54)
-                        .background(WallpaperPalette.goldGradient)
+                        .background(AppTheme.Gradients.Wallpaper.goldGradient)
                         .clipShape(Capsule())
-                        .shadow(color: Color(hexValue: 0xE4A039).opacity(0.45), radius: 10, y: 4)
+                        .shadow(color: Color(hex: 0xE4A039).opacity(0.45), radius: 10, y: 4)
                     }
                     .buttonStyle(.plain)
                     .disabled(store.isSaving || store.activeItem == nil)
@@ -324,7 +324,7 @@ struct WallpaperView: View {
         HStack(spacing: 8) {
             ForEach(0 ..< min(4, store.history.count), id: \.self) { index in
                 Capsule()
-                    .fill(index == store.selectedIndex ? Color.white : Color(hexValue: 0x8E69C4).opacity(0.42))
+                    .fill(index == store.selectedIndex ? Color.white : Color(hex: 0x8E69C4).opacity(0.42))
                     .frame(width: index == store.selectedIndex ? 22 : 7, height: 7)
             }
         }
@@ -343,17 +343,17 @@ struct WallpaperView: View {
                         .overlay(alignment: .bottomTrailing) {
                             Text("\(index + 1)")
                                 .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(index == store.selectedIndex ? WallpaperPalette.deepPurple : .white)
+                                .foregroundStyle(index == store.selectedIndex ? AppTheme.Colors.Wallpaper.deepPurple : .white)
                                 .padding(.horizontal, 4)
                                 .padding(.vertical, 2)
-                                .background(index == store.selectedIndex ? WallpaperPalette.gold : WallpaperPalette.deepPurple.opacity(0.84))
+                                .background(index == store.selectedIndex ? AppTheme.Colors.Wallpaper.gold : AppTheme.Colors.Wallpaper.deepPurple.opacity(0.84))
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                                 .padding(2)
                         }
                         .overlay {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .stroke(
-                                    index == store.selectedIndex ? WallpaperPalette.gold : Color(hexValue: 0x8E69C4).opacity(0.38),
+                                    index == store.selectedIndex ? AppTheme.Colors.Wallpaper.gold : Color(hex: 0x8E69C4).opacity(0.38),
                                     lineWidth: index == store.selectedIndex ? 2 : 1.5
                                 )
                         }
@@ -369,13 +369,13 @@ struct WallpaperView: View {
         VStack {
             Text(message)
                 .font(.system(size: 13.5, weight: .semibold, design: .rounded))
-                .foregroundStyle(WallpaperPalette.gold)
+                .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 11)
-                .background(Color(hexValue: 0x130C21).opacity(0.97))
+                .background(Color(hex: 0x130C21).opacity(0.97))
                 .clipShape(Capsule())
-                .overlay { Capsule().stroke(WallpaperPalette.gold) }
+                .overlay { Capsule().stroke(AppTheme.Colors.Wallpaper.gold) }
                 .shadow(color: .black.opacity(0.4), radius: 10, y: 5)
                 .padding(.horizontal, 20)
                 .padding(.top, 62)
@@ -389,7 +389,7 @@ struct WallpaperDetailView: View {
 
     var body: some View {
         ZStack {
-            Color(hexValue: 0x0A0612).ignoresSafeArea()
+            Color(hex: 0x0A0612).ignoresSafeArea()
             VStack(spacing: 12) {
                 HStack {
                     Button {
@@ -409,15 +409,15 @@ struct WallpaperDetailView: View {
                         store.send(.saveTapped(store.item))
                     } label: {
                         HStack(spacing: 6) {
-                            if store.isSaving { ProgressView().tint(WallpaperPalette.deepPurple) }
+                            if store.isSaving { ProgressView().tint(AppTheme.Colors.Wallpaper.deepPurple) }
                             else { Image(systemName: "arrow.down.to.line") }
                             Text(store.isSaving ? "Đang lưu..." : "Lưu ảnh")
                         }
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(WallpaperPalette.deepPurple)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.deepPurple)
                         .padding(.horizontal, 15)
                         .frame(height: 38)
-                        .background(WallpaperPalette.gold)
+                        .background(AppTheme.Colors.Wallpaper.gold)
                         .clipShape(Capsule())
                     }
                     .disabled(store.isSaving)
@@ -431,24 +431,24 @@ struct WallpaperDetailView: View {
                     Text("“\(store.item.affirmationVi)”")
                         .font(.system(size: 15, weight: .bold, design: .rounded))
                         .italic()
-                        .foregroundStyle(WallpaperPalette.gold)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                         .multilineTextAlignment(.center)
                     Text(store.item.explanationVi)
                         .font(.system(size: 12.5, design: .rounded))
-                        .foregroundStyle(Color(hexValue: 0xD1C7E2))
+                        .foregroundStyle(Color(hex: 0xD1C7E2))
                         .multilineTextAlignment(.center)
                     Text("✦ \(store.item.styleName)  •  \(store.item.intentionName)")
                         .font(.system(size: 11.5, weight: .semibold, design: .rounded))
-                        .foregroundStyle(WallpaperPalette.mutedText)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                         .multilineTextAlignment(.center)
                 }
                 .padding(16)
                 .frame(maxWidth: .infinity)
-                .background(Color(hexValue: 0x1E1233))
+                .background(Color(hex: 0x1E1233))
                 .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(Color(hexValue: 0x8E69C4).opacity(0.3))
+                        .stroke(Color(hex: 0x8E69C4).opacity(0.3))
                 }
             }
             .padding(16)
@@ -468,7 +468,7 @@ struct WallpaperMenuView: View {
                     .foregroundStyle(.white)
                 Text("Số chủ đạo \(store.lifePath) • Ngày cá nhân \(store.personalDay)")
                     .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(WallpaperPalette.mutedText)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
             }
 
             menuButton("Xem 24 Lá Bài Bản Mệnh", "Bản đồ năng lượng linh số Pythagoras", "rectangle.stack") {
@@ -483,14 +483,14 @@ struct WallpaperMenuView: View {
 
             Button("Đóng") { store.send(.closeTapped) }
                 .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(WallpaperPalette.gold)
+                .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                 .frame(maxWidth: .infinity, minHeight: 46)
                 .background(Color.white.opacity(0.06))
                 .clipShape(Capsule())
         }
         .padding(22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(hexValue: 0x1E1233).ignoresSafeArea())
+        .background(Color(hex: 0x1E1233).ignoresSafeArea())
     }
 
     private func menuButton(
@@ -503,7 +503,7 @@ struct WallpaperMenuView: View {
             HStack(spacing: 13) {
                 Image(systemName: systemImage)
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(WallpaperPalette.gold)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.gold)
                     .frame(width: 30)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(title)
@@ -511,17 +511,17 @@ struct WallpaperMenuView: View {
                         .foregroundStyle(.white)
                     Text(subtitle)
                         .font(.system(size: 11.5, design: .rounded))
-                        .foregroundStyle(WallpaperPalette.mutedText)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                         .lineLimit(1)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color(hexValue: 0xC9B3E9))
+                    .foregroundStyle(Color(hex: 0xC9B3E9))
             }
             .padding(.horizontal, 14)
             .frame(minHeight: 68)
-            .background(Color(hexValue: 0x2B1947))
+            .background(Color(hex: 0x2B1947))
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
         .buttonStyle(.plain)
@@ -540,13 +540,13 @@ struct WallpaperProfileView: View {
                         .foregroundStyle(.white)
                     Text("Chỉ dùng một hồ sơ cho mỗi lần tạo")
                         .font(.system(size: 13, design: .rounded))
-                        .foregroundStyle(WallpaperPalette.mutedText)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                 }
                 Spacer()
                 Button { store.send(.closeTapped) } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.system(size: 25))
-                        .foregroundStyle(WallpaperPalette.mutedText)
+                        .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                 }
             }
 
@@ -575,14 +575,14 @@ struct WallpaperProfileView: View {
             if store.isUsingFallback {
                 Text("Hồ sơ này được giữ trong phiên hiện tại. Đồng bộ hồ sơ sẽ được nối khi slice Auth/Profile hoàn tất.")
                     .font(.system(size: 12, design: .rounded))
-                    .foregroundStyle(WallpaperPalette.mutedText)
+                    .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if let validation = store.validationMessage {
                 Text(validation)
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(hexValue: 0xFCA5A5))
+                    .foregroundStyle(Color(hex: 0xFCA5A5))
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
@@ -591,7 +591,7 @@ struct WallpaperProfileView: View {
         }
         .padding(22)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(hexValue: 0x1E1233).ignoresSafeArea())
+        .background(Color(hex: 0x1E1233).ignoresSafeArea())
     }
 
     private func profileField(_ title: String, text: Binding<String>) -> some View {
@@ -599,14 +599,14 @@ struct WallpaperProfileView: View {
             .textInputAutocapitalization(.words)
             .autocorrectionDisabled()
             .foregroundStyle(.white)
-            .tint(WallpaperPalette.gold)
+            .tint(AppTheme.Colors.Wallpaper.gold)
             .padding(.horizontal, 14)
             .frame(height: 50)
-            .background(Color(hexValue: 0x2B1947))
+            .background(Color(hex: 0x2B1947))
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(Color(hexValue: 0x8E69C4).opacity(0.42))
+                    .stroke(Color(hex: 0x8E69C4).opacity(0.42))
             }
     }
 }
@@ -638,17 +638,17 @@ private struct WallpaperArtwork: View {
                 imagePlaceholder(systemName: "photo", text: "Ảnh không hợp lệ", loading: false)
             }
         }
-        .background(Color(hexValue: 0x170E28))
+        .background(Color(hex: 0x170E28))
         .clipped()
     }
 
     private func imagePlaceholder(systemName: String, text: String, loading: Bool) -> some View {
         VStack(spacing: 9) {
-            if loading { ProgressView().tint(WallpaperPalette.gold) }
-            Image(systemName: systemName).foregroundStyle(WallpaperPalette.gold)
+            if loading { ProgressView().tint(AppTheme.Colors.Wallpaper.gold) }
+            Image(systemName: systemName).foregroundStyle(AppTheme.Colors.Wallpaper.gold)
             Text(text)
                 .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(WallpaperPalette.mutedText)
+                .foregroundStyle(AppTheme.Colors.Wallpaper.mutedText)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -750,38 +750,11 @@ private struct WallpaperGoldButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .bold, design: .rounded))
-            .foregroundStyle(WallpaperPalette.deepPurple)
+            .foregroundStyle(AppTheme.Colors.Wallpaper.deepPurple)
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(WallpaperPalette.goldGradient)
+            .background(AppTheme.Gradients.Wallpaper.goldGradient)
             .clipShape(Capsule())
             .opacity(configuration.isPressed ? 0.82 : 1)
-    }
-}
-
-private enum WallpaperPalette {
-    static let background = Color(hexValue: 0x211438)
-    static let deepPurple = Color(hexValue: 0x211438)
-    static let gold = Color(hexValue: 0xF7CC6A)
-    static let mutedText = Color(hexValue: 0xB6A6CE)
-    static let goldGradient = LinearGradient(
-        colors: [Color(hexValue: 0xFFE5A1), Color(hexValue: 0xF5B84E), Color(hexValue: 0xDF962F)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    static let secondaryGradient = LinearGradient(
-        colors: [Color(hexValue: 0x4A2D82), Color(hexValue: 0x30195F), Color(hexValue: 0x1D103F)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-}
-
-private extension Color {
-    init(hexValue: UInt32) {
-        self.init(
-            red: Double((hexValue >> 16) & 0xFF) / 255,
-            green: Double((hexValue >> 8) & 0xFF) / 255,
-            blue: Double(hexValue & 0xFF) / 255
-        )
     }
 }
 

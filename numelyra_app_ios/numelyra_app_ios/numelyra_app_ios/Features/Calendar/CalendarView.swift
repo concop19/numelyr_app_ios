@@ -14,7 +14,7 @@ struct CalendarView: View {
             let contentWidth = min(max(proxy.size.width - 28, 0), 560)
 
             ZStack {
-                CalendarPalette.background.ignoresSafeArea()
+                AppTheme.Colors.Calendar.background.ignoresSafeArea()
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 10) {
@@ -29,8 +29,8 @@ struct CalendarView: View {
                             pager
                         } else {
                             ProgressView("Đang mở lịch…")
-                                .tint(CalendarPalette.gold)
-                                .foregroundStyle(CalendarPalette.text)
+                                .tint(AppTheme.Colors.Calendar.gold)
+                                .foregroundStyle(AppTheme.Colors.Calendar.text)
                                 .frame(maxWidth: .infinity, minHeight: 420)
                         }
                     }
@@ -72,9 +72,9 @@ struct CalendarView: View {
 
             HStack(spacing: 4) {
                 Text("Numelyra")
-                    .foregroundStyle(CalendarPalette.text)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
                 Text("✦")
-                    .foregroundStyle(CalendarPalette.gold)
+                    .foregroundStyle(AppTheme.Colors.Calendar.gold)
             }
             .font(.system(size: 24, weight: .medium, design: .rounded))
 
@@ -83,12 +83,12 @@ struct CalendarView: View {
             Button(action: {}) {
                 Image(systemName: "clock.arrow.circlepath")
                     .font(.system(size: 21, weight: .medium))
-                    .foregroundStyle(CalendarPalette.pink)
+                    .foregroundStyle(AppTheme.Colors.Calendar.pink)
                     .frame(width: 38, height: 38)
             }
             .accessibilityLabel("Lịch sử")
         }
-        .foregroundStyle(CalendarPalette.text)
+        .foregroundStyle(AppTheme.Colors.Calendar.text)
         .frame(height: 54)
     }
 
@@ -107,13 +107,13 @@ struct CalendarView: View {
                         .lineLimit(1)
                     Image(systemName: "chevron.down")
                         .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(CalendarPalette.gold)
+                        .foregroundStyle(AppTheme.Colors.Calendar.gold)
                 }
-                .foregroundStyle(CalendarPalette.text)
+                .foregroundStyle(AppTheme.Colors.Calendar.text)
                 .frame(maxWidth: .infinity, minHeight: 37)
-                .background(CalendarPalette.monthChip)
+                .background(AppTheme.Colors.Calendar.monthChip)
                 .clipShape(Capsule())
-                .overlay { Capsule().stroke(CalendarPalette.purpleBorder, lineWidth: 1) }
+                .overlay { Capsule().stroke(AppTheme.Colors.Calendar.purpleBorder, lineWidth: 1) }
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Chọn ngày")
@@ -131,11 +131,11 @@ struct CalendarView: View {
                     Text("Hôm nay")
                         .font(.system(size: 12, weight: .heavy, design: .rounded))
                 }
-                .foregroundStyle(Color(calendarHex: 0x2A1938))
+                .foregroundStyle(Color(hex: 0x2A1938))
                 .frame(width: 97, height: 35)
-                .background(CalendarPalette.goldGradient)
+                .background(AppTheme.Gradients.Calendar.goldGradient)
                 .clipShape(Capsule())
-                .shadow(color: Color(calendarHex: 0xE4A039).opacity(0.36), radius: 8, y: 3)
+                .shadow(color: Color(hex: 0xE4A039).opacity(0.36), radius: 8, y: 3)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Hôm nay")
@@ -150,11 +150,11 @@ struct CalendarView: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 17, weight: .bold))
-                .foregroundStyle(CalendarPalette.gold)
+                .foregroundStyle(AppTheme.Colors.Calendar.gold)
                 .frame(width: 36, height: 36)
-                .background(CalendarPalette.circleGradient)
+                .background(AppTheme.Gradients.Calendar.circleGradient)
                 .clipShape(Circle())
-                .shadow(color: Color(calendarHex: 0x15092F).opacity(0.44), radius: 7, y: 3)
+                .shadow(color: Color(hex: 0x15092F).opacity(0.44), radius: 7, y: 3)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(label)
@@ -169,13 +169,13 @@ struct CalendarView: View {
                 .clipped()
 
             LinearGradient(
-                colors: [Color(calendarHex: 0x0F0735).opacity(0.82), .clear],
+                colors: [Color(hex: 0x0F0735).opacity(0.82), .clear],
                 startPoint: .leading,
                 endPoint: .trailing
             )
 
             LinearGradient(
-                colors: [.clear, Color(calendarHex: 0x0A0527).opacity(0.45)],
+                colors: [.clear, Color(hex: 0x0A0527).opacity(0.45)],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -183,19 +183,19 @@ struct CalendarView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(snapshot.weekdayVi)
                     .font(.system(size: 21, weight: .heavy, design: .rounded))
-                    .foregroundStyle(CalendarPalette.text)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
                 Text(snapshot.heroLunarText)
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(calendarHex: 0xFFD8A5))
+                    .foregroundStyle(Color(hex: 0xFFD8A5))
                 Text("\(snapshot.day)")
                     .font(.system(size: 78, weight: .black, design: .rounded))
                     .tracking(-5)
-                    .foregroundStyle(CalendarPalette.text)
-                    .shadow(color: Color(calendarHex: 0xC071D4), radius: 9)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
+                    .shadow(color: Color(hex: 0xC071D4), radius: 9)
                     .minimumScaleFactor(0.75)
                 Text("Năm \(snapshot.canChiYear) · Ngày \(snapshot.canChiDay)")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(Color(calendarHex: 0xF1A6E4))
+                    .foregroundStyle(Color(hex: 0xF1A6E4))
                     .lineLimit(1)
             }
             .padding(.horizontal, 22)
@@ -203,13 +203,13 @@ struct CalendarView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         }
         .frame(height: 202)
-        .background(Color(calendarHex: 0x26115D))
+        .background(Color(hex: 0x26115D))
         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color(calendarHex: 0xB570DF).opacity(0.72), lineWidth: 1)
+                .stroke(Color(hex: 0xB570DF).opacity(0.72), lineWidth: 1)
         }
-        .shadow(color: Color(calendarHex: 0x32105E).opacity(0.86), radius: 18, y: 10)
+        .shadow(color: Color(hex: 0x32105E).opacity(0.86), radius: 18, y: 10)
         .accessibilityElement(children: .combine)
     }
 
@@ -217,7 +217,7 @@ struct CalendarView: View {
         LazyVGrid(columns: quickColumns, spacing: 10) {
             QuickCalendarCard(
                 icon: "sun.max",
-                iconColor: CalendarPalette.gold,
+                iconColor: AppTheme.Colors.Calendar.gold,
                 label: "Giờ đại cát",
                 value: snapshot.bestDepartureHour.map { "Giờ \($0.name)" } ?? "Đang cập nhật",
                 detail: snapshot.bestDepartureHour?.range
@@ -225,7 +225,7 @@ struct CalendarView: View {
 
             QuickCalendarCard(
                 icon: "safari",
-                iconColor: CalendarPalette.hotPink,
+                iconColor: AppTheme.Colors.Calendar.hotPink,
                 label: snapshot.direction.than,
                 value: "Hướng tốt",
                 detail: snapshot.direction.huong
@@ -233,14 +233,14 @@ struct CalendarView: View {
 
             QuickCalendarCard(
                 icon: "checkmark",
-                iconColor: Color(calendarHex: 0xA7E8A0),
+                iconColor: Color(hex: 0xA7E8A0),
                 label: "Việc nên làm",
                 value: snapshot.activities.yi.prefix(2).joined(separator: ", ")
             ) { store.send(.auspiciousCardTapped) }
 
             QuickCalendarCard(
                 icon: "minus",
-                iconColor: CalendarPalette.hotPink,
+                iconColor: AppTheme.Colors.Calendar.hotPink,
                 label: "Việc kiêng cữ",
                 value: snapshot.activities.ji.prefix(2).joined(separator: ", ")
             ) { store.send(.auspiciousCardTapped) }
@@ -261,16 +261,16 @@ struct CalendarView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("✦ CHỦ ĐỀ HÔM NAY")
                         .font(.system(size: 10, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color(calendarHex: 0xFFC66F))
+                        .foregroundStyle(Color(hex: 0xFFC66F))
 
                     Text(topicTitle)
                         .font(.system(size: 17, weight: .black, design: .rounded))
-                        .foregroundStyle(CalendarPalette.text)
+                        .foregroundStyle(AppTheme.Colors.Calendar.text)
                         .lineLimit(1)
 
                     Text("“\(topicExcerpt)”")
                         .font(.system(size: 11, weight: .regular, design: .rounded))
-                        .foregroundStyle(Color(calendarHex: 0xD6A9EE))
+                        .foregroundStyle(Color(hex: 0xD6A9EE))
                         .lineLimit(2)
 
                     HStack(spacing: 2) {
@@ -278,26 +278,26 @@ struct CalendarView: View {
                         Image(systemName: "chevron.right")
                     }
                     .font(.system(size: 11, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(calendarHex: 0xFFD28A))
+                    .foregroundStyle(Color(hex: 0xFFD28A))
                 }
                 .padding(11)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 .background(
                     LinearGradient(
-                        colors: [Color(calendarHex: 0x4E2380).opacity(0.5), Color(calendarHex: 0x120836)],
+                        colors: [Color(hex: 0x4E2380).opacity(0.5), Color(hex: 0x120836)],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
             }
             .frame(height: 128)
-            .background(Color(calendarHex: 0x2A1658))
+            .background(Color(hex: 0x2A1658))
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
-                    .stroke(Color(calendarHex: 0xB266D5).opacity(0.66), lineWidth: 1)
+                    .stroke(Color(hex: 0xB266D5).opacity(0.66), lineWidth: 1)
             }
-            .shadow(color: Color(calendarHex: 0x32105E).opacity(0.84), radius: 17, y: 9)
+            .shadow(color: Color(hex: 0x32105E).opacity(0.84), radius: 17, y: 9)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Mở điển tích và nguyên tác văn học")
@@ -308,14 +308,14 @@ struct CalendarView: View {
             VStack(spacing: 2) {
                 Text("Tuần")
                     .font(.system(size: 11, weight: .regular, design: .rounded))
-                    .foregroundStyle(Color(calendarHex: 0xD9B5E9))
+                    .foregroundStyle(Color(hex: 0xD9B5E9))
                 Text("\(week.weekNumber)")
                     .font(.system(size: 19, weight: .heavy, design: .rounded))
-                    .foregroundStyle(CalendarPalette.text)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
             }
             .frame(width: 52)
             .frame(maxHeight: .infinity)
-            .background(Color(calendarHex: 0x4B267D).opacity(0.78))
+            .background(Color(hex: 0x4B267D).opacity(0.78))
 
             ForEach(week.days) { item in
                 Button {
@@ -327,11 +327,11 @@ struct CalendarView: View {
                         Text("\(item.dayNumber)")
                             .font(.system(size: 17, weight: .bold, design: .rounded))
                     }
-                    .foregroundStyle(item.isCurrentDay ? CalendarPalette.text : Color(calendarHex: 0xCBA7E7))
+                    .foregroundStyle(item.isCurrentDay ? AppTheme.Colors.Calendar.text : Color(hex: 0xCBA7E7))
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(item.isCurrentDay ? Color(calendarHex: 0xA4377F).opacity(0.74) : .clear)
+                    .background(item.isCurrentDay ? Color(hex: 0xA4377F).opacity(0.74) : .clear)
                     .overlay(alignment: .leading) {
-                        Rectangle().fill(Color(calendarHex: 0xA972D0).opacity(0.3)).frame(width: 1)
+                        Rectangle().fill(Color(hex: 0xA972D0).opacity(0.3)).frame(width: 1)
                     }
                 }
                 .buttonStyle(.plain)
@@ -339,13 +339,13 @@ struct CalendarView: View {
             }
         }
         .frame(height: 74)
-        .background(CalendarPalette.cardGradient)
+        .background(AppTheme.Gradients.Calendar.cardGradient)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color(calendarHex: 0xA460CD).opacity(0.68), lineWidth: 1)
+                .stroke(Color(hex: 0xA460CD).opacity(0.68), lineWidth: 1)
         }
-        .shadow(color: Color(calendarHex: 0x2D0B57).opacity(0.84), radius: 15, y: 8)
+        .shadow(color: Color(hex: 0x2D0B57).opacity(0.84), radius: 15, y: 8)
     }
 
     private var pager: some View {
@@ -360,7 +360,7 @@ struct CalendarView: View {
             }
         }
         .font(.system(size: 12, weight: .semibold, design: .rounded))
-        .foregroundStyle(Color(calendarHex: 0xC69CE6))
+        .foregroundStyle(Color(hex: 0xC69CE6))
         .padding(.horizontal, 8)
         .buttonStyle(.plain)
     }
@@ -368,17 +368,17 @@ struct CalendarView: View {
     private var culturePullButton: some View {
         Button { store.send(.cultureTapped) } label: {
             Capsule()
-                .fill(Color(calendarHex: 0x281452).opacity(0.96))
+                .fill(Color(hex: 0x281452).opacity(0.96))
                 .frame(width: 218, height: 31)
                 .overlay {
-                    Capsule().stroke(Color(calendarHex: 0xFBC469).opacity(0.48), lineWidth: 1)
+                    Capsule().stroke(Color(hex: 0xFBC469).opacity(0.48), lineWidth: 1)
                 }
                 .overlay {
                     Capsule()
-                        .fill(Color(calendarHex: 0xFFD98A))
+                        .fill(Color(hex: 0xFFD98A))
                         .frame(width: 34, height: 2)
                 }
-                .shadow(color: Color(calendarHex: 0x09031F).opacity(0.4), radius: 6, y: 3)
+                .shadow(color: Color(hex: 0x09031F).opacity(0.4), radius: 6, y: 3)
         }
         .buttonStyle(.plain)
         .simultaneousGesture(
@@ -429,33 +429,33 @@ private struct QuickCalendarCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(label)
                         .font(.system(size: 11, design: .rounded))
-                        .foregroundStyle(Color(calendarHex: 0xD0A7E8))
+                        .foregroundStyle(Color(hex: 0xD0A7E8))
                         .lineLimit(1)
                     Text(value)
                         .font(.system(size: 13, weight: .heavy, design: .rounded))
-                        .foregroundStyle(CalendarPalette.text)
+                        .foregroundStyle(AppTheme.Colors.Calendar.text)
                         .lineLimit(2)
                     if let detail {
                         Text(detail)
                             .font(.system(size: 11, weight: .semibold, design: .rounded))
-                            .foregroundStyle(Color(calendarHex: 0xFFCC8D))
+                            .foregroundStyle(Color(hex: 0xFFCC8D))
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(CalendarPalette.text)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
             }
             .padding(10)
             .frame(maxWidth: .infinity, minHeight: 92, maxHeight: 92)
-            .background(CalendarPalette.cardGradient)
+            .background(AppTheme.Gradients.Calendar.cardGradient)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color(calendarHex: 0x985EC4).opacity(0.62), lineWidth: 1)
+                    .stroke(Color(hex: 0x985EC4).opacity(0.62), lineWidth: 1)
             }
-            .shadow(color: Color(calendarHex: 0x2D0B57).opacity(0.88), radius: 15, y: 8)
+            .shadow(color: Color(hex: 0x2D0B57).opacity(0.88), radius: 15, y: 8)
         }
         .buttonStyle(.plain)
         .accessibilityElement(children: .combine)
@@ -468,41 +468,6 @@ private struct CalendarTrailingIconLabelStyle: LabelStyle {
             configuration.title
             configuration.icon
         }
-    }
-}
-
-enum CalendarPalette {
-    static let background = Color(calendarHex: 0x171044)
-    static let text = Color(calendarHex: 0xFFF0FF)
-    static let gold = Color(calendarHex: 0xFFD793)
-    static let pink = Color(calendarHex: 0xF5B8E8)
-    static let hotPink = Color(calendarHex: 0xFF88C6)
-    static let monthChip = Color(calendarHex: 0x301464)
-    static let purpleBorder = Color(calendarHex: 0x9147C6)
-    static let goldGradient = LinearGradient(
-        colors: [Color(calendarHex: 0xFFE8AA), Color(calendarHex: 0xF5BD55), Color(calendarHex: 0xD98B2E)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    static let circleGradient = LinearGradient(
-        colors: [Color(calendarHex: 0x4A2D82), Color(calendarHex: 0x30195F), Color(calendarHex: 0x1D103F)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    static let cardGradient = LinearGradient(
-        colors: [Color(calendarHex: 0x43236F), Color(calendarHex: 0x28144F)],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-}
-
-extension Color {
-    init(calendarHex: UInt32) {
-        self.init(
-            red: Double((calendarHex >> 16) & 0xFF) / 255,
-            green: Double((calendarHex >> 8) & 0xFF) / 255,
-            blue: Double(calendarHex & 0xFF) / 255
-        )
     }
 }
 

@@ -8,20 +8,26 @@ struct ChatView: View {
 
     var body: some View {
         ZStack {
+            Color(hex: 0x0F0926)
+                .ignoresSafeArea()
+
             ChatSceneBackgroundView(reduceMotion: reduceMotion)
+                .ignoresSafeArea()
+
             VStack(spacing: 0) {
                 header
                 timeline
                 composer
             }
         }
+        .toolbar(isComposerFocused ? .hidden : .visible, for: .tabBar)
         .preferredColorScheme(.dark)
         .task { store.send(.onAppear) }
-        .sheet(item: $store.scope(state: \.profilePicker, action: \.profilePicker)) { ChatProfilePickerView(store: $0) }
-        .sheet(item: $store.scope(state: \.placePicker, action: \.placePicker)) { ChatPlacePickerView(store: $0).presentationDetents([.large]) }
-        .fullScreenCover(item: $store.scope(state: \.ritual, action: \.ritual)) { ChatReadingRitualView(store: $0) }
-        .fullScreenCover(item: $store.scope(state: \.detail, action: \.detail)) { ChatReadingDetailView(store: $0) }
-        .fullScreenCover(item: $store.scope(state: \.numerologyCards, action: \.numerologyCards)) { NumerologyCardsView(store: $0) }
+        .sheet(item: $store.scope(state: \.$destination, action: \.destination).profilePicker) { ChatProfilePickerView(store: $0) }
+        .sheet(item: $store.scope(state: \.$destination, action: \.destination).placePicker) { ChatPlacePickerView(store: $0).presentationDetents([.large]) }
+        .fullScreenCover(item: $store.scope(state: \.$destination, action: \.destination).ritual) { ChatReadingRitualView(store: $0) }
+        .fullScreenCover(item: $store.scope(state: \.$destination, action: \.destination).detail) { ChatReadingDetailView(store: $0) }
+        .fullScreenCover(item: $store.scope(state: \.$destination, action: \.destination).numerologyCards) { NumerologyCardsView(store: $0) }
         .alert("Numelyra", isPresented: Binding(get: { store.errorMessage != nil }, set: { if !$0 { store.send(.errorDismissed) } })) {
             Button("Đã hiểu") { store.send(.errorDismissed) }
         } message: { Text(store.errorMessage ?? "") }
@@ -55,7 +61,7 @@ struct ChatView: View {
                             AssistantPreview(message: message) { store.send(.messageTypingFinished(message.id)) } onOpen: { store.send(.messageTapped(message.id)) }
                         }
                     }
-                    Color.clear.frame(height: isComposerFocused ? 1 : 218).id("bottom")
+                    Color.clear.frame(height: 218).id("bottom")
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
@@ -63,19 +69,24 @@ struct ChatView: View {
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: store.messages.count) { _, _ in withAnimation { proxy.scrollTo("bottom", anchor: .bottom) } }
             .onChange(of: store.showAllHistory) { _, _ in withAnimation { proxy.scrollTo("bottom", anchor: .bottom) } }
+            .onChange(of: store.messages.last?.isTypingCompleted) { _, completed in
+                if completed == true {
+                    withAnimation { proxy.scrollTo("bottom", anchor: .bottom) }
+                }
+            }
             .overlay {
-                if store.messages.isEmpty && !store.isLoading && !isComposerFocused {
+                if store.messages.isEmpty && !store.isLoading {
                     VStack(spacing: 8) {
                         Text("Hi, I’m Numelyra").font(.title2.bold()).foregroundStyle(.white)
                         Text("Ask me anything\nor share how you feel.").multilineTextAlignment(.center).foregroundStyle(AppTheme.Colors.textSecondary)
                         Spacer()
                         Button { store.send(.mascotTapped) } label: { FlameMascotView(state: store.isListening ? "thinking" : "idle", size: 175, reduceMotion: reduceMotion) }.buttonStyle(.plain).accessibilityLabel("Mở 24 lá bài Thần số học")
                     }
-                } else if store.isLoading && !isComposerFocused {
+                } else if store.isLoading {
                     VStack { Spacer(); FlameMascotView(state: "thinking", size: 175, reduceMotion: reduceMotion).accessibilityLabel("Tiểu Linh Miêu đang suy nghĩ") }
                         .padding(.bottom, 16)
                         .allowsHitTesting(false)
-                } else if !store.messages.isEmpty && !isComposerFocused {
+                } else if !store.messages.isEmpty {
                     VStack {
                         Spacer()
                         Button { store.send(.mascotTapped) } label: {
@@ -116,11 +127,27 @@ struct ChatView: View {
 }
 
 private struct AssistantPreview: View {
-    let message: ChatMessage; let onFinish: () -> Void; let onOpen: () -> Void
+    let message: ChatMessage
+    let onFinish: () -> Void
+    let onOpen: () -> Void
     @State private var shown = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     var body: some View {
-        HStack { Button(action: onOpen) { Text(String(message.text.prefix(message.isTypingCompleted ? message.text.count : shown)) + (message.isTypingCompleted ? "" : " ▌")).font(AppTheme.Typography.body).foregroundStyle(Color(hex: 0x301934)).lineLimit(3).frame(maxWidth: .infinity, alignment: .leading).padding(14).background(Color(hex: 0xF6DEC4), in: RoundedRectangle(cornerRadius: 20)) }.buttonStyle(.plain).disabled(!message.isTypingCompleted); Spacer(minLength: 42) }
+        HStack {
+            Button(action: onOpen) {
+                Text(String(message.text.prefix(message.isTypingCompleted ? message.text.count : shown)) + (message.isTypingCompleted ? "" : " ▌"))
+                    .font(AppTheme.Typography.body)
+                    .foregroundStyle(Color(hex: 0x301934))
+                    .lineLimit(3)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(14)
+                    .background(Color(hex: 0xF6DEC4), in: RoundedRectangle(cornerRadius: 20))
+            }
+            .buttonStyle(.plain)
+            .disabled(!message.isTypingCompleted)
+            Spacer(minLength: 42)
+        }
         .task(id: message.id) {
             guard !message.isTypingCompleted else { shown = message.text.count; return }
             if reduceMotion { shown = message.text.count; onFinish(); return }
@@ -137,13 +164,47 @@ private struct AssistantPreview: View {
 private struct ChatSceneBackgroundView: View {
     let reduceMotion: Bool
     @State private var twinkle = false
+
     var body: some View {
-        ZStack {
-            Image(AppAsset.chatSceneSky.rawValue).resizable().scaledToFill()
-            Image(AppAsset.chatSceneStars.rawValue).resizable().scaledToFit().frame(maxWidth: 180).opacity(twinkle ? 1 : 0.62).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading).padding(.top, 90).padding(.leading, 18)
-            Image(AppAsset.chatSceneMountains.rawValue).resizable().scaledToFill()
-            Image(AppAsset.chatSceneForeground.rawValue).resizable().scaledToFill()
-        }.ignoresSafeArea().clipped().onAppear { guard !reduceMotion else { return }; withAnimation(.easeInOut(duration: 2.3).repeatForever(autoreverses: true)) { twinkle = true } }
+        GeometryReader { proxy in
+            let size = proxy.size
+            ZStack {
+                Image(AppAsset.chatSceneSky.rawValue)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
+
+                Image(AppAsset.chatSceneStars.rawValue)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 180)
+                    .opacity(twinkle ? 1 : 0.62)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .padding(.top, proxy.safeAreaInsets.top + 30)
+                    .padding(.leading, 18)
+
+                Image(AppAsset.chatSceneMountains.rawValue)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
+
+                Image(AppAsset.chatSceneForeground.rawValue)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
+            }
+            .frame(width: size.width, height: size.height)
+        }
+        .ignoresSafeArea()
+        .onAppear {
+            guard !reduceMotion else { return }
+            withAnimation(.easeInOut(duration: 2.3).repeatForever(autoreverses: true)) {
+                twinkle = true
+            }
+        }
     }
 }
 
@@ -187,20 +248,18 @@ struct ChatProfilePickerView: View {
     }
     private var birthDateBinding: Binding<Date> {
         Binding(get: {
-            let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
-            return formatter.date(from: store.newBirthDate) ?? Date(timeIntervalSince1970: 946_684_800)
+            DateFormatter.appStorageDate.date(from: store.newBirthDate)
+                ?? Date(timeIntervalSince1970: 946_684_800)
         }, set: { value in
-            let formatter = DateFormatter(); formatter.calendar = Calendar(identifier: .gregorian); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "yyyy-MM-dd"
-            store.send(.birthDateChanged(formatter.string(from: value)))
+            store.send(.birthDateChanged(DateFormatter.appStorageDate.string(from: value)))
         })
     }
     private var birthTimeBinding: Binding<Date> {
         Binding(get: {
-            let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "HH:mm"
-            return formatter.date(from: store.newBirthTime) ?? Date(timeIntervalSince1970: 43_200)
+            DateFormatter.appBirthTime().date(from: store.newBirthTime)
+                ?? Date(timeIntervalSince1970: 43_200)
         }, set: { value in
-            let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX"); formatter.dateFormat = "HH:mm"
-            store.send(.birthTimeChanged(formatter.string(from: value)))
+            store.send(.birthTimeChanged(DateFormatter.appBirthTime().string(from: value)))
         })
     }
 }

@@ -21,7 +21,9 @@ struct ChatProfilePickerFeature {
         case nameChanged(String), birthDateChanged(String), birthTimeChanged(String), hasBirthTimeChanged(Bool), genderChanged(Gender), saveProfileTapped
         case deleteTapped(String), closeTapped
         case delegate(Delegate)
-        enum Delegate: Equatable { case selected([UserProfile]); case close }
+        enum Delegate: Equatable
+        { case selected([UserProfile]);
+            case close }
     }
     @Dependency(\.userProfileClient) var profilesClient
     var body: some Reducer<State, Action> { Reduce { state, action in
@@ -129,16 +131,20 @@ struct ChatFeature {
         var indicators1: [NumerologyIndicator] = []; var indicators2: [NumerologyIndicator]?; var cards: [DrawnTarotCard] = []
         var color: ColorGuidanceContext?; var place: PlaceSearchContext?; var ziWeiCompatibility: ChatZiWeiCompatibilityPayload?
     }
+    @Reducer
+    enum Destination {
+        case profilePicker(ChatProfilePickerFeature)
+        case placePicker(ChatPlacePickerFeature)
+        case ritual(ChatReadingRitualFeature)
+        case numerologyCards(NumerologyCardsFeature)
+        case detail(ChatReadingDetailFeature)
+    }
     @ObservableState struct State: Equatable {
         var ownerID = "guest"; var isHydrated = false; var messages: [ChatMessage] = []; var showAllHistory = false
         var draft = ""; var selectedProfiles: [UserProfile] = []; var isLoading = false; var isListening = false
         var errorMessage: String?; var pending: PendingTurn?; var mascotState = "idle"; var mascotCategory = "default"
         var hydrationID: UUID?
-        @Presents var profilePicker: ChatProfilePickerFeature.State?
-        @Presents var placePicker: ChatPlacePickerFeature.State?
-        @Presents var ritual: ChatReadingRitualFeature.State?
-        @Presents var numerologyCards: NumerologyCardsFeature.State?
-        @Presents var detail: ChatReadingDetailFeature.State?
+        @Presents var destination: Destination.State?
         var visibleMessages: [ChatMessage] { showAllHistory ? messages : Array(messages.suffix(messages.last?.sender == .mascot ? 2 : 1)) }
     }
     enum Action: Equatable {
@@ -147,13 +153,10 @@ struct ChatFeature {
         case historyToggleTapped, profileTapped, mascotTapped, microphoneTapped, transcriptReceived(String), listeningEnded, listeningFailed(String)
         case messageTypingFinished(String), messageTapped(String), mapTapped(String), errorDismissed, gameHubTapped
         case locationResponse(Result<PlaceSearchContext, ChatError>)
-        case profilePicker(PresentationAction<ChatProfilePickerFeature.Action>)
-        case placePicker(PresentationAction<ChatPlacePickerFeature.Action>)
-        case ritual(PresentationAction<ChatReadingRitualFeature.Action>)
-        case numerologyCards(PresentationAction<NumerologyCardsFeature.Action>)
-        case detail(PresentationAction<ChatReadingDetailFeature.Action>)
+        case destination(PresentationAction<Destination.Action>)
         case delegate(Delegate)
-        enum Delegate: Equatable { case gameHubTapped }
+        enum Delegate: Equatable
+        { case gameHubTapped }
     }
     @Dependency(\.chatClient) var chatClient; @Dependency(\.chatHistoryClient) var history
     @Dependency(\.userProfileClient) var profilesClient; @Dependency(\.supabaseClient) var supabase
@@ -178,8 +181,7 @@ struct ChatFeature {
                 state.isListening = false
                 state.isLoading = false
                 state.pending = nil
-                state.placePicker = nil
-                state.ritual = nil
+                state.destination = nil
                 state.mascotState = "idle"
                 return .merge(.cancel(id: CancelID.load), .cancel(id: CancelID.recognition), .cancel(id: CancelID.request), .cancel(id: CancelID.location), .run { _ in await recognition.stop(); await location.cancel(); await speech.stop() })
             case let .hydrated(hydrationID, owner, profiles, messages):
@@ -210,11 +212,11 @@ struct ChatFeature {
             case .sendTapped:
                 let prompt = state.draft.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard state.isHydrated, !state.isLoading, !prompt.isEmpty else { return .none }
-                guard !state.selectedProfiles.isEmpty else { state.profilePicker = pickerState(state); return .none }
-                if state.selectedProfiles.count > 1, ColorGuidanceEngine.isColorQuestion(prompt) { state.errorMessage = "Màu hợp mệnh cần đúng một hồ sơ. Hãy chọn chế độ Cá nhân."; state.profilePicker = pickerState(state); return .none }
+                guard !state.selectedProfiles.isEmpty else { state.destination = .profilePicker(pickerState(state)); return .none }
+                if state.selectedProfiles.count > 1, ColorGuidanceEngine.isColorQuestion(prompt) { state.errorMessage = "Màu hợp mệnh cần đúng một hồ sơ. Hãy chọn chế độ Cá nhân."; state.destination = .profilePicker(pickerState(state)); return .none }
                 if state.selectedProfiles.count > 1, state.selectedProfiles.contains(where: { $0.gender == nil || $0.effectiveBirthTimeAccuracy != .exact || $0.birthTime?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty != false }) {
                     state.errorMessage = "Luận tương hợp Tử Vi mới cần giới tính và giờ sinh chính xác của cả hai hồ sơ. Hãy bổ sung hồ sơ trước khi gửi."
-                    state.profilePicker = pickerState(state)
+                    state.destination = .profilePicker(pickerState(state))
                     return .none
                 }
                 state.messages.append(.init(id: "user-\(uuid().uuidString)", sender: .user, text: prompt, time: time(now)))
@@ -230,12 +232,22 @@ struct ChatFeature {
                 let decision = (try? result.get()) ?? ChatDecisionEngine.evaluate(user.text, profiles: state.selectedProfiles)
                 if decision.intent == .trash { appendAssistant(decision.replyText ?? ChatDecisionEngine.trashReply, card: nil, to: &state); return persist(state.ownerID, state.messages) }
                 state.pending = PendingTurn(id: "mascot-\(uuid().uuidString)", prompt: user.text, decision: decision)
-                if decision.intent == .whereToGo { state.isLoading = false; state.placePicker = .init(); return .none }
+                if decision.intent == .whereToGo { state.isLoading = false; state.destination = .placePicker(.init()); return .none }
                 return prepareResponse(&state)
             case let .locationResponse(result):
                 switch result {
-                case let .success(context): state.placePicker = nil; state.pending?.place = context; state.isLoading = true; return prepareResponse(&state)
-                case let .failure(error): state.placePicker?.isLocating = false; state.placePicker?.errorMessage = error.localizedDescription; return .none
+                case let .success(context):
+                    state.destination = nil
+                    state.pending?.place = context
+                    state.isLoading = true
+                    return prepareResponse(&state)
+                case let .failure(error):
+                    if case var .some(.placePicker(picker)) = state.destination {
+                        picker.isLocating = false
+                        picker.errorMessage = error.localizedDescription
+                        state.destination = .placePicker(picker)
+                    }
+                    return .none
                 }
             case let .response(result):
                 guard let pending = state.pending else { return .none }
@@ -248,10 +260,11 @@ struct ChatFeature {
                 }
                 state.messages.append(.init(id: pending.id, sender: .mascot, text: output.text, time: time(now), card: output.card, isTypingCompleted: false))
                 state.messages = Array(state.messages.suffix(100)); state.isLoading = !pending.cards.isEmpty; state.mascotState = pending.cards.isEmpty ? "answer" : "thinking"
-                if state.ritual?.id == pending.id {
-                    state.ritual?.replyText = output.text
-                    state.ritual?.status = .ready
-                    if state.ritual?.revealedCount == pending.cards.count {
+                if case var .some(.ritual(ritual)) = state.destination, ritual.id == pending.id {
+                    ritual.replyText = output.text
+                    ritual.status = .ready
+                    state.destination = .ritual(ritual)
+                    if ritual.revealedCount == pending.cards.count {
                         let finish = finishRitual(&state, text: output.text)
                         let save = persist(state.ownerID, state.messages)
                         state.pending = nil
@@ -260,10 +273,10 @@ struct ChatFeature {
                 }
                 let effect = persist(state.ownerID, state.messages); state.pending = nil; return effect
             case .historyToggleTapped: state.showAllHistory.toggle(); return .none
-            case .profileTapped: state.profilePicker = pickerState(state); return .none
+            case .profileTapped: state.destination = .profilePicker(pickerState(state)); return .none
             case .mascotTapped:
-                guard let profile = state.selectedProfiles.first else { state.profilePicker = pickerState(state); return .none }
-                state.numerologyCards = .init(activeProfile: profile); return .none
+                guard let profile = state.selectedProfiles.first else { state.destination = .profilePicker(pickerState(state)); return .none }
+                state.destination = .numerologyCards(.init(activeProfile: profile)); return .none
             case .microphoneTapped:
                 if state.isListening {
                     state.isListening = false
@@ -283,49 +296,58 @@ struct ChatFeature {
             case let .messageTypingFinished(id): if let index = state.messages.firstIndex(where: { $0.id == id }) { state.messages[index].isTypingCompleted = true; return persist(state.ownerID, state.messages) }; return .none
             case let .messageTapped(id):
                 guard let index = state.messages.firstIndex(where: { $0.id == id }), state.messages[index].sender == .mascot, state.messages[index].isTypingCompleted else { return .none }
-                let question = state.messages[..<index].last(where: { $0.sender == .user })?.text; state.detail = .init(message: state.messages[index], question: question); return .none
+                let question = state.messages[..<index].last(where: { $0.sender == .user })?.text
+                state.destination = .detail(.init(message: state.messages[index], question: question))
+                return .none
             case let .mapTapped(raw): guard let url = URL(string: raw) else { return .none }; return .run { _ in _ = await externalURL.open(url) }
-            case .detail(.presented(.delegate(.close))): state.detail = nil; return .none
-            case let .detail(.presented(.delegate(.openMap(raw)))): guard let url = URL(string: raw) else { return .none }; return .run { _ in _ = await externalURL.open(url) }
+            case .destination(.presented(.detail(.delegate(.close)))): state.destination = nil; return .none
+            case let .destination(.presented(.detail(.delegate(.openMap(raw))))): guard let url = URL(string: raw) else { return .none }; return .run { _ in _ = await externalURL.open(url) }
             case .errorDismissed: state.errorMessage = nil; return .none
             case .gameHubTapped: return .send(.delegate(.gameHubTapped))
-            case let .profilePicker(.presented(.delegate(.selected(values)))): state.selectedProfiles = values; state.profilePicker = nil; return .none
-            case .profilePicker(.presented(.delegate(.close))): state.profilePicker = nil; return .none
-            case let .placePicker(.presented(.delegate(.locate(preferences)))):
+            case let .destination(.presented(.profilePicker(.delegate(.selected(values))))): state.selectedProfiles = values; state.destination = nil; return .none
+            case .destination(.presented(.profilePicker(.delegate(.close)))): state.destination = nil; return .none
+            case let .destination(.presented(.placePicker(.delegate(.locate(preferences))))):
                 return .run { send in
                     do { await send(.locationResponse(.success(try await location.locate(preferences)))) }
                     catch is CancellationError { }
                     catch { await send(.locationResponse(.failure(.permissionDenied(error.localizedDescription)))) }
                 }.cancellable(id: CancelID.location, cancelInFlight: true)
-            case .placePicker(.presented(.delegate(.cancel))):
-                state.placePicker = nil; state.isLoading = false; state.pending = nil
+            case .destination(.presented(.placePicker(.delegate(.cancel)))):
+                state.destination = nil; state.isLoading = false; state.pending = nil
                 appendAssistant("✦ TIỂU LINH MIÊU CẦN VỊ TRÍ HIỆN TẠI:\nĐể lọc địa điểm theo khoảng cách thực tế, bạn hãy cho phép dùng vị trí một lần nhé.", card: nil, to: &state)
                 return .merge(.cancel(id: CancelID.location), .run { _ in await location.cancel() }, persist(state.ownerID, state.messages))
-            case .placePicker(.dismiss):
-                state.isLoading = false; state.pending = nil
-                appendAssistant("✦ TIỂU LINH MIÊU CẦN VỊ TRÍ HIỆN TẠI:\nĐể lọc địa điểm theo khoảng cách thực tế, bạn hãy cho phép dùng vị trí một lần nhé.", card: nil, to: &state)
-                return .merge(.cancel(id: CancelID.location), .run { _ in await location.cancel() }, persist(state.ownerID, state.messages))
-            case .ritual(.presented(.delegate(.revealedAll))):
-                if state.ritual?.status == .ready, let text = state.ritual?.replyText { return finishRitual(&state, text: text) }; return .none
-            case .ritual(.presented(.delegate(.close))): state.ritual = nil; state.isLoading = false; state.mascotState = "idle"; return .run { _ in await speech.stop() }
-            case .ritual(.dismiss):
-                state.isLoading = false; state.mascotState = "idle"
-                return .run { _ in await speech.stop() }
-            case .numerologyCards(.presented(.delegate(.didClose))), .numerologyCards(.presented(.closeTapped)): state.numerologyCards = nil; return .none
-            case .profilePicker, .placePicker, .ritual, .numerologyCards, .detail, .delegate: return .none
+            case .destination(.dismiss):
+                let dismissedDestination = state.destination
+                switch dismissedDestination {
+                case .some(.placePicker):
+                    state.isLoading = false
+                    state.pending = nil
+                    appendAssistant("✦ TIỂU LINH MIÊU CẦN VỊ TRÍ HIỆN TẠI:\nĐể lọc địa điểm theo khoảng cách thực tế, bạn hãy cho phép dùng vị trí một lần nhé.", card: nil, to: &state)
+                    return .merge(.cancel(id: CancelID.location), .run { _ in await location.cancel() }, persist(state.ownerID, state.messages))
+                case .some(.ritual):
+                    state.isLoading = false
+                    state.mascotState = "idle"
+                    return .run { _ in await speech.stop() }
+                case .some(.profilePicker), .some(.numerologyCards), .some(.detail), .none:
+                    return .none
+                }
+            case .destination(.presented(.ritual(.delegate(.revealedAll)))):
+                if case let .some(.ritual(ritual)) = state.destination, ritual.status == .ready, let text = ritual.replyText { return finishRitual(&state, text: text) }
+                return .none
+            case .destination(.presented(.ritual(.delegate(.close)))): state.destination = nil; state.isLoading = false; state.mascotState = "idle"; return .run { _ in await speech.stop() }
+            case .destination(.presented(.numerologyCards(.delegate(.didClose)))), .destination(.presented(.numerologyCards(.closeTapped))): state.destination = nil; return .none
+            case .destination, .delegate: return .none
             }
         }
-        .ifLet(\.$profilePicker, action: \.profilePicker) { ChatProfilePickerFeature() }
-        .ifLet(\.$placePicker, action: \.placePicker) { ChatPlacePickerFeature() }
-        .ifLet(\.$ritual, action: \.ritual) { ChatReadingRitualFeature() }
-        .ifLet(\.$numerologyCards, action: \.numerologyCards) { NumerologyCardsFeature() }
-        .ifLet(\.$detail, action: \.detail) { ChatReadingDetailFeature() }
+        .ifLet(\.$destination, action: \.destination)
     }
 
     private func pickerState(_ state: State) -> ChatProfilePickerFeature.State { .init(profiles: profilesClient.loadAllProfiles(), selectedIDs: state.selectedProfiles.map(\.id), mode: state.selectedProfiles.count > 1 ? .couple : .single) }
     private func persist(_ owner: String, _ messages: [ChatMessage]) -> Effect<Action> { .run { _ in try? await history.save(owner, messages) } }
     private func appendAssistant(_ text: String, card: ChatCardPayload?, to state: inout State) { state.messages.append(.init(id: "mascot-\(uuid().uuidString)", sender: .mascot, text: text, time: time(now), card: card, isTypingCompleted: false)); state.messages = Array(state.messages.suffix(100)); state.isLoading = false; state.mascotState = "answer"; state.pending = nil }
-    private func time(_ date: Date) -> String { let f = DateFormatter(); f.locale = Locale(identifier: "vi_VN"); f.dateFormat = "HH:mm"; return f.string(from: date) }
+    private func time(_ date: Date) -> String {
+        DateFormatter.appMessageTime().string(from: date)
+    }
     private func prepareResponse(_ state: inout State) -> Effect<Action> {
         guard var pending = state.pending, let p1 = state.selectedProfiles.first else { return .none }
         pending.indicators1 = numerology.requestedIndicators(p1.fullName, p1.birthDate, pending.decision.targetIndicators, now)
@@ -344,7 +366,7 @@ struct ChatFeature {
         if pending.decision.needsTarot { pending.cards = (try? TarotEngine.bundled().drawCardsForSpread(pending.decision.spreadId)) ?? [] }
         if pending.decision.intent == .colorGuidance, let card = pending.cards.first { pending.color = try? ColorGuidanceEngine.create(birthDate: p1.birthDate, card: card) }
         state.pending = pending
-        if !pending.cards.isEmpty { state.ritual = .init(id: pending.id, question: pending.prompt, cards: pending.cards) }
+        if !pending.cards.isEmpty { state.destination = .ritual(.init(id: pending.id, question: pending.prompt, cards: pending.cards)) }
         let request = ChatAgentRequest(message: pending.prompt, decision: pending.decision, timeZone: TimeZone.current.identifier, profiles: state.selectedProfiles, indicators: .init(profile1: pending.indicators1, profile2: pending.indicators2), tarotCards: pending.cards, colorGuidance: pending.color, tuViBazi: nil, ziWeiCompatibility: pending.ziWeiCompatibility, placeContext: pending.place)
         return .run { send in
             do { let value = try await chatClient.answer(request); await send(.response(.success(ChatAnswer(text: value.0, card: value.1)))) }
@@ -352,7 +374,15 @@ struct ChatFeature {
             catch { await send(.response(.failure(.server(error.localizedDescription)))) }
         }.cancellable(id: CancelID.request, cancelInFlight: true)
     }
-    private func finishRitual(_ state: inout State, text: String) -> Effect<Action> { state.ritual?.status = .revealed; state.isLoading = false; state.mascotState = "answer"; return .run { _ in await speech.speak("detail", text) } }
+    private func finishRitual(_ state: inout State, text: String) -> Effect<Action> {
+        if case var .some(.ritual(ritual)) = state.destination {
+            ritual.status = .revealed
+            state.destination = .ritual(ritual)
+        }
+        state.isLoading = false
+        state.mascotState = "answer"
+        return .run { _ in await speech.speak("detail", text) }
+    }
     private func ziWeiInput(_ profile: UserProfile) -> ZiWeiBirthInput? {
         let date = profile.birthDate.split(separator: "-").compactMap { Int($0) }
         guard date.count == 3 else { return nil }
@@ -361,3 +391,6 @@ struct ChatFeature {
         return .init(year: date[0], month: date[1], day: date[2], hour: time[0], minute: time[1], gender: gender, timeZoneOffsetHours: 7, ruleset: .vietnameseDefaultV2)
     }
 }
+
+extension ChatFeature.Destination.State: Equatable {}
+extension ChatFeature.Destination.Action: Equatable {}

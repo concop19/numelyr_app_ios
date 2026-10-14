@@ -31,8 +31,7 @@ public nonisolated enum GameHubStorage {
         let key = gameId.rawValue
         var prev = current.games[key] ?? GameProgressSummary(playedAt: nil, completed: 0, total: nil, bestScore: nil)
         
-        let formatter = ISO8601DateFormatter()
-        prev.playedAt = formatter.string(from: now)
+        prev.playedAt = ISO8601DateFormatter.appFormatter().string(from: now)
         if let completed = update.completed { prev.completed = completed }
         if let total = update.total { prev.total = total }
         if let bestScore = update.bestScore { prev.bestScore = bestScore }
@@ -53,8 +52,7 @@ public nonisolated enum GameHubStorage {
         let key = gameId.rawValue
         var game = current.games[key] ?? GameProgressSummary(playedAt: nil, completed: 0, total: nil, bestScore: nil)
         
-        let formatter = ISO8601DateFormatter()
-        let nowString = formatter.string(from: now)
+        let nowString = ISO8601DateFormatter.appFormatter().string(from: now)
         game.playedAt = nowString
         if !alreadyDone {
             game.completed += 1
@@ -71,18 +69,13 @@ public nonisolated enum GameHubStorage {
     }
 
     public static func getLocalDateKey(date: Date = Date()) -> String {
-        let calendar = Calendar.current
-        let year = calendar.component(.year, from: date)
-        let month = calendar.component(.month, from: date)
-        let day = calendar.component(.day, from: date)
-        return String(format: "%04d-%02d-%02d", year, month, day)
+        DateFormatter.appLocalDateKey().string(from: date)
     }
 
     public static func getYesterdayKey(_ dateKey: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
+        let formatter = DateFormatter.appLocalDateKey()
         guard let date = formatter.date(from: dateKey),
-              let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: date)
+              let yesterday = formatter.calendar.date(byAdding: .day, value: -1, to: date)
         else { return "" }
         return formatter.string(from: yesterday)
     }

@@ -134,7 +134,7 @@ public nonisolated enum UserProfileStorage {
     public static func addProfile(_ profile: UserProfile, defaults: UserDefaults = .standard) throws -> UserProfile {
         let name = profile.fullName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !name.isEmpty,
-              let date = ISO8601DateFormatter.chatDate.date(from: profile.birthDate)
+              let date = DateFormatter.appStorageDate.date(from: profile.birthDate)
         else { throw ChatError.invalidProfile }
         if let birthTime = profile.birthTime, !birthTime.isEmpty {
             let values = birthTime.split(separator: ":").compactMap { Int($0) }
@@ -142,7 +142,7 @@ public nonisolated enum UserProfileStorage {
         }
         var value = profile
         value.fullName = name
-        value.birthDate = ISO8601DateFormatter.chatDate.string(from: date)
+        value.birthDate = DateFormatter.appStorageDate.string(from: date)
         var profiles = loadAllProfiles(defaults: defaults)
         profiles.append(value)
         saveAllProfiles(profiles, defaults: defaults)
@@ -160,18 +160,6 @@ public nonisolated enum UserProfileStorage {
         }
         return profiles
     }
-}
-
-private extension ISO8601DateFormatter {
-    static let chatDate: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.calendar = Calendar(identifier: .gregorian)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.timeZone = TimeZone(secondsFromGMT: 0)
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.isLenient = false
-        return formatter
-    }()
 }
 
 @DependencyClient

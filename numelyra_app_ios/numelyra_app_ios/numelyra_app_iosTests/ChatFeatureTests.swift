@@ -106,7 +106,7 @@ final class ChatReducerTests: XCTestCase {
             prompt: "Công việc sắp tới ra sao?",
             decision: .init(mode: .single, intent: .timingTrajectory, needsTarot: true)
         )
-        state.placePicker = .init()
+        state.destination = .placePicker(.init())
         let store = TestStore(initialState: state) { ChatFeature() }
 
         await store.send(.onDisappear) {
@@ -114,7 +114,7 @@ final class ChatReducerTests: XCTestCase {
             $0.isListening = false
             $0.mascotState = "idle"
             $0.pending = nil
-            $0.placePicker = nil
+            $0.destination = nil
         }
         await store.finish()
     }
@@ -128,9 +128,25 @@ final class ChatReducerTests: XCTestCase {
         }
 
         await store.send(.sendTapped) {
-            $0.profilePicker = .init(profiles: [], selectedIDs: [], mode: .single)
+            $0.destination = .profilePicker(.init(profiles: [], selectedIDs: [], mode: .single))
         }
         XCTAssertTrue(store.state.messages.isEmpty)
+    }
+
+    func testProfilePickerDestinationRoutesSelectionAndDismisses() async {
+        let profile = UserProfile(id: "a", fullName: "An", birthDate: "1998-10-20", gender: .male)
+        var state = ChatFeature.State()
+        state.destination = .profilePicker(
+            .init(profiles: [profile], selectedIDs: [], mode: .single)
+        )
+        let store = TestStore(initialState: state) { ChatFeature() }
+
+        await store.send(
+            .destination(.presented(.profilePicker(.delegate(.selected([profile])))))
+        ) {
+            $0.selectedProfiles = [profile]
+            $0.destination = nil
+        }
     }
 
     func testColorQuestionWithTwoProfilesDoesNotAppendOrCallAgent() async {
@@ -148,7 +164,7 @@ final class ChatReducerTests: XCTestCase {
 
         await store.send(.sendTapped) {
             $0.errorMessage = "Màu hợp mệnh cần đúng một hồ sơ. Hãy chọn chế độ Cá nhân."
-            $0.profilePicker = .init(profiles: profiles, selectedIDs: ["a", "b"], mode: .couple)
+            $0.destination = .profilePicker(.init(profiles: profiles, selectedIDs: ["a", "b"], mode: .couple))
         }
         XCTAssertTrue(store.state.messages.isEmpty)
         XCTAssertFalse(store.state.isLoading)
@@ -194,7 +210,7 @@ final class ChatReducerTests: XCTestCase {
 
         await store.send(.sendTapped) {
             $0.errorMessage = "Luận tương hợp Tử Vi mới cần giới tính và giờ sinh chính xác của cả hai hồ sơ. Hãy bổ sung hồ sơ trước khi gửi."
-            $0.profilePicker = .init(profiles: profiles, selectedIDs: ["a", "b"], mode: .couple)
+            $0.destination = .profilePicker(.init(profiles: profiles, selectedIDs: ["a", "b"], mode: .couple))
         }
         XCTAssertTrue(store.state.messages.isEmpty)
     }

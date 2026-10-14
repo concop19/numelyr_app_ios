@@ -12,12 +12,12 @@ struct CalendarDatePickerView: View {
             HStack {
                 Text("Chọn ngày")
                     .font(.system(size: 17, weight: .heavy, design: .rounded))
-                    .foregroundStyle(CalendarPalette.text)
+                    .foregroundStyle(AppTheme.Colors.Calendar.text)
                 Spacer()
                 Button { store.send(.closeTapped) } label: {
                     Image(systemName: "xmark")
                         .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(CalendarPalette.text)
+                        .foregroundStyle(AppTheme.Colors.Calendar.text)
                         .frame(width: 34, height: 34)
                         .background(.white.opacity(0.08))
                         .clipShape(Circle())
@@ -32,7 +32,7 @@ struct CalendarDatePickerView: View {
                 Spacer()
                 Text(monthYearText(store.displayedMonth))
                     .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(CalendarPalette.gold)
+                    .foregroundStyle(AppTheme.Colors.Calendar.gold)
                 Spacer()
                 monthButton(systemName: "chevron.right", label: "Tháng sau") {
                     store.send(.nextMonthTapped)
@@ -44,7 +44,7 @@ struct CalendarDatePickerView: View {
                 ForEach(weekdays, id: \.self) { weekday in
                     Text(weekday)
                         .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(calendarHex: 0xC8A9DF))
+                        .foregroundStyle(Color(hex: 0xC8A9DF))
                         .frame(maxWidth: .infinity, minHeight: 32)
                 }
 
@@ -58,7 +58,7 @@ struct CalendarDatePickerView: View {
                             .font(.system(size: 14, weight: selected || today ? .heavy : .semibold, design: .rounded))
                             .foregroundStyle(dayColor(date, selected: selected, today: today))
                             .frame(maxWidth: .infinity, minHeight: 42)
-                            .background(selected ? Color(calendarHex: 0x8D4FB6) : .clear)
+                            .background(selected ? Color(hex: 0x8D4FB6) : .clear)
                             .clipShape(Circle())
                             .opacity(isDisplayedMonth(date) ? 1 : 0.45)
                     }
@@ -70,10 +70,10 @@ struct CalendarDatePickerView: View {
             Button { store.send(.todayTapped) } label: {
                 Text("Hôm nay")
                     .font(.system(size: 12, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color(calendarHex: 0x2A1938))
+                    .foregroundStyle(Color(hex: 0x2A1938))
                     .padding(.horizontal, 18)
                     .padding(.vertical, 8)
-                    .background(Color(calendarHex: 0xF2BC64))
+                    .background(Color(hex: 0xF2BC64))
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
@@ -81,16 +81,16 @@ struct CalendarDatePickerView: View {
         .padding(.horizontal, 16)
         .padding(.top, 14)
         .padding(.bottom, 12)
-        .background(Color(calendarHex: 0x211246).ignoresSafeArea())
+        .background(Color(hex: 0x211246).ignoresSafeArea())
     }
 
     private func monthButton(systemName: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 15, weight: .bold))
-                .foregroundStyle(CalendarPalette.gold)
+                .foregroundStyle(AppTheme.Colors.Calendar.gold)
                 .frame(width: 36, height: 36)
-                .background(Color(calendarHex: 0x3A2069))
+                .background(Color(hex: 0x3A2069))
                 .clipShape(Circle())
         }
         .buttonStyle(.plain)
@@ -113,8 +113,8 @@ struct CalendarDatePickerView: View {
 
     private func dayColor(_ date: Date, selected: Bool, today: Bool) -> Color {
         if selected { return .white }
-        if today { return CalendarPalette.gold }
-        return isDisplayedMonth(date) ? CalendarPalette.text : Color(calendarHex: 0xB79BCB)
+        if today { return AppTheme.Colors.Calendar.gold }
+        return isDisplayedMonth(date) ? AppTheme.Colors.Calendar.text : Color(hex: 0xB79BCB)
     }
 
     private func monthYearText(_ date: Date) -> String {

@@ -109,24 +109,11 @@ public nonisolated enum SettingsEngine {
             return nil
         }
 
-        let isoWithFractional = ISO8601DateFormatter()
-        isoWithFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = isoWithFractional.date(from: trimmed) {
+        if let date = ISO8601DateFormatter.appDate(from: trimmed) {
             return date
         }
 
-        let isoStandard = ISO8601DateFormatter()
-        isoStandard.formatOptions = [.withInternetDateTime]
-        if let date = isoStandard.date(from: trimmed) {
-            return date
-        }
-
-        let dateOnlyFormatter = DateFormatter()
-        dateOnlyFormatter.calendar = Calendar(identifier: .gregorian)
-        dateOnlyFormatter.locale = Locale(identifier: "en_US_POSIX")
-        dateOnlyFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        dateOnlyFormatter.dateFormat = "yyyy-MM-dd"
-        return dateOnlyFormatter.date(from: trimmed)
+        return DateFormatter.appStorageDate.date(from: trimmed)
     }
 
     public static func formatActiveUntil(
@@ -136,14 +123,7 @@ public nonisolated enum SettingsEngine {
         guard let date = parsePeriodEndDate(rawDateString) else {
             return nil
         }
-        let formatter = DateFormatter()
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = timeZone
-        formatter.calendar = calendar
-        formatter.locale = Locale(identifier: "vi_VN")
-        formatter.timeZone = timeZone
-        formatter.dateFormat = "d/M/yyyy"
-        return formatter.string(from: date)
+        return DateFormatter.appVietnameseShortDate(timeZone: timeZone).string(from: date)
     }
 
     public static func proSubscriptionSummary(

@@ -102,6 +102,31 @@ final class AppFeatureTests: XCTestCase {
         }
     }
 
+    func testChatDestinationProfileSelectionSyncsActiveProfile() async {
+        var state = AppFeature.State()
+        state.launchFlow = .main
+        state.chat.destination = .profilePicker(
+            .init(profiles: [sampleProfile], selectedIDs: [], mode: .single)
+        )
+        let store = TestStore(initialState: state) {
+            AppFeature()
+        } withDependencies: {
+            $0.userProfileClient.setActiveProfileID = { _ in }
+        }
+
+        await store.send(
+            .chat(.destination(.presented(.profilePicker(.delegate(.selected([sampleProfile]))))))
+        ) {
+            $0.calendar.profile = self.sampleProfile
+            $0.wallpaper.profile = self.sampleProfile
+            $0.chat.selectedProfiles = [self.sampleProfile]
+            $0.chat.destination = nil
+        }
+        await store.receive(\.astrology.profileUpdated) {
+            $0.astrology.profile = self.sampleProfile
+        }
+    }
+
     func testSettingsRequestLoginPresentsAuthAndCanBeDismissed() async {
         var state = AppFeature.State()
         state.launchFlow = .main

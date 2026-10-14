@@ -650,8 +650,7 @@ nonisolated enum AstrologyEngine {
             .conjunction: "Năng lượng đang hội tụ mạnh, phù hợp để chọn một trọng tâm và làm đến nơi đến chốn.",
             .balanced: "Các dòng tác động đan xen khá cân bằng, phù hợp để duy trì nhịp sống và quan sát tín hiệu mới.",
         ]
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let formatter = ISO8601DateFormatter.appFormatter(.fractionalSeconds)
         let metadata = AstroFeatureMetadata(
             birthDate: input.birthDate,
             birthTime: input.birthTime,

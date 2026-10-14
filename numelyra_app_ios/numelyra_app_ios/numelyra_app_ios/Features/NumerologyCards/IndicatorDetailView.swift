@@ -31,10 +31,10 @@ struct IndicatorDetailView: View {
 
             footerRow
         }
-        .background(DetailPalette.modalBackground.ignoresSafeArea())
+        .background(AppTheme.Colors.IndicatorDetail.modalBackground.ignoresSafeArea())
         .overlay(alignment: .top) {
             RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(DetailPalette.modalBorder, lineWidth: 1)
+                .strokeBorder(AppTheme.Colors.IndicatorDetail.modalBorder, lineWidth: 1)
                 .ignoresSafeArea(edges: .bottom)
                 .allowsHitTesting(false)
         }
@@ -51,14 +51,14 @@ struct IndicatorDetailView: View {
             HStack(spacing: 10) {
                 Text("#\(store.indicator.definition.number)")
                     .font(.system(size: 12, weight: .bold))
-                    .foregroundStyle(DetailPalette.goldText)
+                    .foregroundStyle(AppTheme.Colors.IndicatorDetail.goldText)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 3)
-                    .background(DetailPalette.numberBadgeBg)
+                    .background(AppTheme.Colors.IndicatorDetail.numberBadgeBg)
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
                     .overlay {
                         RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .stroke(DetailPalette.numberBadgeBorder, lineWidth: 1)
+                            .stroke(AppTheme.Colors.IndicatorDetail.numberBadgeBorder, lineWidth: 1)
                     }
 
                 Text(store.indicator.definition.categoryNameVi.uppercased())
@@ -97,7 +97,7 @@ struct IndicatorDetailView: View {
     private var heroSection: some View {
         HStack(alignment: .top, spacing: 16) {
             ZStack {
-                DetailPalette.imagePlaceholder
+                AppTheme.Colors.IndicatorDetail.imagePlaceholder
 
                 if let asset = AppAsset(rawValue: store.indicator.definition.assetName) {
                     Image(appAsset: asset)
@@ -107,15 +107,15 @@ struct IndicatorDetailView: View {
                         .clipped()
                 }
 
-                DetailPalette.cardGlowOverlay
+                AppTheme.Colors.IndicatorDetail.cardGlowOverlay
             }
             .frame(width: 105, height: 155)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(DetailPalette.cardImageBorder, lineWidth: 1.5)
+                    .stroke(AppTheme.Colors.IndicatorDetail.cardImageBorder, lineWidth: 1.5)
             }
-            .shadow(color: DetailPalette.goldPrimary.opacity(0.25), radius: 10, x: 0, y: 4)
+            .shadow(color: AppTheme.Colors.IndicatorDetail.goldPrimary.opacity(0.25), radius: 10, x: 0, y: 4)
 
             VStack(alignment: .leading, spacing: 0) {
                 Text(store.indicator.definition.nameVi)
@@ -138,23 +138,23 @@ struct IndicatorDetailView: View {
                         .font(.system(size: 16, weight: .heavy))
                         .foregroundStyle(
                             store.indicator.isMaster
-                                ? DetailPalette.masterValueText
-                                : DetailPalette.goldText
+                                ? AppTheme.Colors.IndicatorDetail.masterValueText
+                                : AppTheme.Colors.IndicatorDetail.goldText
                         )
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
                         .background(
                             store.indicator.isMaster
-                                ? DetailPalette.masterPillBg
-                                : DetailPalette.valuePillBg
+                                ? AppTheme.Colors.IndicatorDetail.masterPillBg
+                                : AppTheme.Colors.IndicatorDetail.valuePillBg
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 12, style: .continuous)
                                 .stroke(
                                     store.indicator.isMaster
-                                        ? DetailPalette.masterPillBorder
-                                        : DetailPalette.goldPrimary,
+                                        ? AppTheme.Colors.IndicatorDetail.masterPillBorder
+                                        : AppTheme.Colors.IndicatorDetail.goldPrimary,
                                     lineWidth: 1
                                 )
                         }
@@ -162,10 +162,10 @@ struct IndicatorDetailView: View {
                     if store.indicator.isMaster {
                         Text("Master")
                             .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(DetailPalette.masterTagText)
+                            .foregroundStyle(AppTheme.Colors.IndicatorDetail.masterTagText)
                             .padding(.horizontal, 6)
                             .padding(.vertical, 2)
-                            .background(DetailPalette.masterTagBg)
+                            .background(AppTheme.Colors.IndicatorDetail.masterTagBg)
                             .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                     }
                 }
@@ -187,7 +187,7 @@ struct IndicatorDetailView: View {
         HStack(spacing: 8) {
             Image(systemName: "book")
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(DetailPalette.goldText)
+                .foregroundStyle(AppTheme.Colors.IndicatorDetail.goldText)
 
             Text("Luận giải tri thức chuẩn Pythagoras • Tức thì & Không qua AI")
                 .font(.system(size: 11))
@@ -210,7 +210,7 @@ struct IndicatorDetailView: View {
         VStack(spacing: 12) {
             ProgressView()
                 .controlSize(.large)
-                .tint(DetailPalette.goldPrimary)
+                .tint(AppTheme.Colors.IndicatorDetail.goldPrimary)
 
             Text("Đang tra cứu kho tri thức bản mệnh...")
                 .font(.system(size: 13))
@@ -228,7 +228,7 @@ struct IndicatorDetailView: View {
             sectionCard {
                 sectionTitle(
                     icon: "sparkles",
-                    iconColor: DetailPalette.goldText,
+                    iconColor: AppTheme.Colors.IndicatorDetail.goldText,
                     title: "Bản Chất Cốt Lõi & Năng Lượng",
                     titleColor: .white
                 )
@@ -244,14 +244,14 @@ struct IndicatorDetailView: View {
                 sectionCard {
                     sectionTitle(
                         icon: "suit.diamond",
-                        iconColor: DetailPalette.cyanIcon,
+                        iconColor: AppTheme.Colors.IndicatorDetail.cyanIcon,
                         title: "Điểm Mạnh Tự Nhiên",
                         titleColor: .white
                     )
 
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(reading.strengths.enumerated()), id: \.offset) { _, item in
-                            bulletRow(text: item, dotColor: DetailPalette.greenBullet)
+                            bulletRow(text: item, dotColor: AppTheme.Colors.IndicatorDetail.greenBullet)
                         }
                     }
                 }
@@ -262,14 +262,14 @@ struct IndicatorDetailView: View {
                 sectionCard {
                     sectionTitle(
                         icon: "moon",
-                        iconColor: DetailPalette.purpleIcon,
+                        iconColor: AppTheme.Colors.IndicatorDetail.purpleIcon,
                         title: "Vùng Bóng Tối Cần Lưu Ý",
                         titleColor: .white
                     )
 
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(Array(reading.challenges.enumerated()), id: \.offset) { _, item in
-                            bulletRow(text: item, dotColor: DetailPalette.redBullet)
+                            bulletRow(text: item, dotColor: AppTheme.Colors.IndicatorDetail.redBullet)
                         }
                     }
                 }
@@ -280,16 +280,16 @@ struct IndicatorDetailView: View {
                 sectionCard(isAdvice: true) {
                     sectionTitle(
                         icon: "leaf",
-                        iconColor: DetailPalette.mintIcon,
+                        iconColor: AppTheme.Colors.IndicatorDetail.mintIcon,
                         title: "Lời Khuyên & Bước Chuyển Hóa",
-                        titleColor: DetailPalette.goldText
+                        titleColor: AppTheme.Colors.IndicatorDetail.goldText
                     )
 
                     Text(reading.advice)
                         .font(.system(size: 13.5))
                         .italic()
                         .lineSpacing(5)
-                        .foregroundStyle(DetailPalette.adviceBodyText)
+                        .foregroundStyle(AppTheme.Colors.IndicatorDetail.adviceBodyText)
                 }
             }
 
@@ -302,7 +302,7 @@ struct IndicatorDetailView: View {
                         HStack(spacing: 4) {
                             Image(systemName: store.isFullArticleExpanded ? "chevron.up" : "chevron.down")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(DetailPalette.expandBlue)
+                                .foregroundStyle(AppTheme.Colors.IndicatorDetail.expandBlue)
 
                             Text(
                                 store.isFullArticleExpanded
@@ -310,7 +310,7 @@ struct IndicatorDetailView: View {
                                     : "Đọc toàn văn tư liệu gốc"
                             )
                             .font(.system(size: 12.5, weight: .semibold))
-                            .foregroundStyle(DetailPalette.expandBlue)
+                            .foregroundStyle(AppTheme.Colors.IndicatorDetail.expandBlue)
                         }
                         .padding(.vertical, 8)
                         .padding(.horizontal, 16)
@@ -347,11 +347,11 @@ struct IndicatorDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(isAdvice ? DetailPalette.adviceBg : .white.opacity(0.03))
+        .background(isAdvice ? AppTheme.Colors.IndicatorDetail.adviceBg : .white.opacity(0.03))
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(isAdvice ? DetailPalette.adviceBorder : .white.opacity(0.07), lineWidth: 1)
+                .stroke(isAdvice ? AppTheme.Colors.IndicatorDetail.adviceBorder : .white.opacity(0.07), lineWidth: 1)
         }
     }
 
@@ -402,46 +402,18 @@ struct IndicatorDetailView: View {
                 Text("Đã Hiểu • Quay Lại 24 Lá Bài")
                     .font(.system(size: 14.5, weight: .bold))
                     .kerning(0.5)
-                    .foregroundStyle(DetailPalette.footerBtnText)
+                    .foregroundStyle(AppTheme.Colors.IndicatorDetail.footerBtnText)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(DetailPalette.goldPrimary)
+                    .background(AppTheme.Colors.IndicatorDetail.goldPrimary)
                     .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                    .shadow(color: DetailPalette.goldPrimary.opacity(0.35), radius: 8, x: 0, y: 2)
+                    .shadow(color: AppTheme.Colors.IndicatorDetail.goldPrimary.opacity(0.35), radius: 8, x: 0, y: 2)
             }
             .buttonStyle(.plain)
             .padding(.horizontal, 20)
             .padding(.top, 12)
             .padding(.bottom, 16)
         }
-        .background(DetailPalette.modalBackground)
+        .background(AppTheme.Colors.IndicatorDetail.modalBackground)
     }
-}
-
-private enum DetailPalette {
-    static let modalBackground = Color(red: 13 / 255, green: 18 / 255, blue: 36 / 255) // #0D1224
-    static let modalBorder = Color(red: 212 / 255, green: 175 / 255, blue: 55 / 255).opacity(0.28)
-    static let numberBadgeBg = Color(red: 212 / 255, green: 175 / 255, blue: 55 / 255).opacity(0.15)
-    static let numberBadgeBorder = Color(red: 212 / 255, green: 175 / 255, blue: 55 / 255).opacity(0.35)
-    static let goldPrimary = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255) // #E5A93C
-    static let goldText = Color(red: 252 / 255, green: 211 / 255, blue: 77 / 255) // #FCD34D
-    static let imagePlaceholder = Color(red: 30 / 255, green: 41 / 255, blue: 59 / 255) // #1E293B
-    static let cardImageBorder = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.45)
-    static let cardGlowOverlay = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.04)
-    static let valuePillBg = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.18)
-    static let masterPillBg = Color(red: 245 / 255, green: 158 / 255, blue: 11 / 255).opacity(0.30)
-    static let masterPillBorder = Color(red: 245 / 255, green: 158 / 255, blue: 11 / 255) // #F59E0B
-    static let masterValueText = Color(red: 254 / 255, green: 240 / 255, blue: 138 / 255) // #FEF08A
-    static let masterTagBg = Color(red: 124 / 255, green: 58 / 255, blue: 237 / 255) // #7C3AED
-    static let masterTagText = Color(red: 237 / 255, green: 233 / 255, blue: 254 / 255) // #EDE9FE
-    static let cyanIcon = Color(red: 125 / 255, green: 211 / 255, blue: 252 / 255) // #7DD3FC
-    static let greenBullet = Color(red: 52 / 255, green: 211 / 255, blue: 153 / 255) // #34D399
-    static let purpleIcon = Color(red: 196 / 255, green: 181 / 255, blue: 253 / 255) // #C4B5FD
-    static let redBullet = Color(red: 248 / 255, green: 113 / 255, blue: 113 / 255) // #F87171
-    static let mintIcon = Color(red: 167 / 255, green: 243 / 255, blue: 208 / 255) // #A7F3D0
-    static let adviceBg = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.08)
-    static let adviceBorder = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.25)
-    static let adviceBodyText = Color(red: 254 / 255, green: 243 / 255, blue: 199 / 255) // #FEF3C7
-    static let expandBlue = Color(red: 147 / 255, green: 197 / 255, blue: 253 / 255) // #93C5FD
-    static let footerBtnText = Color(red: 10 / 255, green: 14 / 255, blue: 26 / 255) // #0A0E1A
 }

@@ -26,7 +26,7 @@ struct DailyConstellationView: View {
             Text("BIỂU TƯỢNG HÔM NAY · \(symbol.title.uppercased())")
                 .font(.system(size: 11, weight: .heavy))
                 .tracking(1.75)
-                .foregroundStyle(Color(red: 0.43, green: 0.92, blue: 1))
+                .foregroundStyle(AppTheme.Colors.Astrology.constellationLabel)
                 .multilineTextAlignment(.center)
                 .shadow(color: .black.opacity(0.9), radius: 6)
                 .accessibilityAddTraits(.isHeader)
@@ -80,7 +80,7 @@ struct ConstellationCanvasView: View {
                 height: radius * 2
             )
             context.opacity = star.opacity
-            context.fill(Path(ellipseIn: rect), with: .color(Color(red: 0.84, green: 0.96, blue: 1)))
+            context.fill(Path(ellipseIn: rect), with: .color(AppTheme.Colors.Astrology.ambientStar))
         }
         context.opacity = 1
     }
@@ -99,16 +99,16 @@ struct ConstellationCanvasView: View {
             if contour.isClosed { line.closeSubpath() }
 
             context.drawLayer { layer in
-                layer.addFilter(.shadow(color: Color(red: 0.15, green: 0.75, blue: 1).opacity(0.85), radius: 6))
+                layer.addFilter(.shadow(color: AppTheme.Colors.Astrology.constellationGlow.opacity(0.85), radius: 6))
                 layer.stroke(
                     line,
-                    with: .color(Color(red: 0.15, green: 0.75, blue: 1).opacity(0.28)),
+                    with: .color(AppTheme.Colors.Astrology.constellationGlow.opacity(0.28)),
                     lineWidth: 4
                 )
             }
             context.stroke(
                 line,
-                with: .color(Color(red: 0.89, green: 0.98, blue: 1).opacity(0.96)),
+                with: .color(AppTheme.Colors.Astrology.constellationStroke.opacity(0.96)),
                 lineWidth: 1.25
             )
 
@@ -124,17 +124,17 @@ struct ConstellationCanvasView: View {
         let coreRect = CGRect(x: point.x - 2.5, y: point.y - 2.5, width: 5, height: 5)
 
         context.drawLayer { layer in
-            layer.addFilter(.shadow(color: Color(red: 0.09, green: 0.77, blue: 1).opacity(0.9), radius: 10))
+            layer.addFilter(.shadow(color: AppTheme.Colors.Astrology.starHaloShadow.opacity(0.9), radius: 10))
             layer.fill(
                 Path(ellipseIn: haloRect),
-                with: .color(Color(red: 0.07, green: 0.75, blue: 1).opacity(0.22))
+                with: .color(AppTheme.Colors.Astrology.starHalo.opacity(0.22))
             )
         }
         context.drawLayer { layer in
-            layer.addFilter(.shadow(color: Color(red: 0.66, green: 0.95, blue: 1), radius: 5))
+            layer.addFilter(.shadow(color: AppTheme.Colors.Astrology.starMiddleShadow, radius: 5))
             layer.fill(
                 Path(ellipseIn: middleRect),
-                with: .color(Color(red: 0.35, green: 0.87, blue: 1))
+                with: .color(AppTheme.Colors.Astrology.starMiddle)
             )
         }
         context.fill(Path(ellipseIn: coreRect), with: .color(.white))
@@ -146,7 +146,7 @@ struct ConstellationCanvasView: View {
         rays.addLine(to: CGPoint(x: point.x, y: point.y + 15))
         context.stroke(
             rays,
-            with: .color(Color(red: 0.91, green: 0.98, blue: 1).opacity(0.9)),
+            with: .color(AppTheme.Colors.Astrology.starRays.opacity(0.9)),
             lineWidth: 1
         )
     }
@@ -155,7 +155,7 @@ struct ConstellationCanvasView: View {
 private struct DailyConstellationView_Previews: PreviewProvider {
     static var previews: some View {
         ZStack {
-            Color(red: 0.01, green: 0.04, blue: 0.12).ignoresSafeArea()
+            AppTheme.Colors.Astrology.constellationPreviewBackground.ignoresSafeArea()
             DailyConstellationView(
                 date: Date(timeIntervalSince1970: 1_791_331_200),
                 profileKey: "preview|1998-10-20"

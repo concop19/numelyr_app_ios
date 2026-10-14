@@ -31,7 +31,7 @@ struct NumerologyCardsView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(CardsPalette.background.ignoresSafeArea())
+            .background(AppTheme.Colors.NumerologyCards.background.ignoresSafeArea())
         }
         .preferredColorScheme(.dark)
         .task {
@@ -53,7 +53,7 @@ struct NumerologyCardsView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
                         .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(CardsPalette.goldPrimary)
+                        .foregroundStyle(AppTheme.Colors.NumerologyCards.goldPrimary)
 
                     Text("Bản Đồ 24 Chỉ Số Thần Số Học")
                         .font(.system(size: 17, weight: .heavy))
@@ -67,7 +67,7 @@ struct NumerologyCardsView: View {
                         .foregroundStyle(.white.opacity(0.65))
                     + Text(store.displayFullName)
                         .fontWeight(.bold)
-                        .foregroundStyle(CardsPalette.goldHighlight)
+                        .foregroundStyle(AppTheme.Colors.NumerologyCards.goldHighlight)
                     + Text(" • Sinh ngày: \(store.displayBirthDate)")
                         .foregroundStyle(.white.opacity(0.65))
                 )
@@ -96,7 +96,7 @@ struct NumerologyCardsView: View {
         .padding(.bottom, 12)
         .overlay(alignment: .bottom) {
             Rectangle()
-                .fill(CardsPalette.headerBorder)
+                .fill(AppTheme.Colors.NumerologyCards.headerBorder)
                 .frame(height: 1)
         }
     }
@@ -106,16 +106,16 @@ struct NumerologyCardsView: View {
     private var noticeBanner: some View {
         Text("Chạm vào bất kỳ lá bài nào để mở bài luận giải tri thức bản mệnh tức thì.")
             .font(.system(size: 11.5))
-            .foregroundStyle(CardsPalette.bannerText)
+            .foregroundStyle(AppTheme.Colors.NumerologyCards.bannerText)
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(CardsPalette.bannerBg)
+            .background(AppTheme.Colors.NumerologyCards.bannerBg)
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .stroke(CardsPalette.bannerBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.NumerologyCards.bannerBorder, lineWidth: 1)
             }
             .padding(.horizontal, 16)
             .padding(.top, 10)
@@ -135,14 +135,14 @@ struct NumerologyCardsView: View {
                             .font(.system(size: 12, weight: isActive ? .bold : .semibold))
                             .foregroundStyle(
                                 isActive
-                                    ? CardsPalette.goldHighlight
+                                    ? AppTheme.Colors.NumerologyCards.goldHighlight
                                     : .white.opacity(0.65)
                             )
                             .padding(.horizontal, 14)
                             .padding(.vertical, 6)
                             .background(
                                 isActive
-                                    ? CardsPalette.tabActiveBg
+                                    ? AppTheme.Colors.NumerologyCards.tabActiveBg
                                     : .white.opacity(0.06)
                             )
                             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -150,7 +150,7 @@ struct NumerologyCardsView: View {
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                                     .stroke(
                                         isActive
-                                            ? CardsPalette.goldPrimary
+                                            ? AppTheme.Colors.NumerologyCards.goldPrimary
                                             : .white.opacity(0.1),
                                         lineWidth: 1
                                     )
@@ -178,7 +178,7 @@ struct NumerologyCardsView: View {
         } label: {
             VStack(alignment: .leading, spacing: 0) {
                 ZStack {
-                    CardsPalette.imageFrameBg
+                    AppTheme.Colors.NumerologyCards.imageFrameBg
 
                     if let asset = AppAsset(rawValue: item.definition.assetName) {
                         Image(appAsset: asset)
@@ -193,14 +193,14 @@ struct NumerologyCardsView: View {
                         HStack(alignment: .top) {
                             Text("#\(item.definition.number)")
                                 .font(.system(size: 10, weight: .heavy))
-                                .foregroundStyle(CardsPalette.goldHighlight)
+                                .foregroundStyle(AppTheme.Colors.NumerologyCards.goldHighlight)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(CardsPalette.badgeOverlayBg)
+                                .background(AppTheme.Colors.NumerologyCards.badgeOverlayBg)
                                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 6, style: .continuous)
-                                        .stroke(CardsPalette.numBadgeBorder, lineWidth: 1)
+                                        .stroke(AppTheme.Colors.NumerologyCards.numBadgeBorder, lineWidth: 1)
                                 }
 
                             Spacer(minLength: 4)
@@ -211,7 +211,7 @@ struct NumerologyCardsView: View {
                                 .lineLimit(1)
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
-                                .background(CardsPalette.badgeOverlayBg)
+                                .background(AppTheme.Colors.NumerologyCards.badgeOverlayBg)
                                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
                                 .overlay {
                                     RoundedRectangle(cornerRadius: 6, style: .continuous)
@@ -235,8 +235,8 @@ struct NumerologyCardsView: View {
                                 .font(.system(size: 13, weight: .heavy))
                                 .foregroundStyle(
                                     item.isMaster
-                                        ? CardsPalette.masterValueText
-                                        : CardsPalette.goldHighlight
+                                        ? AppTheme.Colors.NumerologyCards.masterValueText
+                                        : AppTheme.Colors.NumerologyCards.goldHighlight
                                 )
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.7)
@@ -245,15 +245,15 @@ struct NumerologyCardsView: View {
                         .padding(.vertical, 6)
                         .background(
                             item.isMaster
-                                ? CardsPalette.valueOverlayMasterBg
-                                : CardsPalette.valueOverlayBg
+                                ? AppTheme.Colors.NumerologyCards.valueOverlayMasterBg
+                                : AppTheme.Colors.NumerologyCards.valueOverlayBg
                         )
                         .overlay(alignment: .top) {
                             Rectangle()
                                 .fill(
                                     item.isMaster
-                                        ? CardsPalette.valueOverlayMasterBorder
-                                        : CardsPalette.valueOverlayBorder
+                                        ? AppTheme.Colors.NumerologyCards.valueOverlayMasterBorder
+                                        : AppTheme.Colors.NumerologyCards.valueOverlayBorder
                                 )
                                 .frame(height: 1)
                         }
@@ -274,41 +274,20 @@ struct NumerologyCardsView: View {
                 }
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(CardsPalette.cardContainerBg)
+                .background(AppTheme.Colors.NumerologyCards.cardContainerBg)
             }
             .frame(width: cardWidth)
-            .background(CardsPalette.cardContainerBg)
+            .background(AppTheme.Colors.NumerologyCards.cardContainerBg)
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(CardsPalette.cardBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.NumerologyCards.cardBorder, lineWidth: 1)
             }
             .shadow(color: .black.opacity(0.35), radius: 6, x: 0, y: 3)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("\(item.definition.nameVi), chỉ số \(item.displayValue)")
     }
-}
-
-private enum CardsPalette {
-    static let background = Color(red: 7 / 255, green: 9 / 255, blue: 19 / 255) // #070913
-    static let headerBorder = Color(red: 212 / 255, green: 175 / 255, blue: 55 / 255).opacity(0.20)
-    static let goldPrimary = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255) // #E5A93C
-    static let goldHighlight = Color(red: 252 / 255, green: 211 / 255, blue: 77 / 255) // #FCD34D
-    static let bannerBg = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.10)
-    static let bannerBorder = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.20)
-    static let bannerText = Color(red: 253 / 255, green: 230 / 255, blue: 138 / 255) // #FDE68A
-    static let tabActiveBg = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.20)
-    static let cardContainerBg = Color(red: 15 / 255, green: 21 / 255, blue: 40 / 255) // #0F1528
-    static let cardBorder = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.22)
-    static let imageFrameBg = Color(red: 30 / 255, green: 41 / 255, blue: 59 / 255) // #1E293B
-    static let badgeOverlayBg = Color(red: 5 / 255, green: 7 / 255, blue: 15 / 255).opacity(0.85)
-    static let numBadgeBorder = Color(red: 212 / 255, green: 175 / 255, blue: 55 / 255).opacity(0.40)
-    static let valueOverlayBg = Color(red: 7 / 255, green: 10 / 255, blue: 22 / 255).opacity(0.92)
-    static let valueOverlayBorder = Color(red: 229 / 255, green: 169 / 255, blue: 60 / 255).opacity(0.30)
-    static let valueOverlayMasterBg = Color(red: 88 / 255, green: 28 / 255, blue: 135 / 255).opacity(0.92)
-    static let valueOverlayMasterBorder = Color(red: 167 / 255, green: 139 / 255, blue: 250 / 255) // #A78BFA
-    static let masterValueText = Color(red: 254 / 255, green: 240 / 255, blue: 138 / 255) // #FEF08A
 }
 
 #Preview("Bản Đồ 24 Chỉ Số") {

@@ -119,7 +119,7 @@ struct AstrologyInsightFeature {
     nonisolated static func aspectMeta(for aspect: DetectedAstroAspect) -> String {
         String(
             format: "Góc %.0f° · Sai số %.1f°",
-            locale: Locale(identifier: "en_US_POSIX"),
+            locale: .appPOSIX,
             aspect.actualAngle,
             aspect.orb
         )

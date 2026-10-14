@@ -14,7 +14,7 @@ struct AstrologyView: View {
             let compact = size.height > 0 && size.height < 720
 
             ZStack {
-                Color(red: 2 / 255, green: 9 / 255, blue: 29 / 255)
+                AppTheme.Colors.Astrology.background
                     .ignoresSafeArea()
 
                 if store.showVideoLayer {
@@ -41,7 +41,7 @@ struct AstrologyView: View {
                         .allowsHitTesting(false)
                 }
 
-                Color(red: 0, green: 13 / 255, blue: 50 / 255)
+                AppTheme.Colors.Astrology.videoTint
                     .opacity(0.10)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
@@ -51,24 +51,7 @@ struct AstrologyView: View {
                         .ignoresSafeArea()
                 }
 
-                LinearGradient(
-                    stops: [
-                        .init(
-                            color: Color(red: 2 / 255, green: 8 / 255, blue: 29 / 255).opacity(0.0),
-                            location: 0.0
-                        ),
-                        .init(
-                            color: Color(red: 2 / 255, green: 8 / 255, blue: 29 / 255).opacity(0.08),
-                            location: 0.68
-                        ),
-                        .init(
-                            color: Color(red: 2 / 255, green: 8 / 255, blue: 29 / 255).opacity(0.48),
-                            location: 1.0
-                        ),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+                AppTheme.Gradients.Astrology.screenFade
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
@@ -138,21 +121,21 @@ struct AstrologyView: View {
                 .tracking(0.6)
                 .foregroundStyle(Color.white)
                 .shadow(
-                    color: Color(red: 65 / 255, green: 199 / 255, blue: 1.0).opacity(0.40),
+                    color: AppTheme.Colors.Astrology.titleGlow.opacity(0.40),
                     radius: 12
                 )
 
             HStack(spacing: 7) {
                 Rectangle()
-                    .fill(Color(red: 124 / 255, green: 235 / 255, blue: 1.0))
+                    .fill(AppTheme.Colors.Astrology.accent)
                     .frame(width: 35, height: 0.5)
 
                 Image(systemName: "sparkles")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(Color(red: 124 / 255, green: 235 / 255, blue: 1.0))
+                    .foregroundStyle(AppTheme.Colors.Astrology.accent)
 
                 Rectangle()
-                    .fill(Color(red: 124 / 255, green: 235 / 255, blue: 1.0))
+                    .fill(AppTheme.Colors.Astrology.accent)
                     .frame(width: 35, height: 0.5)
             }
             .padding(.top, 3)
@@ -160,7 +143,7 @@ struct AstrologyView: View {
             Text(store.dateHeaderText)
                 .font(.system(size: 15, weight: .regular))
                 .tracking(0.3)
-                .foregroundStyle(Color(red: 242 / 255, green: 248 / 255, blue: 1.0))
+                .foregroundStyle(AppTheme.Colors.Astrology.headerText)
                 .shadow(color: Color.black.opacity(0.65), radius: 6)
                 .padding(.top, 10)
         }
@@ -171,11 +154,11 @@ struct AstrologyView: View {
         HStack(spacing: 7) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(Color(red: 124 / 255, green: 235 / 255, blue: 1.0))
+                .foregroundStyle(AppTheme.Colors.Astrology.accent)
 
             Text("Biểu tượng hôm nay đang tạm ẩn.")
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(Color(red: 221 / 255, green: 248 / 255, blue: 1.0))
+                .foregroundStyle(AppTheme.Colors.Astrology.geometryErrorText)
         }
     }
 
@@ -186,7 +169,7 @@ struct AstrologyView: View {
             Text(store.symbolLabelText)
                 .font(.system(size: 11, weight: .heavy))
                 .tracking(1.75)
-                .foregroundStyle(Color(red: 109 / 255, green: 235 / 255, blue: 1.0))
+                .foregroundStyle(AppTheme.Colors.Astrology.symbolLabel)
                 .multilineTextAlignment(.center)
                 .shadow(color: Color.black.opacity(0.90), radius: 6)
                 .accessibilityAddTraits(.isHeader)
@@ -194,11 +177,11 @@ struct AstrologyView: View {
             if store.isLoading {
                 VStack(spacing: 10) {
                     ProgressView()
-                        .tint(Color(red: 113 / 255, green: 231 / 255, blue: 1.0))
+                        .tint(AppTheme.Colors.Astrology.progress)
 
                     Text("Đang đọc bầu trời của bạn...")
                         .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(Color(red: 226 / 255, green: 247 / 255, blue: 1.0))
+                        .foregroundStyle(AppTheme.Colors.Astrology.loadingText)
                 }
                 .frame(minHeight: 108)
             } else if let errorMessage = store.errorMessage {
@@ -206,7 +189,7 @@ struct AstrologyView: View {
                     Text(errorMessage)
                         .font(.system(size: 13))
                         .lineSpacing(3)
-                        .foregroundStyle(Color(red: 244 / 255, green: 249 / 255, blue: 1.0))
+                        .foregroundStyle(AppTheme.Colors.Astrology.errorText)
                         .multilineTextAlignment(.center)
                         .lineLimit(2)
 
@@ -216,21 +199,21 @@ struct AstrologyView: View {
                         HStack(spacing: 7) {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(Color(red: 231 / 255, green: 251 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonText)
 
                             Text("Thử lại")
                                 .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color(red: 245 / 255, green: 252 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonTextStrong)
                         }
                         .padding(.horizontal, 16)
                         .frame(height: 38)
                         .background(
                             Capsule()
-                                .fill(Color(red: 15 / 255, green: 96 / 255, blue: 151 / 255).opacity(0.35))
+                                .fill(AppTheme.Colors.Astrology.retryBackground.opacity(0.35))
                         )
                         .overlay(
                             Capsule()
-                                .stroke(Color(red: 91 / 255, green: 190 / 255, blue: 1.0), lineWidth: 1)
+                                .stroke(AppTheme.Colors.Astrology.actionBorder, lineWidth: 1)
                         )
                     }
                     .buttonStyle(.plain)
@@ -239,12 +222,12 @@ struct AstrologyView: View {
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color(red: 3 / 255, green: 19 / 255, blue: 57 / 255).opacity(0.78))
+                        .fill(AppTheme.Colors.Astrology.errorCardBackground.opacity(0.78))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
                         .stroke(
-                            Color(red: 124 / 255, green: 235 / 255, blue: 1.0).opacity(0.45),
+                            AppTheme.Colors.Astrology.accent.opacity(0.45),
                             lineWidth: 1
                         )
                 )
@@ -279,21 +262,21 @@ struct AstrologyView: View {
                         HStack(spacing: 7) {
                             Image(systemName: "square.and.arrow.up")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(Color(red: 231 / 255, green: 251 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonText)
 
                             Text("Chia sẻ quẻ")
                                 .font(.system(size: 13, weight: .bold))
-                                .foregroundStyle(Color(red: 231 / 255, green: 251 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonText)
                         }
                         .frame(width: shareWidth, height: 48)
                         .background(
                             Capsule()
-                                .fill(Color(red: 3 / 255, green: 24 / 255, blue: 70 / 255).opacity(0.72))
+                                .fill(AppTheme.Colors.Astrology.actionBackground.opacity(0.72))
                         )
                         .overlay(
                             Capsule()
                                 .stroke(
-                                    Color(red: 91 / 255, green: 190 / 255, blue: 1.0).opacity(0.85),
+                                    AppTheme.Colors.Astrology.actionBorder.opacity(0.85),
                                     lineWidth: 1
                                 )
                         )
@@ -307,23 +290,23 @@ struct AstrologyView: View {
                         HStack(spacing: 9) {
                             Image(systemName: "sparkles")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(Color(red: 231 / 255, green: 251 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonText)
 
                             Text("Xem giải mã")
                                 .font(.system(size: 15, weight: .heavy))
-                                .foregroundStyle(Color(red: 245 / 255, green: 252 / 255, blue: 1.0))
+                                .foregroundStyle(AppTheme.Colors.Astrology.buttonTextStrong)
                         }
                         .frame(width: insightWidth, height: 48)
                         .background(
                             Capsule()
-                                .fill(Color(red: 3 / 255, green: 24 / 255, blue: 70 / 255).opacity(0.78))
+                                .fill(AppTheme.Colors.Astrology.actionBackground.opacity(0.78))
                         )
                         .overlay(
                             Capsule()
-                                .stroke(Color(red: 91 / 255, green: 190 / 255, blue: 1.0), lineWidth: 1)
+                                .stroke(AppTheme.Colors.Astrology.actionBorder, lineWidth: 1)
                         )
                         .shadow(
-                            color: Color(red: 33 / 255, green: 191 / 255, blue: 1.0).opacity(0.38),
+                            color: AppTheme.Colors.Astrology.actionGlow.opacity(0.38),
                             radius: 12
                         )
                     }

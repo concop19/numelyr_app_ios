@@ -6,7 +6,7 @@ struct AuthView: View {
 
     var body: some View {
         ZStack {
-            AuthPalette.safeAreaBackground
+            AppTheme.Colors.Auth.safeAreaBackground
                 .ignoresSafeArea()
 
             AppScreenBackground()
@@ -62,20 +62,20 @@ struct AuthView: View {
             ZStack(alignment: .topLeading) {
                 Text("✦")
                     .font(.system(size: 16))
-                    .foregroundStyle(AuthPalette.starOneColor)
+                    .foregroundStyle(AppTheme.Colors.Auth.starOneColor)
                     .padding(.top, 56)
                     .padding(.leading, 30)
 
                 Text("✧")
                     .font(.system(size: 13))
-                    .foregroundStyle(AuthPalette.starTwoColor)
+                    .foregroundStyle(AppTheme.Colors.Auth.starTwoColor)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.top, 44)
                     .padding(.trailing, 38)
 
                 Text("✦")
                     .font(.system(size: 18))
-                    .foregroundStyle(AuthPalette.starThreeColor)
+                    .foregroundStyle(AppTheme.Colors.Auth.starThreeColor)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.top, 178)
                     .padding(.trailing, 26)
@@ -90,7 +90,7 @@ struct AuthView: View {
     private var heroSection: some View {
         ZStack(alignment: .top) {
             RadialGradient(
-                colors: [AuthPalette.heroGlow, .clear],
+                colors: [AppTheme.Colors.Auth.heroGlow, .clear],
                 center: .center,
                 startRadius: 8,
                 endRadius: 118
@@ -117,28 +117,28 @@ struct AuthView: View {
             Text("✦ WELCOME TO")
                 .font(.system(size: 12, weight: .heavy))
                 .kerning(2)
-                .foregroundStyle(AuthPalette.eyebrow)
+                .foregroundStyle(AppTheme.Colors.Auth.eyebrow)
                 .multilineTextAlignment(.center)
 
             Text("NUMELYRA")
                 .font(.system(size: 34, weight: .black))
                 .kerning(0.4)
-                .foregroundStyle(AuthPalette.brand)
-                .shadow(color: AuthPalette.brandGlow, radius: 10, x: 0, y: 2)
+                .foregroundStyle(AppTheme.Colors.Auth.brand)
+                .shadow(color: AppTheme.Colors.Auth.brandGlow, radius: 10, x: 0, y: 2)
                 .multilineTextAlignment(.center)
                 .padding(.top, 2)
 
             Text("Unlock your magic ♡")
                 .font(.system(size: 17, weight: .regular))
                 .italic()
-                .foregroundStyle(AuthPalette.tagline)
+                .foregroundStyle(AppTheme.Colors.Auth.tagline)
                 .multilineTextAlignment(.center)
                 .padding(.top, 2)
 
             Text(store.descriptionText)
                 .font(.system(size: 13))
                 .lineSpacing(4)
-                .foregroundStyle(AuthPalette.description)
+                .foregroundStyle(AppTheme.Colors.Auth.description)
                 .multilineTextAlignment(.center)
                 .padding(.top, 14)
                 .padding(.bottom, 18)
@@ -163,17 +163,17 @@ struct AuthView: View {
         .frame(maxWidth: .infinity)
         .background {
             ZStack {
-                AuthPalette.cardGradient
-                AuthPalette.cardOverlay
+                AppTheme.Gradients.Auth.cardGradient
+                AppTheme.Gradients.Auth.cardOverlay
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .stroke(AuthPalette.cardBorder, lineWidth: 1)
+                .stroke(AppTheme.Colors.Auth.cardBorder, lineWidth: 1)
         }
         .shadow(
-            color: AuthPalette.cardShadow,
+            color: AppTheme.Colors.Auth.cardShadow,
             radius: 21,
             x: 0,
             y: 10
@@ -189,11 +189,11 @@ struct AuthView: View {
             HStack(spacing: 0) {
                 if store.isGoogleSubmitting {
                     ProgressView()
-                        .tint(AuthPalette.eyebrow)
+                        .tint(AppTheme.Colors.Auth.eyebrow)
                 } else {
                     ZStack {
                         Circle()
-                            .fill(AuthPalette.googleBadgeRed)
+                            .fill(AppTheme.Colors.Auth.googleBadgeRed)
                             .frame(width: 24, height: 24)
 
                         Text("G")
@@ -205,19 +205,19 @@ struct AuthView: View {
                     Text("Tiếp tục với Google")
                         .font(.system(size: 14, weight: .bold))
                         .kerning(0.2)
-                        .foregroundStyle(AuthPalette.googleButtonText)
+                        .foregroundStyle(AppTheme.Colors.Auth.googleButtonText)
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 50)
             .padding(.horizontal, 16)
-            .background(AuthPalette.googleButtonGradient)
+            .background(AppTheme.Gradients.Auth.googleButtonGradient)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(AuthPalette.googleBorder, lineWidth: 1.5)
+                    .stroke(AppTheme.Colors.Auth.googleBorder, lineWidth: 1.5)
             }
             .shadow(
-                color: AuthPalette.googleShadow,
+                color: AppTheme.Colors.Auth.googleShadow,
                 radius: 9,
                 x: 0,
                 y: 5
@@ -235,18 +235,18 @@ struct AuthView: View {
     private var dividerRow: some View {
         HStack(spacing: 0) {
             Rectangle()
-                .fill(AuthPalette.dividerLine)
+                .fill(AppTheme.Colors.Auth.dividerLine)
                 .frame(height: 1)
 
             Text("HOẶC VỚI EMAIL")
                 .font(.system(size: 11, weight: .bold))
                 .kerning(0.8)
-                .foregroundStyle(AuthPalette.dividerText)
+                .foregroundStyle(AppTheme.Colors.Auth.dividerText)
                 .padding(.horizontal, 10)
                 .fixedSize()
 
             Rectangle()
-                .fill(AuthPalette.dividerLine)
+                .fill(AppTheme.Colors.Auth.dividerLine)
                 .frame(height: 1)
         }
         .padding(.vertical, 14)
@@ -263,20 +263,20 @@ struct AuthView: View {
                         get: { store.fullName },
                         set: { store.send(.fullNameChanged($0)) }
                     ),
-                    prompt: Text("Họ và tên").foregroundStyle(AuthPalette.placeholder)
+                    prompt: Text("Họ và tên").foregroundStyle(AppTheme.Colors.Auth.placeholder)
                 )
                 .textInputAutocapitalization(.words)
                 .textContentType(.name)
                 .font(.system(size: 15))
-                .foregroundStyle(AuthPalette.inputText)
-                .tint(AuthPalette.cursorTint)
+                .foregroundStyle(AppTheme.Colors.Auth.inputText)
+                .tint(AppTheme.Colors.Auth.cursorTint)
                 .padding(.horizontal, 14)
                 .frame(minHeight: 50)
-                .background(AuthPalette.inputBackground)
+                .background(AppTheme.Colors.Auth.inputBackground)
                 .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 13, style: .continuous)
-                        .stroke(AuthPalette.inputBorder, lineWidth: 1)
+                        .stroke(AppTheme.Colors.Auth.inputBorder, lineWidth: 1)
                 }
                 .padding(.bottom, 10)
                 .accessibilityLabel("Họ và tên")
@@ -288,22 +288,22 @@ struct AuthView: View {
                     get: { store.email },
                     set: { store.send(.emailChanged($0)) }
                 ),
-                prompt: Text("Email").foregroundStyle(AuthPalette.placeholder)
+                prompt: Text("Email").foregroundStyle(AppTheme.Colors.Auth.placeholder)
             )
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
             .keyboardType(.emailAddress)
             .textContentType(.emailAddress)
             .font(.system(size: 15))
-            .foregroundStyle(AuthPalette.inputText)
-            .tint(AuthPalette.cursorTint)
+            .foregroundStyle(AppTheme.Colors.Auth.inputText)
+            .tint(AppTheme.Colors.Auth.cursorTint)
             .padding(.horizontal, 14)
             .frame(minHeight: 50)
-            .background(AuthPalette.inputBackground)
+            .background(AppTheme.Colors.Auth.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 13, style: .continuous)
-                    .stroke(AuthPalette.inputBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.Auth.inputBorder, lineWidth: 1)
             }
             .padding(.bottom, 10)
             .accessibilityLabel("Email")
@@ -317,7 +317,7 @@ struct AuthView: View {
                                 get: { store.password },
                                 set: { store.send(.passwordChanged($0)) }
                             ),
-                            prompt: Text("Mật khẩu").foregroundStyle(AuthPalette.placeholder)
+                            prompt: Text("Mật khẩu").foregroundStyle(AppTheme.Colors.Auth.placeholder)
                         )
                     } else {
                         SecureField(
@@ -326,7 +326,7 @@ struct AuthView: View {
                                 get: { store.password },
                                 set: { store.send(.passwordChanged($0)) }
                             ),
-                            prompt: Text("Mật khẩu").foregroundStyle(AuthPalette.placeholder)
+                            prompt: Text("Mật khẩu").foregroundStyle(AppTheme.Colors.Auth.placeholder)
                         )
                     }
                 }
@@ -334,8 +334,8 @@ struct AuthView: View {
                 .autocorrectionDisabled()
                 .textContentType(store.isSignUp ? .newPassword : .password)
                 .font(.system(size: 15))
-                .foregroundStyle(AuthPalette.inputText)
-                .tint(AuthPalette.cursorTint)
+                .foregroundStyle(AppTheme.Colors.Auth.inputText)
+                .tint(AppTheme.Colors.Auth.cursorTint)
                 .padding(.horizontal, 14)
                 .frame(maxWidth: .infinity, minHeight: 50)
                 .accessibilityLabel("Mật khẩu")
@@ -345,7 +345,7 @@ struct AuthView: View {
                 } label: {
                     Text(store.passwordToggleTitle)
                         .font(.system(size: 11, weight: .heavy))
-                        .foregroundStyle(AuthPalette.showPasswordText)
+                        .foregroundStyle(AppTheme.Colors.Auth.showPasswordText)
                         .padding(.horizontal, 13)
                         .padding(.vertical, 12)
                 }
@@ -353,11 +353,11 @@ struct AuthView: View {
                 .accessibilityLabel(store.isPasswordVisible ? "Ẩn mật khẩu" : "Hiện mật khẩu")
             }
             .frame(minHeight: 50)
-            .background(AuthPalette.inputBackground)
+            .background(AppTheme.Colors.Auth.inputBackground)
             .clipShape(RoundedRectangle(cornerRadius: 13, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 13, style: .continuous)
-                    .stroke(AuthPalette.inputBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.Auth.inputBorder, lineWidth: 1)
             }
         }
     }
@@ -370,7 +370,7 @@ struct AuthView: View {
                 Text(unconfigured)
                     .font(.system(size: 12))
                     .lineSpacing(3)
-                    .foregroundStyle(AuthPalette.warningText)
+                    .foregroundStyle(AppTheme.Colors.Auth.warningText)
                     .multilineTextAlignment(.center)
                     .padding(.top, 12)
             }
@@ -379,7 +379,7 @@ struct AuthView: View {
                 Text(errorMessage)
                     .font(.system(size: 12))
                     .lineSpacing(3)
-                    .foregroundStyle(AuthPalette.errorText)
+                    .foregroundStyle(AppTheme.Colors.Auth.errorText)
                     .multilineTextAlignment(.center)
                     .padding(.top, 12)
                     .accessibilityAddTraits(.isStaticText)
@@ -389,7 +389,7 @@ struct AuthView: View {
                 Text(message)
                     .font(.system(size: 12))
                     .lineSpacing(3)
-                    .foregroundStyle(AuthPalette.successText)
+                    .foregroundStyle(AppTheme.Colors.Auth.successText)
                     .multilineTextAlignment(.center)
                     .padding(.top, 12)
             }
@@ -405,29 +405,29 @@ struct AuthView: View {
             Group {
                 if store.isSubmitting {
                     ProgressView()
-                        .tint(AuthPalette.submitText)
+                        .tint(AppTheme.Colors.Auth.submitText)
                 } else {
                     HStack(spacing: 8) {
                         Text(store.submitButtonTitle)
                             .font(.system(size: 14, weight: .black))
                             .kerning(0.4)
-                            .foregroundStyle(AuthPalette.submitText)
+                            .foregroundStyle(AppTheme.Colors.Auth.submitText)
 
                         Image(systemName: "arrow.forward")
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(AuthPalette.submitText)
+                            .foregroundStyle(AppTheme.Colors.Auth.submitText)
                     }
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(AuthPalette.submitGradient)
+            .background(AppTheme.Gradients.Auth.submitGradient)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(AuthPalette.submitBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.Auth.submitBorder, lineWidth: 1)
             }
             .shadow(
-                color: AuthPalette.submitShadow,
+                color: AppTheme.Colors.Auth.submitShadow,
                 radius: 12,
                 x: 0,
                 y: 6
@@ -449,11 +449,11 @@ struct AuthView: View {
             HStack(spacing: 0) {
                 Text(store.modePromptPrefix)
                     .font(.system(size: 13))
-                    .foregroundStyle(AuthPalette.description)
+                    .foregroundStyle(AppTheme.Colors.Auth.description)
 
                 Text(store.modePromptEmphasis)
                     .font(.system(size: 13, weight: .heavy))
-                    .foregroundStyle(AuthPalette.modeEmphasis)
+                    .foregroundStyle(AppTheme.Colors.Auth.modeEmphasis)
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 17)
@@ -470,63 +470,13 @@ struct AuthView: View {
             Text("Tiếp tục với tư cách Khách")
                 .font(.system(size: 12))
                 .underline()
-                .foregroundStyle(AuthPalette.guestText)
+                .foregroundStyle(AppTheme.Colors.Auth.guestText)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Tiếp tục với tư cách Khách")
     }
-}
-
-// MARK: - Auth Screen Palette (Synchronized with `AppTheme` Mystic Deep Purple & Gold)
-
-private enum AuthPalette {
-    static let safeAreaBackground = Color(hex: 0x0E092B)
-    static let heroGlow = AppTheme.Colors.primary.opacity(0.24)
-
-    static let starOneColor = Color(hex: 0xF8B7FF)
-    static let starTwoColor = Color(hex: 0xFFE29A)
-    static let starThreeColor = Color(hex: 0xFFD779)
-
-    static let cardGradient = AppTheme.Gradients.cardElevated
-    static let cardOverlay = AppTheme.Gradients.cardOverlay
-    static let cardBorder = AppTheme.Colors.cardBorder
-    static let cardShadow = Color(hex: 0x1A063A, opacity: 0.88)
-
-    static let eyebrow = Color(hex: 0xFFD16D)
-    static let brand = AppTheme.Colors.textPrimary
-    static let brandGlow = AppTheme.Colors.primary.opacity(0.32)
-    static let tagline = AppTheme.Colors.accentPink
-    static let description = AppTheme.Colors.textSecondary
-
-    static let googleButtonGradient = AppTheme.Gradients.secondaryAction
-    static let googleBorder = Color(hex: 0xFFD573, opacity: 0.55)
-    static let googleBadgeRed = Color(hex: 0xEA4335)
-    static let googleButtonText = Color(hex: 0xFCF5FF)
-    static let googleShadow = Color(hex: 0x2A0A57, opacity: 0.82)
-
-    static let dividerLine = AppTheme.Colors.divider
-    static let dividerText = Color(hex: 0xB8A8D8)
-
-    static let inputBackground = AppTheme.Colors.inputBackground
-    static let inputBorder = AppTheme.Colors.inputBorder
-    static let inputText = AppTheme.Colors.textPrimary
-    static let placeholder = AppTheme.Colors.inputPlaceholder
-    static let cursorTint = AppTheme.Colors.primary
-    static let showPasswordText = AppTheme.Colors.primaryBright
-
-    static let submitGradient = AppTheme.Gradients.goldAction
-    static let submitBorder = Color(hex: 0xFFF1AA, opacity: 0.80)
-    static let submitText = AppTheme.Colors.textOnPrimary
-    static let submitShadow = Color(hex: 0xE4A039, opacity: 0.48)
-
-    static let modeEmphasis = AppTheme.Colors.primaryBright
-    static let guestText = Color(hex: 0xC6BDD9)
-
-    static let warningText = AppTheme.Colors.warning
-    static let errorText = AppTheme.Colors.errorSoft
-    static let successText = AppTheme.Colors.success
 }
 
 #Preview("Đăng nhập") {

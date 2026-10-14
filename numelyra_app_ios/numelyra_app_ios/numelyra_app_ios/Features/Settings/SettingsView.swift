@@ -7,10 +7,10 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            SettingsPalette.safeAreaBackground
+            AppTheme.Colors.Settings.safeAreaBackground
                 .ignoresSafeArea()
 
-            SettingsPalette.screenGradient
+            AppTheme.Gradients.Settings.screenGradient
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
@@ -57,7 +57,7 @@ struct SettingsView: View {
         GeometryReader { proxy in
             ZStack(alignment: .topLeading) {
                 Ellipse()
-                    .stroke(SettingsPalette.orbitBorder, lineWidth: 1)
+                    .stroke(AppTheme.Colors.Settings.orbitBorder, lineWidth: 1)
                     .frame(width: 330, height: 250)
                     .rotationEffect(.degrees(25))
                     .position(
@@ -67,7 +67,7 @@ struct SettingsView: View {
 
                 Text("☾")
                     .font(.system(size: 86))
-                    .foregroundStyle(SettingsPalette.moonColor)
+                    .foregroundStyle(AppTheme.Colors.Settings.moonColor)
                     .rotationEffect(.degrees(-18))
                     .opacity(0.95)
                     .frame(maxWidth: .infinity, alignment: .trailing)
@@ -76,19 +76,19 @@ struct SettingsView: View {
 
                 Text("✦")
                     .font(.system(size: 16))
-                    .foregroundStyle(SettingsPalette.starOneColor)
+                    .foregroundStyle(AppTheme.Colors.Settings.starOneColor)
                     .padding(.top, 112)
                     .padding(.leading, 26)
 
                 Text("✧")
                     .font(.system(size: 12))
-                    .foregroundStyle(SettingsPalette.starTwoColor)
+                    .foregroundStyle(AppTheme.Colors.Settings.starTwoColor)
                     .padding(.top, 76)
                     .padding(.leading, 164)
 
                 Text("✦")
                     .font(.system(size: 20))
-                    .foregroundStyle(SettingsPalette.starThreeColor)
+                    .foregroundStyle(AppTheme.Colors.Settings.starThreeColor)
                     .frame(maxWidth: .infinity, alignment: .trailing)
                     .padding(.top, 188)
                     .padding(.trailing, 52)
@@ -105,13 +105,13 @@ struct SettingsView: View {
             Text("Cài đặt")
                 .font(.system(size: 35, weight: .black))
                 .kerning(0.2)
-                .foregroundStyle(SettingsPalette.titleText)
+                .foregroundStyle(AppTheme.Colors.Settings.titleText)
                 .multilineTextAlignment(.center)
 
             Text("Tùy chỉnh hành trình NUMELYRA theo cách của bạn")
                 .font(.system(size: 14))
                 .lineSpacing(3)
-                .foregroundStyle(SettingsPalette.subtitleText)
+                .foregroundStyle(AppTheme.Colors.Settings.subtitleText)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -124,7 +124,7 @@ struct SettingsView: View {
         Text(title)
             .font(.system(size: 13, weight: .black))
             .kerning(1.05)
-            .foregroundStyle(SettingsPalette.groupTitleText)
+            .foregroundStyle(AppTheme.Colors.Settings.groupTitleText)
             .padding(.leading, 5)
             .padding(.bottom, 9)
     }
@@ -137,20 +137,20 @@ struct SettingsView: View {
                 HStack(spacing: 12) {
                     settingIconBadge(
                         systemName: "bell",
-                        iconColor: SettingsPalette.reminderIconTint,
-                        backgroundColor: SettingsPalette.reminderIconBackground,
-                        borderColor: SettingsPalette.reminderIconBorder
+                        iconColor: AppTheme.Colors.Settings.reminderIconTint,
+                        backgroundColor: AppTheme.Colors.Settings.reminderIconBackground,
+                        borderColor: AppTheme.Colors.Settings.reminderIconBorder
                     )
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Nhắc chơi mỗi ngày")
                             .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(SettingsPalette.titleText)
+                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
 
                         Text(store.reminderHint)
                             .font(.system(size: 12))
                             .lineSpacing(2)
-                            .foregroundStyle(SettingsPalette.hintText)
+                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -162,7 +162,7 @@ struct SettingsView: View {
                         )
                     )
                     .labelsHidden()
-                    .tint(SettingsPalette.switchActiveTrack)
+                    .tint(AppTheme.Colors.Settings.switchActiveTrack)
                     .disabled(!store.canUseNativeNotifications)
                 }
                 .frame(minHeight: 58)
@@ -172,20 +172,20 @@ struct SettingsView: View {
                 HStack(spacing: 12) {
                     settingIconBadge(
                         systemName: "clock",
-                        iconColor: SettingsPalette.timeIconTint,
-                        backgroundColor: SettingsPalette.timeIconBackground,
-                        borderColor: SettingsPalette.timeIconBorder
+                        iconColor: AppTheme.Colors.Settings.timeIconTint,
+                        backgroundColor: AppTheme.Colors.Settings.timeIconBackground,
+                        borderColor: AppTheme.Colors.Settings.timeIconBorder
                     )
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Giờ nhắc")
                             .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(SettingsPalette.titleText)
+                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
 
                         Text("Chọn thời điểm phù hợp với bạn")
                             .font(.system(size: 12))
                             .lineSpacing(2)
-                            .foregroundStyle(SettingsPalette.hintText)
+                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -202,14 +202,14 @@ struct SettingsView: View {
                                 .font(.system(size: 14, weight: .heavy))
                                 .foregroundStyle(
                                     isSelected
-                                        ? SettingsPalette.timeTextActive
-                                        : SettingsPalette.timeTextInactive
+                                        ? AppTheme.Colors.Settings.timeTextActive
+                                        : AppTheme.Colors.Settings.timeTextInactive
                                 )
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 9)
                                 .background(
                                     isSelected
-                                        ? SettingsPalette.switchActiveTrack
+                                        ? AppTheme.Colors.Settings.switchActiveTrack
                                         : Color.clear
                                 )
                                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -217,8 +217,8 @@ struct SettingsView: View {
                                     RoundedRectangle(cornerRadius: 10, style: .continuous)
                                         .stroke(
                                             isSelected
-                                                ? SettingsPalette.switchActiveTrack
-                                                : SettingsPalette.timeButtonBorder,
+                                                ? AppTheme.Colors.Settings.switchActiveTrack
+                                                : AppTheme.Colors.Settings.timeButtonBorder,
                                             lineWidth: 1
                                         )
                                 }
@@ -243,21 +243,21 @@ struct SettingsView: View {
                 HStack(spacing: 12) {
                     settingIconBadge(
                         systemName: store.isAuthenticated ? "person" : "person.badge.plus",
-                        iconColor: SettingsPalette.profileIconTint,
-                        backgroundColor: SettingsPalette.profileIconBackground,
-                        borderColor: SettingsPalette.profileIconBorder
+                        iconColor: AppTheme.Colors.Settings.profileIconTint,
+                        backgroundColor: AppTheme.Colors.Settings.profileIconBackground,
+                        borderColor: AppTheme.Colors.Settings.profileIconBorder
                     )
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(store.accountTitle)
                             .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(SettingsPalette.titleText)
+                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
                             .lineLimit(1)
 
                         Text(store.accountHint)
                             .font(.system(size: 12))
                             .lineSpacing(2)
-                            .foregroundStyle(SettingsPalette.hintText)
+                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -291,24 +291,24 @@ struct SettingsView: View {
                         HStack {
                             Text(store.guestActionTitle)
                                 .font(.system(size: 14, weight: .black))
-                                .foregroundStyle(SettingsPalette.actionText)
+                                .foregroundStyle(AppTheme.Colors.Settings.actionText)
 
                             Spacer(minLength: 8)
 
                             Image(systemName: "chevron.forward")
                                 .font(.system(size: 15, weight: .bold))
-                                .foregroundStyle(SettingsPalette.crownSymbolColor)
+                                .foregroundStyle(AppTheme.Colors.Settings.crownSymbolColor)
                         }
                         .padding(.horizontal, 15)
                         .frame(maxWidth: .infinity, minHeight: 49)
-                        .background(SettingsPalette.inlineActionBackground)
+                        .background(AppTheme.Colors.Settings.inlineActionBackground)
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .stroke(SettingsPalette.inlineActionBorder, lineWidth: 1)
+                                .stroke(AppTheme.Colors.Settings.inlineActionBorder, lineWidth: 1)
                         }
                         .shadow(
-                            color: SettingsPalette.inlineActionShadow,
+                            color: AppTheme.Colors.Settings.inlineActionShadow,
                             radius: 9,
                             x: 0,
                             y: 5
@@ -320,7 +320,7 @@ struct SettingsView: View {
 
                 if store.isBusy {
                     ProgressView()
-                        .tint(SettingsPalette.switchActiveTrack)
+                        .tint(AppTheme.Colors.Settings.switchActiveTrack)
                         .frame(maxWidth: .infinity)
                         .padding(.top, 13)
                 }
@@ -337,28 +337,28 @@ struct SettingsView: View {
                     HStack(alignment: .top, spacing: 12) {
                         ZStack {
                             Circle()
-                                .fill(SettingsPalette.crownBackground)
+                                .fill(AppTheme.Colors.Settings.crownBackground)
                                 .frame(width: 48, height: 48)
                                 .overlay {
                                     Circle()
-                                        .stroke(SettingsPalette.crownBorder, lineWidth: 1)
+                                        .stroke(AppTheme.Colors.Settings.crownBorder, lineWidth: 1)
                                 }
 
                             Text("♛")
                                 .font(.system(size: 26))
-                                .foregroundStyle(SettingsPalette.crownSymbolColor)
+                                .foregroundStyle(AppTheme.Colors.Settings.crownSymbolColor)
                         }
 
                         VStack(alignment: .leading, spacing: 6) {
                             Text("GÓI THÀNH VIÊN")
                                 .font(.system(size: 15, weight: .black))
                                 .kerning(0.8)
-                                .foregroundStyle(SettingsPalette.cardTitleGold)
+                                .foregroundStyle(AppTheme.Colors.Settings.cardTitleGold)
 
                             Text(store.proHeadlineTitle)
                                 .font(.system(size: 21, weight: .black))
                                 .lineSpacing(2)
-                                .foregroundStyle(SettingsPalette.titleText)
+                                .foregroundStyle(AppTheme.Colors.Settings.titleText)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -369,23 +369,23 @@ struct SettingsView: View {
                         .kerning(0.6)
                         .foregroundStyle(
                             store.isPro
-                                ? SettingsPalette.planBadgeActiveText
-                                : SettingsPalette.planBadgeInactiveText
+                                ? AppTheme.Colors.Settings.planBadgeActiveText
+                                : AppTheme.Colors.Settings.planBadgeInactiveText
                         )
                         .padding(.horizontal, 11)
                         .padding(.vertical, 6)
                         .background(
                             store.isPro
-                                ? SettingsPalette.switchActiveTrack
-                                : SettingsPalette.planBadgeInactiveBackground
+                                ? AppTheme.Colors.Settings.switchActiveTrack
+                                : AppTheme.Colors.Settings.planBadgeInactiveBackground
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .stroke(
                                     store.isPro
-                                        ? SettingsPalette.planBadgeActiveBorder
-                                        : SettingsPalette.planBadgeInactiveBorder,
+                                        ? AppTheme.Colors.Settings.planBadgeActiveBorder
+                                        : AppTheme.Colors.Settings.planBadgeInactiveBorder,
                                     lineWidth: 1
                                 )
                         }
@@ -395,19 +395,19 @@ struct SettingsView: View {
                     Text(store.proSubscriptionSummary)
                         .font(.system(size: 14))
                         .lineSpacing(3)
-                        .foregroundStyle(SettingsPalette.hintText)
+                        .foregroundStyle(AppTheme.Colors.Settings.hintText)
                         .padding(.top, 10)
                 } else {
                     Text("Tăng lượt luận giải AI, tạo nhiều hình nền hơn và mở khóa các trải bài chuyên sâu.")
                         .font(.system(size: 14))
                         .lineSpacing(3)
-                        .foregroundStyle(SettingsPalette.hintText)
+                        .foregroundStyle(AppTheme.Colors.Settings.hintText)
                         .padding(.top, 10)
 
                     Text("CHỌN PHƯƠNG THỨC THANH TOÁN")
                         .font(.system(size: 13, weight: .black))
                         .kerning(0.7)
-                        .foregroundStyle(SettingsPalette.paymentSectionLabel)
+                        .foregroundStyle(AppTheme.Colors.Settings.paymentSectionLabel)
                         .padding(.top, 19)
                         .padding(.bottom, 10)
 
@@ -435,29 +435,29 @@ struct SettingsView: View {
                         Group {
                             if store.isBusy {
                                 ProgressView()
-                                    .tint(SettingsPalette.planBadgeActiveText)
+                                    .tint(AppTheme.Colors.Settings.planBadgeActiveText)
                             } else {
                                 HStack(spacing: 8) {
                                     Text(store.upgradeButtonTitle)
                                         .font(.system(size: 14, weight: .black))
                                         .kerning(0.2)
-                                        .foregroundStyle(SettingsPalette.upgradeButtonText)
+                                        .foregroundStyle(AppTheme.Colors.Settings.upgradeButtonText)
 
                                     Image(systemName: "arrow.forward")
                                         .font(.system(size: 15, weight: .bold))
-                                        .foregroundStyle(SettingsPalette.upgradeButtonText)
+                                        .foregroundStyle(AppTheme.Colors.Settings.upgradeButtonText)
                                 }
                             }
                         }
                         .frame(maxWidth: .infinity, minHeight: 56)
-                        .background(SettingsPalette.upgradeButtonGradient)
+                        .background(AppTheme.Gradients.Settings.upgradeButtonGradient)
                         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                         .overlay {
                             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .stroke(SettingsPalette.upgradeButtonBorder, lineWidth: 1)
+                                .stroke(AppTheme.Colors.Settings.upgradeButtonBorder, lineWidth: 1)
                         }
                         .shadow(
-                            color: SettingsPalette.upgradeButtonShadow,
+                            color: AppTheme.Colors.Settings.upgradeButtonShadow,
                             radius: 12,
                             x: 0,
                             y: 6
@@ -474,7 +474,7 @@ struct SettingsView: View {
                     Text("Bạn có một yêu cầu PayPal chưa hoàn tất. Hãy xác nhận hoặc quay lại website để hủy yêu cầu đó trước khi thử lại.")
                         .font(.system(size: 12))
                         .lineSpacing(3)
-                        .foregroundStyle(SettingsPalette.warningText)
+                        .foregroundStyle(AppTheme.Colors.Settings.warningText)
                         .padding(.top, 12)
                 }
 
@@ -482,7 +482,7 @@ struct SettingsView: View {
                     Text(billingError)
                         .font(.system(size: 12))
                         .lineSpacing(3)
-                        .foregroundStyle(SettingsPalette.errorText)
+                        .foregroundStyle(AppTheme.Colors.Settings.errorText)
                         .padding(.top, 12)
                         .accessibilityAddTraits(.isStaticText)
                 }
@@ -494,12 +494,12 @@ struct SettingsView: View {
                         HStack(spacing: 5) {
                             Image(systemName: "arrow.clockwise")
                                 .font(.system(size: 12, weight: .semibold))
-                                .foregroundStyle(SettingsPalette.refreshText)
+                                .foregroundStyle(AppTheme.Colors.Settings.refreshText)
 
                             Text("Cập nhật trạng thái Pro")
                                 .font(.system(size: 12))
                                 .underline()
-                                .foregroundStyle(SettingsPalette.refreshText)
+                                .foregroundStyle(AppTheme.Colors.Settings.refreshText)
                         }
                         .padding(.horizontal, 10)
                         .padding(.vertical, 12)
@@ -518,7 +518,7 @@ struct SettingsView: View {
 
     private var rowDivider: some View {
         Rectangle()
-            .fill(SettingsPalette.rowDivider)
+            .fill(AppTheme.Colors.Settings.rowDivider)
             .frame(height: 1)
             .padding(.vertical, 14)
     }
@@ -553,23 +553,23 @@ struct SettingsView: View {
         Button(action: action) {
             Text(label)
                 .font(.system(size: 16, weight: .black))
-                .foregroundStyle(danger ? SettingsPalette.errorText : SettingsPalette.actionText)
+                .foregroundStyle(danger ? AppTheme.Colors.Settings.errorText : AppTheme.Colors.Settings.actionText)
                 .padding(.horizontal, 12)
                 .frame(maxWidth: .infinity, minHeight: 55)
                 .background(
                     danger
-                        ? SettingsPalette.dangerActionGradient
-                        : SettingsPalette.primaryActionGradient
+                        ? AppTheme.Gradients.Settings.dangerActionGradient
+                        : AppTheme.Gradients.Settings.primaryActionGradient
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
                 .overlay {
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(SettingsPalette.actionBorder, lineWidth: 1.5)
+                        .stroke(AppTheme.Colors.Settings.actionBorder, lineWidth: 1.5)
                 }
                 .shadow(
                     color: danger
-                        ? SettingsPalette.dangerActionShadow
-                        : SettingsPalette.primaryActionShadow,
+                        ? AppTheme.Colors.Settings.dangerActionShadow
+                        : AppTheme.Colors.Settings.primaryActionShadow,
                     radius: 10,
                     x: 0,
                     y: 5
@@ -598,8 +598,8 @@ struct SettingsView: View {
                         .font(.system(size: 25, weight: .black))
                         .foregroundStyle(
                             selected
-                                ? SettingsPalette.paymentSelectedText
-                                : SettingsPalette.paymentUnselectedIcon
+                                ? AppTheme.Colors.Settings.paymentSelectedText
+                                : AppTheme.Colors.Settings.paymentUnselectedIcon
                         )
 
                     Spacer(minLength: 4)
@@ -608,15 +608,15 @@ struct SettingsView: View {
                         Circle()
                             .stroke(
                                 selected
-                                    ? SettingsPalette.paymentSelectedBorder
-                                    : SettingsPalette.radioBorder,
+                                    ? AppTheme.Colors.Settings.paymentSelectedBorder
+                                    : AppTheme.Colors.Settings.radioBorder,
                                 lineWidth: 2
                             )
                             .background(
                                 Circle()
                                     .fill(
                                         selected
-                                            ? SettingsPalette.paymentSelectedBorder
+                                            ? AppTheme.Colors.Settings.paymentSelectedBorder
                                             : Color.clear
                                     )
                             )
@@ -624,7 +624,7 @@ struct SettingsView: View {
 
                         if selected {
                             Circle()
-                                .fill(SettingsPalette.radioInnerDot)
+                                .fill(AppTheme.Colors.Settings.radioInnerDot)
                                 .frame(width: 8, height: 8)
                         }
                     }
@@ -634,14 +634,14 @@ struct SettingsView: View {
                     .font(.system(size: 15, weight: .black))
                     .foregroundStyle(
                         selected
-                            ? SettingsPalette.paymentSelectedText
-                            : SettingsPalette.paymentTitleText
+                            ? AppTheme.Colors.Settings.paymentSelectedText
+                            : AppTheme.Colors.Settings.paymentTitleText
                     )
                     .padding(.top, 14)
 
                 Text(detail)
                     .font(.system(size: 12))
-                    .foregroundStyle(SettingsPalette.paymentDetailText)
+                    .foregroundStyle(AppTheme.Colors.Settings.paymentDetailText)
                     .padding(.top, 5)
             }
             .padding(12)
@@ -649,11 +649,11 @@ struct SettingsView: View {
             .background {
                 ZStack {
                     (selected
-                        ? SettingsPalette.paymentSelectedBackground
-                        : SettingsPalette.paymentUnselectedBackground)
+                        ? AppTheme.Colors.Settings.paymentSelectedBackground
+                        : AppTheme.Colors.Settings.paymentUnselectedBackground)
                     (selected
-                        ? SettingsPalette.paymentSelectedOverlay
-                        : SettingsPalette.paymentUnselectedOverlay)
+                        ? AppTheme.Gradients.Settings.paymentSelectedOverlay
+                        : AppTheme.Gradients.Settings.paymentUnselectedOverlay)
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
@@ -661,15 +661,15 @@ struct SettingsView: View {
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .stroke(
                         selected
-                            ? SettingsPalette.paymentSelectedBorder
-                            : SettingsPalette.paymentUnselectedBorder,
+                            ? AppTheme.Colors.Settings.paymentSelectedBorder
+                            : AppTheme.Colors.Settings.paymentUnselectedBorder,
                         lineWidth: 1
                     )
             }
             .shadow(
                 color: selected
-                    ? SettingsPalette.paymentSelectedShadow
-                    : SettingsPalette.paymentUnselectedShadow,
+                    ? AppTheme.Colors.Settings.paymentSelectedShadow
+                    : AppTheme.Colors.Settings.paymentUnselectedShadow,
                 radius: 9,
                 x: 0,
                 y: 5
@@ -693,198 +693,26 @@ private struct SettingsCardContainer<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
                 ZStack {
-                    (isPro ? SettingsPalette.proCardGradient : SettingsPalette.standardCardGradient)
-                    SettingsPalette.cardOverlayGradient
+                    (isPro ? AppTheme.Gradients.Settings.proCardGradient : AppTheme.Gradients.Settings.standardCardGradient)
+                    AppTheme.Gradients.Settings.cardOverlayGradient
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(
-                        isPro ? SettingsPalette.proCardBorder : SettingsPalette.standardCardBorder,
+                        isPro ? AppTheme.Colors.Settings.proCardBorder : AppTheme.Colors.Settings.standardCardBorder,
                         lineWidth: 1
                     )
             }
             .shadow(
-                color: isPro ? SettingsPalette.proCardShadow : SettingsPalette.standardCardShadow,
+                color: isPro ? AppTheme.Colors.Settings.proCardShadow : AppTheme.Colors.Settings.standardCardShadow,
                 radius: isPro ? 21 : 19,
                 x: 0,
                 y: 10
             )
             .padding(.bottom, 16)
     }
-}
-
-// MARK: - Settings Screen Palette (`SettingsScreen.tsx:120-381`)
-
-private enum SettingsPalette {
-    static let safeAreaBackground = Color(red: 14 / 255, green: 9 / 255, blue: 43 / 255) // #0E092B
-
-    static let screenGradient = LinearGradient(
-        colors: [
-            Color(red: 33 / 255, green: 16 / 255, blue: 82 / 255), // #211052
-            Color(red: 17 / 255, green: 8 / 255, blue: 47 / 255),  // #11082F
-            Color(red: 12 / 255, green: 6 / 255, blue: 37 / 255)   // #0C0625
-        ],
-        startPoint: UnitPoint(x: 0.1, y: 0),
-        endPoint: UnitPoint(x: 0.9, y: 1)
-    )
-
-    static let moonColor = Color(red: 255 / 255, green: 231 / 255, blue: 160 / 255) // #FFE7A0
-    static let starOneColor = Color(red: 248 / 255, green: 183 / 255, blue: 255 / 255) // #F8B7FF
-    static let starTwoColor = Color(red: 255 / 255, green: 226 / 255, blue: 154 / 255) // #FFE29A
-    static let starThreeColor = Color(red: 255 / 255, green: 215 / 255, blue: 121 / 255) // #FFD779
-    static let orbitBorder = Color(red: 235 / 255, green: 157 / 255, blue: 255 / 255).opacity(0.32)
-
-    static let titleText = Color(red: 252 / 255, green: 245 / 255, blue: 255 / 255) // #FCF5FF
-    static let subtitleText = Color(red: 184 / 255, green: 168 / 255, blue: 216 / 255) // #B8A8D8
-    static let groupTitleText = Color(red: 228 / 255, green: 213 / 255, blue: 255 / 255) // #E4D5FF
-    static let hintText = Color(red: 187 / 255, green: 174 / 255, blue: 214 / 255) // #BBAED6
-
-    static let standardCardGradient = LinearGradient(
-        colors: [
-            Color(red: 50 / 255, green: 16 / 255, blue: 96 / 255), // #321060
-            Color(red: 41 / 255, green: 16 / 255, blue: 81 / 255), // #291051
-            Color(red: 33 / 255, green: 9 / 255, blue: 67 / 255)   // #210943
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
-    static let proCardGradient = LinearGradient(
-        colors: [
-            Color(red: 66 / 255, green: 23 / 255, blue: 119 / 255), // #421777
-            Color(red: 50 / 255, green: 16 / 255, blue: 96 / 255),  // #321060
-            Color(red: 35 / 255, green: 9 / 255, blue: 68 / 255)    // #230944
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
-    static let cardOverlayGradient = LinearGradient(
-        colors: [
-            Color(red: 247 / 255, green: 199 / 255, blue: 255 / 255).opacity(0.12),
-            Color(red: 33 / 255, green: 12 / 255, blue: 76 / 255).opacity(0.04),
-            Color(red: 8 / 255, green: 4 / 255, blue: 34 / 255).opacity(0.32)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    static let standardCardBorder = Color(red: 153 / 255, green: 95 / 255, blue: 210 / 255).opacity(0.62)
-    static let proCardBorder = Color(red: 184 / 255, green: 111 / 255, blue: 226 / 255).opacity(0.70)
-    static let standardCardShadow = Color(red: 26 / 255, green: 6 / 255, blue: 58 / 255).opacity(0.94)
-    static let proCardShadow = Color(red: 37 / 255, green: 7 / 255, blue: 74 / 255).opacity(0.98)
-
-    static let reminderIconTint = Color(red: 255 / 255, green: 210 / 255, blue: 108 / 255) // #FFD26C
-    static let reminderIconBackground = Color(red: 127 / 255, green: 75 / 255, blue: 168 / 255).opacity(0.28)
-    static let reminderIconBorder = Color(red: 255 / 255, green: 209 / 255, blue: 109 / 255).opacity(0.46)
-
-    static let timeIconTint = Color(red: 199 / 255, green: 164 / 255, blue: 255 / 255) // #C7A4FF
-    static let timeIconBackground = Color(red: 86 / 255, green: 59 / 255, blue: 152 / 255).opacity(0.36)
-    static let timeIconBorder = Color(red: 182 / 255, green: 137 / 255, blue: 241 / 255).opacity(0.44)
-
-    static let profileIconTint = Color(red: 244 / 255, green: 184 / 255, blue: 255 / 255) // #F4B8FF
-    static let profileIconBackground = Color(red: 139 / 255, green: 58 / 255, blue: 157 / 255).opacity(0.31)
-    static let profileIconBorder = Color(red: 237 / 255, green: 160 / 255, blue: 255 / 255).opacity(0.45)
-
-    static let switchActiveTrack = Color(red: 245 / 255, green: 186 / 255, blue: 91 / 255) // #F5BA5B
-    static let rowDivider = Color(red: 182 / 255, green: 133 / 255, blue: 231 / 255).opacity(0.23)
-
-    static let timeButtonBorder = Color(red: 90 / 255, green: 70 / 255, blue: 119 / 255) // #5A4677
-    static let timeTextInactive = Color(red: 214 / 255, green: 201 / 255, blue: 235 / 255) // #D6C9EB
-    static let timeTextActive = Color(red: 36 / 255, green: 19 / 255, blue: 63 / 255) // #24133F
-
-    static let primaryActionGradient = LinearGradient(
-        colors: [
-            Color(red: 67 / 255, green: 32 / 255, blue: 120 / 255), // #432078
-            Color(red: 49 / 255, green: 22 / 255, blue: 94 / 255),  // #31165E
-            Color(red: 33 / 255, green: 16 / 255, blue: 67 / 255)   // #211043
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
-    static let dangerActionGradient = LinearGradient(
-        colors: [
-            Color(red: 93 / 255, green: 32 / 255, blue: 94 / 255), // #5D205E
-            Color(red: 64 / 255, green: 20 / 255, blue: 66 / 255), // #401442
-            Color(red: 40 / 255, green: 16 / 255, blue: 49 / 255)  // #281031
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
-    static let actionBorder = Color(red: 255 / 255, green: 213 / 255, blue: 115 / 255).opacity(0.64)
-    static let actionText = Color(red: 255 / 255, green: 224 / 255, blue: 138 / 255) // #FFE08A
-    static let primaryActionShadow = Color(red: 42 / 255, green: 10 / 255, blue: 87 / 255).opacity(0.82)
-    static let dangerActionShadow = Color(red: 75 / 255, green: 16 / 255, blue: 78 / 255).opacity(0.82)
-
-    static let inlineActionBackground = Color(red: 73 / 255, green: 38 / 255, blue: 119 / 255).opacity(0.68)
-    static let inlineActionBorder = Color(red: 255 / 255, green: 211 / 255, blue: 110 / 255).opacity(0.52)
-    static let inlineActionShadow = Color(red: 25 / 255, green: 6 / 255, blue: 50 / 255).opacity(0.76)
-
-    static let crownBackground = Color(red: 40 / 255, green: 32 / 255, blue: 87 / 255) // #282057
-    static let crownBorder = Color(red: 200 / 255, green: 140 / 255, blue: 241 / 255) // #C88CF1
-    static let crownSymbolColor = Color(red: 255 / 255, green: 211 / 255, blue: 110 / 255) // #FFD36E
-    static let cardTitleGold = Color(red: 255 / 255, green: 209 / 255, blue: 109 / 255) // #FFD16D
-
-    static let planBadgeInactiveBackground = Color(red: 39 / 255, green: 32 / 255, blue: 74 / 255) // #27204A
-    static let planBadgeInactiveBorder = Color(red: 102 / 255, green: 81 / 255, blue: 142 / 255) // #66518E
-    static let planBadgeInactiveText = Color(red: 199 / 255, green: 185 / 255, blue: 228 / 255) // #C7B9E4
-    static let planBadgeActiveBorder = Color(red: 255 / 255, green: 215 / 255, blue: 127 / 255) // #FFD77F
-    static let planBadgeActiveText = Color(red: 17 / 255, green: 15 / 255, blue: 32 / 255) // #110F20
-
-    static let paymentSectionLabel = Color(red: 198 / 255, green: 184 / 255, blue: 227 / 255) // #C6B8E3
-    static let paymentUnselectedBackground = Color(red: 37 / 255, green: 16 / 255, blue: 74 / 255) // #25104A
-    static let paymentSelectedBackground = Color(red: 60 / 255, green: 26 / 255, blue: 96 / 255) // #3C1A60
-    static let paymentUnselectedBorder = Color(red: 128 / 255, green: 77 / 255, blue: 183 / 255).opacity(0.62)
-    static let paymentSelectedBorder = Color(red: 255 / 255, green: 210 / 255, blue: 95 / 255) // #FFD25F
-    static let paymentUnselectedShadow = Color(red: 23 / 255, green: 5 / 255, blue: 47 / 255).opacity(0.78)
-    static let paymentSelectedShadow = Color(red: 42 / 255, green: 11 / 255, blue: 82 / 255).opacity(0.90)
-
-    static let paymentSelectedOverlay = LinearGradient(
-        colors: [
-            Color(red: 255 / 255, green: 226 / 255, blue: 154 / 255).opacity(0.14),
-            Color(red: 65 / 255, green: 34 / 255, blue: 99 / 255).opacity(0.12),
-            Color(red: 14 / 255, green: 7 / 255, blue: 39 / 255).opacity(0.34)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    static let paymentUnselectedOverlay = LinearGradient(
-        colors: [
-            Color(red: 237 / 255, green: 191 / 255, blue: 255 / 255).opacity(0.09),
-            Color(red: 13 / 255, green: 6 / 255, blue: 42 / 255).opacity(0.28)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    static let paymentUnselectedIcon = Color(red: 182 / 255, green: 175 / 255, blue: 201 / 255) // #B6AFC9
-    static let paymentTitleText = Color(red: 242 / 255, green: 234 / 255, blue: 251 / 255) // #F2EAFB
-    static let paymentDetailText = Color(red: 173 / 255, green: 162 / 255, blue: 197 / 255) // #ADA2C5
-    static let paymentSelectedText = Color(red: 245 / 255, green: 210 / 255, blue: 123 / 255) // #F5D27B
-    static let radioBorder = Color(red: 114 / 255, green: 88 / 255, blue: 155 / 255) // #72589B
-    static let radioInnerDot = Color(red: 77 / 255, green: 43 / 255, blue: 96 / 255) // #4D2B60
-
-    static let upgradeButtonGradient = LinearGradient(
-        colors: [
-            Color(red: 255 / 255, green: 232 / 255, blue: 170 / 255), // #FFE8AA
-            Color(red: 245 / 255, green: 189 / 255, blue: 85 / 255),  // #F5BD55
-            Color(red: 217 / 255, green: 139 / 255, blue: 46 / 255)   // #D98B2E
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    static let upgradeButtonBorder = Color(red: 255 / 255, green: 241 / 255, blue: 170 / 255) // #FFF1AA
-    static let upgradeButtonText = Color(red: 33 / 255, green: 20 / 255, blue: 67 / 255) // #211443
-    static let upgradeButtonShadow = Color(red: 228 / 255, green: 160 / 255, blue: 57 / 255).opacity(0.58)
-
-    static let warningText = Color(red: 252 / 255, green: 211 / 255, blue: 77 / 255) // #FCD34D
-    static let errorText = Color(red: 253 / 255, green: 164 / 255, blue: 175 / 255) // #FDA4AF
-    static let refreshText = Color(red: 198 / 255, green: 189 / 255, blue: 217 / 255) // #C6BDD9
 }
 
 #Preview("Tài khoản khách (Free)") {

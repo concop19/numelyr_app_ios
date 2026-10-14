@@ -142,7 +142,9 @@ struct AppFeature {
                     state.isAuthPresented = false
                     return .send(.chat(.ownerChanged("guest")))
                 }
-
+/*case didAuthenticate(AuthSession)
+ case didContinueAsGuest
+ case didDismiss*/
             case .auth(.delegate(.didDismiss)):
                 state.isAuthPresented = false
                 return .none
@@ -175,7 +177,7 @@ struct AppFeature {
                 state.gameHub = nil
                 return .none
 
-            case let .chat(.profilePicker(.presented(.delegate(.selected(profiles))))):
+            case let .chat(.destination(.presented(.profilePicker(.delegate(.selected(profiles)))))):
                 if let first = profiles.first {
                     userProfileClient.setActiveProfileID(first.id)
                     return synchronizeActiveProfile(first, in: &state)

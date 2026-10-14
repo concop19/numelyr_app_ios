@@ -504,7 +504,7 @@ public nonisolated enum SupabaseAuthService {
                     id: session.userId,
                     email: session.userEmail,
                     fullName: primaryFullName,
-                    updatedAt: ISO8601DateFormatter().string(from: Date())
+                    updatedAt: ISO8601DateFormatter.appFormatter().string(from: Date())
                 )
                 let accountData = try JSONEncoder().encode(accountRow)
                 _ = try await sendPostgRESTRequest(

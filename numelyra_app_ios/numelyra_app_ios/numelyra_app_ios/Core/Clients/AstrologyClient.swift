@@ -229,7 +229,7 @@ extension AstrologyClient {
             highlights.append(
                 String(
                     format: "%@ %@ %@ (%.0f°, orb %.1f°)",
-                    locale: Locale(identifier: "en_US_POSIX"),
+                    locale: .appPOSIX,
                     aspect.natalPlanet,
                     aspect.nameVi,
                     aspect.transitPlanet,

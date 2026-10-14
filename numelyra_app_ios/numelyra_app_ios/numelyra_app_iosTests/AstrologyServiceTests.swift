@@ -30,7 +30,7 @@ final class AstrologyServiceTests: XCTestCase {
     }
 
     func testVectorMatchesBaselineInvariants() throws {
-        let currentDate = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-04T12:00:00Z"))
+        let currentDate = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2026-10-04T12:00:00Z"))
         let first = try AstrologyEngine.generateVector(
             input: AstroBirthInput(birthDate: "1995-03-21"),
             currentDate: currentDate
@@ -72,7 +72,7 @@ final class AstrologyServiceTests: XCTestCase {
     func testCacheKeyPreservesReactNativeUTF16HashContract() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Asia/Ho_Chi_Minh"))
-        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-05T16:45:00Z"))
+        let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2026-10-05T16:45:00Z"))
         let profile = UserProfile(
             fullName: "  An Nguyễn  ",
             birthDate: "1998-10-20"
@@ -174,7 +174,7 @@ final class AstrologyServiceTests: XCTestCase {
         ]
 
         for fixture in fixtures {
-            let date = try XCTUnwrap(ISO8601DateFormatter().date(from: fixture.1), fixture.0)
+            let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: fixture.1), fixture.0)
             let angles = AstrologyEngine.calculateAngles(
                 date: date,
                 latitude: fixture.2,
@@ -193,7 +193,7 @@ final class AstrologyServiceTests: XCTestCase {
     func testAscendantFormulaMatchesAnalyticalGroundTruth() throws {
         // At J2000.0 (2000-01-01T12:00:00Z), GMST = 280.460618°
         // We set longitude = (RAMC - GMST) mod 360 so that sidereal == RAMC.
-        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2000-01-01T12:00:00Z"))
+        let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2000-01-01T12:00:00Z"))
         let gmst = 280.46061837
         let testCases: [(ramc: Double, lat: Double, expectedMC: Double, expectedASC: Double)] = [
             (0.0, 0.0, 0.0, 90.0),
@@ -240,7 +240,7 @@ final class AstrologyServiceTests: XCTestCase {
             birthTimeAccuracy: .exact,
             resolvedBirthLocation: location
         )
-        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-06T12:00:00Z"))
+        let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2026-10-06T12:00:00Z"))
         let result = try AstrologyEngine.generateVector(input: input, currentDate: date)
         XCTAssertEqual(result.vector.count, 32)
         XCTAssertEqual(result.metadata.natalContext?.houseCusps.count, 12)
@@ -294,7 +294,7 @@ final class AstrologyServiceTests: XCTestCase {
                 timeZone: "Asia/Ho_Chi_Minh"
             )
         )
-        let date = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-10-06T12:00:00Z"))
+        let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2026-10-06T12:00:00Z"))
         let metadata = try AstrologyEngine.generateVector(input: input, currentDate: date).metadata
         let request = AstrologyClient.makeRequest(
             metadata: metadata,
