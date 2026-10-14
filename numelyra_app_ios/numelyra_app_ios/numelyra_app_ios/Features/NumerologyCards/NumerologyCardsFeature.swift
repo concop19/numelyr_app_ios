@@ -34,11 +34,16 @@ struct NumerologyCardsFeature {
 
     @ObservableState
     struct State: Equatable {
+        /// Hồ sơ dùng để tính 24 chỉ số; nếu chưa được truyền vào, feature lấy hồ sơ active khi xuất hiện.
         var activeProfile: UserProfile?
+        /// Tab nhóm chỉ số đang được chọn để lọc danh sách thẻ.
         var selectedCategory: CategoryFilter
+        /// Kết quả tính đầy đủ 24 chỉ số cho hồ sơ hiện tại.
         var indicators: [CalculatedNumerologyIndicator]
+        /// Quy định giao diện có hiển thị nút đóng khi feature được mở dạng modal hay không.
         var showsCloseButton: Bool
 
+        /// State của sheet luận giải một chỉ số; có giá trị khi người dùng mở một thẻ.
         @Presents var detail: IndicatorDetailFeature.State?
 
         init(
@@ -53,6 +58,7 @@ struct NumerologyCardsFeature {
             self.showsCloseButton = showsCloseButton
         }
 
+        /// Danh sách chỉ số sau khi áp dụng tab nhóm đang chọn.
         var filteredIndicators: [CalculatedNumerologyIndicator] {
             switch selectedCategory {
             case .all:
@@ -62,6 +68,7 @@ struct NumerologyCardsFeature {
             }
         }
 
+        /// Họ tên an toàn để hiển thị, có fallback khi hồ sơ thiếu hoặc chỉ chứa khoảng trắng.
         var displayFullName: String {
             guard let name = activeProfile?.fullName.trimmingCharacters(in: .whitespacesAndNewlines),
                   !name.isEmpty
@@ -71,6 +78,7 @@ struct NumerologyCardsFeature {
             return name
         }
 
+        /// Ngày sinh an toàn để hiển thị, có fallback khi hồ sơ chưa cung cấp ngày sinh.
         var displayBirthDate: String {
             guard let date = activeProfile?.birthDate.trimmingCharacters(in: .whitespacesAndNewlines),
                   !date.isEmpty

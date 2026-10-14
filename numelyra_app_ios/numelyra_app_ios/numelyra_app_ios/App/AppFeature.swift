@@ -20,15 +20,25 @@ struct AppFeature {
 
     @ObservableState
     struct State: Equatable {
+        /// Giai đoạn khởi chạy hiện tại, quyết định app hiển thị loading, đăng nhập, onboarding hay giao diện chính.
         var launchFlow: LaunchFlow = .loading
+        /// Tab đang được chọn trong giao diện chính; Chat là tab mặc định.
         var selectedTab: Tab = .chat
+        /// Cho biết màn hình Auth đang được trình bày toàn màn hình từ Settings hay không.
         var isAuthPresented = false
+        /// State luôn tồn tại của tính năng Chat.
         var chat = ChatFeature.State()
+        /// State luôn tồn tại của tính năng Lịch.
         var calendar = CalendarFeature.State()
+        /// State luôn tồn tại của tính năng Chiêm tinh.
         var astrology = AstrologyFeature.State()
+        /// State luôn tồn tại của tính năng Hình nền.
         var wallpaper = WallpaperFeature.State()
+        /// State luôn tồn tại của tính năng Cài đặt và tài khoản.
         var settings = SettingsFeature.State()
+        /// State của form đăng nhập/đăng ký, dùng ở cả luồng khởi chạy và màn hình phủ toàn màn hình từ Settings.
         var auth = AuthFeature.State()
+        /// State của bước thu thập hồ sơ lần đầu sau khi đăng nhập hoặc tiếp tục dưới dạng khách.
         var onboarding = OnboardingFeature.State()
     }
 

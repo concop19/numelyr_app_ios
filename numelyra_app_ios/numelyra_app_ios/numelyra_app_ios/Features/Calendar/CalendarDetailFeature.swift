@@ -24,10 +24,15 @@ struct CalendarDetailFeature {
 
     @ObservableState
     struct State: Equatable {
+        /// Chế độ nội dung của sheet: thông tin cát hung hoặc điển tích/văn học.
         var mode: Mode
+        /// Snapshot Âm lịch/Hoàng lịch của ngày đang được trình bày chi tiết.
         var snapshot: LunarDaySnapshot
+        /// Câu ca dao của ngày; có thể được cập nhật sau khi sheet đã mở nếu tải chưa xong.
         var caDao: CaDaoRecord?
+        /// Metadata tranh minh họa gắn với ngày Âm lịch đang xem.
         var art: CalendarArtItem
+        /// Dữ liệu ảnh từ xa dùng trong sheet; `nil` để dùng asset fallback của `art`.
         var remoteImageData: Data?
     }
 

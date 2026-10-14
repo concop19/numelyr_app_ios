@@ -5,8 +5,11 @@ import Foundation
 struct CalendarDatePickerFeature {
     @ObservableState
     struct State: Equatable {
+        /// Ngày đang được chọn ở màn hình lịch chính, dùng để đánh dấu ô tương ứng trong lưới.
         var selectedDate: Date
+        /// Tháng đang được hiển thị và được thay đổi bởi nút tháng trước/tháng sau.
         var displayedMonth: Date
+        /// Danh sách ngày tạo lưới tháng 6 tuần, bao gồm các ngày đệm ở hai đầu khi cần.
         var days: [Date]
     }
 

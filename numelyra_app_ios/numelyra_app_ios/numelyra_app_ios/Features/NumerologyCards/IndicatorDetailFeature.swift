@@ -5,9 +5,13 @@ import Foundation
 struct IndicatorDetailFeature {
     @ObservableState
     struct State: Equatable {
+        /// Chỉ số đã tính mà sheet đang trình bày.
         var indicator: CalculatedNumerologyIndicator
+        /// Nội dung luận giải lấy từ kho kiến thức cho khóa và giá trị của chỉ số.
         var reading: KnowledgeReading?
+        /// Cho biết nội dung luận giải đang được nạp.
         var isLoading: Bool = false
+        /// Điều khiển việc hiển thị toàn bộ bài viết dài thay vì phần tóm tắt.
         var isFullArticleExpanded: Bool = false
 
         init(
@@ -22,6 +26,7 @@ struct IndicatorDetailFeature {
             self.isFullArticleExpanded = isFullArticleExpanded
         }
 
+        /// Cho biết bài viết đầy đủ đủ dài để giao diện hiển thị nút mở rộng/thu gọn.
         var canExpandFullArticle: Bool {
             guard let fullContent = reading?.fullContent else { return false }
             return fullContent.count > 300

@@ -13,42 +13,42 @@ struct AstrologyFeature {
             self.message = message
         }
     }
-    // day la du lieu hien thi le man hinh boi vi no dc luu tru trong local nen moi co id
-
     @ObservableState
     struct State: Equatable {
+        /// Ngày địa phương đang được dùng để lấy quẻ và chọn biểu tượng chòm sao hằng ngày.
         var currentDate: Date
+        /// Hồ sơ đang được dùng để cá nhân hóa phép tính và khóa cache; `nil` dùng ngữ cảnh khách.
         var profile: UserProfile?
+        /// Quẻ chiêm tinh của ngày hiện tại sau khi đọc cache hoặc tải từ dịch vụ.
         var fortune: AstroFortuneSlip?
-        // chinh là toàn bộ dư liệu
+        /// Cho biết request lấy quẻ đang chạy.
         var isLoading: Bool
-        // liệu có dag loading ko
-
+        /// Thông báo lỗi lấy quẻ cần hiển thị; được xóa khi bắt đầu thử lại hoặc tải thành công.
         var errorMessage: String?
-       // message loi
-
+        /// Mẫu biểu tượng được chọn ổn định từ ngày hiện tại và khóa hồ sơ.
         var symbol: ConstellationSymbolPreset
-    // đây biểu tượng gìg
+        /// Hình học đã dựng từ `symbol` để canvas vẽ các điểm sao và đường nối.
         var geometry: ConstellationGeometry?
-        // vẽ dữ liệu
+        /// Lỗi dựng hình học biểu tượng; dùng để chuyển UI sang trạng thái fallback.
         var geometryErrorMessage: String?
-        // có lỗi khi vẽ ko
+        /// Cho biết tab Chiêm tinh đang thực sự hiển thị trên màn hình.
         var isScreenVisible: Bool
-        // màn hình có. dc ko. có thẻ nhìn dc ko
+        /// Cho biết scene của ứng dụng đang active, dùng để tạm dừng video khi app vào nền.
         var isAppActive: Bool
-        // app
+        /// Giá trị Reduce Motion của hệ thống; khi bật, video nền bị vô hiệu hóa.
         var reduceMotion: Bool
-            // có bị reduce motion ko
+        /// Cho biết player đã có frame video sẵn sàng để thay ảnh nền fallback.
         var isVideoReady: Bool
-        // video sẵn sàng ch
+        /// Ghi nhận video đã phát lỗi để không tiếp tục thử hiển thị video trong phiên hiện tại.
         var hasVideoFailed: Bool
-        // video co loi ko
+        /// Ghi nhận feature đã chạy `onAppear` ít nhất một lần để tránh tải lại không cần thiết.
         var hasAppeared: Bool
-        // d xuat hien ch
+        /// Dirty flag yêu cầu tải lại quẻ khi hồ sơ đổi trong lúc màn hình không hiển thị.
         var needsRefresh: Bool
-        // co can refresh ko
+        /// Nội dung đang được đưa sang share sheet; `nil` nghĩa là share sheet đóng.
         var sharePayload: SharePayload?
 
+        /// State của sheet giải mã chi tiết; có giá trị khi sheet đang được trình bày.
         @Presents
         var insight: AstrologyInsightFeature.State?
 
@@ -100,38 +100,47 @@ struct AstrologyFeature {
             }
         }
 
+        /// Khóa ổn định đại diện cho hồ sơ, dùng cho cache và lựa chọn biểu tượng theo ngày.
         var profileKey: String {
             AstrologyCacheKey.profileKey(profile)
         }
 
+        /// Ngày hiện tại được định dạng `DD.MM` cho phần tiêu đề.
         var formattedShortDate: String {
             AstrologyFeature.formatShortDate(currentDate)
         }
 
+        /// Chuỗi tiêu đề ngày hoàn chỉnh hiển thị ở đầu màn hình.
         var dateHeaderText: String {
             "Hôm nay • \(formattedShortDate)"
         }
 
+        /// Nhãn viết hoa của biểu tượng chòm sao được chọn cho hôm nay.
         var symbolLabelText: String {
             "BIỂU TƯỢNG HÔM NAY · \(symbol.title.uppercased())"
         }
 
+        /// Tiêu đề quẻ đã chuẩn hóa, có fallback khi backend không trả tiêu đề hợp lệ.
         var fortuneTitleText: String {
             AstrologyInsightFeature.normalizedTitle(fortune?.title)
         }
 
+        /// Metadata chiêm tinh đính kèm quẻ, dùng để hiển thị dữ liệu cá nhân hóa trong sheet chi tiết.
         var metadata: AstroFeatureMetadata? {
             fortune?.astroMetadata
         }
 
+        /// Cho biết video nền có được gắn vào view hay phải bỏ hẳn vì Reduce Motion hoặc lỗi phát.
         var showVideoLayer: Bool {
             !reduceMotion && !hasVideoFailed
         }
 
+        /// Cho biết video nền nên phát ở thời điểm hiện tại dựa trên visibility và trạng thái app.
         var shouldPlayVideo: Bool {
             isScreenVisible && isAppActive && !reduceMotion && !hasVideoFailed
         }
 
+        /// Cho biết ảnh nền tĩnh phải hiển thị trong lúc video bị tắt hoặc chưa sẵn sàng.
         var shouldShowFallbackImage: Bool {
             !showVideoLayer || !isVideoReady
         }

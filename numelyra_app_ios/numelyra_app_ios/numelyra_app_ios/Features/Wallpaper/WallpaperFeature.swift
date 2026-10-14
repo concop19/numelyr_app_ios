@@ -18,20 +18,31 @@ struct WallpaperFeature {
 
     @ObservableState
     struct State: Equatable {
+        /// Bước hiện tại của luồng tạo hình nền: nhập mong muốn, đang tạo hoặc xem kết quả.
         var step: Step = .input
+        /// Mong muốn tùy chỉnh người dùng nhập để gửi trong yêu cầu tạo hình nền.
         var prompt = ""
+        /// Danh sách hình nền hiện có cho carousel, gồm preset ban đầu và ảnh AI mới tạo trong phiên.
         var history: [WallpaperItem]
+        /// Vị trí hình nền đang được chọn trong `history`.
         var selectedIndex = 0
+        /// Hồ sơ dùng để tính các chỉ số cá nhân hóa cho yêu cầu tạo hình nền.
         var profile: UserProfile?
+        /// Cho biết thao tác lưu ảnh vào Photos đang diễn ra, dùng để chặn yêu cầu lưu lặp.
         var isSaving = false
+        /// Nội dung toast tạm thời đang hiển thị; `nil` nghĩa là không có toast.
         var toastMessage: String?
 
+        /// State của màn hình xem toàn màn hình một hình nền.
         @Presents
         var detail: WallpaperDetailFeature.State?
+        /// State của menu điều hướng thư viện, tạo mới và bản đồ thần số học.
         @Presents
         var menu: WallpaperMenuFeature.State?
+        /// State của sheet nhập/chỉnh hồ sơ dùng riêng cho việc cá nhân hóa hình nền.
         @Presents
         var profilePicker: WallpaperProfileFeature.State?
+        /// State của màn hình Bản Đồ 24 Chỉ Số mở từ menu Hình nền.
         @Presents
         var numerologyCards: NumerologyCardsFeature.State?
 
@@ -43,6 +54,7 @@ struct WallpaperFeature {
             self.history = history
         }
 
+        /// Hình nền tương ứng với `selectedIndex`; fallback về phần tử đầu nếu chỉ số không còn hợp lệ.
         var activeItem: WallpaperItem? {
             guard history.indices.contains(selectedIndex) else { return history.first }
             return history[selectedIndex]
@@ -350,7 +362,9 @@ struct WallpaperFeature {
 struct WallpaperDetailFeature {
     @ObservableState
     struct State: Equatable {
+        /// Hình nền đang được xem toàn màn hình.
         var item: WallpaperItem
+        /// Cho biết hình nền này đang được lưu vào Photos để UI hiển thị tiến trình và khóa nút.
         var isSaving = false
     }
 
@@ -368,8 +382,11 @@ struct WallpaperDetailFeature {
 struct WallpaperMenuFeature {
     @ObservableState
     struct State: Equatable {
+        /// Chỉ số Đường đời của hồ sơ hiện tại, hiển thị trong phần tóm tắt thần số học.
         var lifePath: Int
+        /// Chỉ số Ngày cá nhân tại thời điểm mở menu.
         var personalDay: Int
+        /// Số hình nền hiện có trong thư viện phiên hiện tại, dùng trong mô tả nút Thư viện.
         var historyCount: Int
     }
 
@@ -405,11 +422,17 @@ struct WallpaperMenuFeature {
 struct WallpaperProfileFeature {
     @ObservableState
     struct State: Equatable {
+        /// Họ tên đang được chỉnh sửa để tạo hồ sơ cá nhân hóa hình nền.
         var fullName: String
+        /// Ngày sinh đang được chỉnh sửa theo định dạng lưu trữ `YYYY-MM-DD`.
         var birthDate: String
+        /// Giới tính đang được chọn cho hồ sơ.
         var gender: Gender
+        /// ID của hồ sơ ban đầu, được giữ lại khi cập nhật một hồ sơ thật.
         var originalID: String
+        /// Cho biết form được mở từ hồ sơ fallback; khi áp dụng sẽ tạo ID mới thay vì dùng `originalID`.
         var isUsingFallback: Bool
+        /// Thông báo validation cho họ tên hoặc định dạng ngày sinh.
         var validationMessage: String?
 
         init(profile: UserProfile, isUsingFallback: Bool) {

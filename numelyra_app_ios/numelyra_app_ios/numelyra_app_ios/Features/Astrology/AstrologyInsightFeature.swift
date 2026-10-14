@@ -5,7 +5,9 @@ import Foundation
 struct AstrologyInsightFeature {
     @ObservableState
     struct State: Equatable, Sendable {
+        /// Quẻ chiêm tinh đầy đủ được trình bày trong sheet giải mã.
         var fortune: AstroFortuneSlip
+        /// Metadata lá số dùng cho phần thông tin ngày sinh, khí chất và các góc chiếu.
         var metadata: AstroFeatureMetadata?
 
         init(fortune: AstroFortuneSlip, metadata: AstroFeatureMetadata? = nil) {
@@ -13,15 +15,18 @@ struct AstrologyInsightFeature {
             self.metadata = metadata ?? fortune.astroMetadata
         }
 
+        /// Tiêu đề sheet đã chuẩn hóa từ tiêu đề quẻ, có fallback khi dữ liệu trống.
         var sheetTitle: String {
             AstrologyInsightFeature.normalizedTitle(fortune.title)
         }
 
+        /// Câu mô tả dữ liệu ngày/giờ sinh đã dùng để tạo quẻ; `nil` khi không có metadata.
         var birthDescriptionText: String? {
             guard let metadata else { return nil }
             return AstrologyInsightFeature.birthDescription(for: metadata)
         }
 
+        /// Tên nhóm của câu ca dao neo đã loại bỏ khoảng trắng; `nil` khi không có tên hợp lệ.
         var anchorCategoryText: String? {
             guard let category = fortune.anchorCaDao.category?
                 .trimmingCharacters(in: .whitespacesAndNewlines),
@@ -32,6 +37,7 @@ struct AstrologyInsightFeature {
             return category
         }
 
+        /// Cho biết quẻ có nội dung ca dao neo không rỗng để quyết định hiển thị khối ca dao.
         var hasAnchorCaDao: Bool {
             !fortune.anchorCaDao.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }

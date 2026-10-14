@@ -9,19 +9,28 @@ struct AuthFeature {
         "Chưa có cấu hình Supabase cho mobile app. Bạn vẫn có thể dùng chế độ Khách."
 
     @ObservableState
-    struct State: Equatable { // state la equatable la de so sanh cac trang thai khac nahu
-        // bản chất dùng equâtle bởi khi dữ liệu state thy đổi thường ứng với việc thay đổi giao diện
-        // nếu 2 state ko thể so sánh với nhau dữ liệu se ko bao h render
+    struct State: Equatable {
+        /// Chọn chế độ của form: `true` để tạo tài khoản, `false` để đăng nhập.
         var isSignUp: Bool
+        /// Họ tên người dùng nhập khi tạo tài khoản; không được yêu cầu ở chế độ đăng nhập.
         var fullName: String
+        /// Địa chỉ email đang hiển thị trong ô nhập và được dùng để xác thực.
         var email: String
+        /// Mật khẩu đang hiển thị trong ô nhập và được gửi cho Supabase khi submit.
         var password: String
+        /// Điều khiển việc ô mật khẩu hiển thị ký tự rõ hay che nội dung.
         var isPasswordVisible: Bool
+        /// Cho biết request đăng nhập/đăng ký bằng email đang chạy.
         var isSubmitting: Bool
+        /// Cho biết luồng đăng nhập Google đang chạy.
         var isGoogleSubmitting: Bool
+        /// Phản ánh Supabase đã được cấu hình hay chưa; khi `false`, các hành động xác thực bị khóa.
         var isConfigured: Bool
+        /// Quy định màn hình hiện tại có cho phép người dùng tiếp tục bằng chế độ khách hay không.
         var allowGuest: Bool
+        /// Thông báo thành công hoặc hướng dẫn không phải lỗi, ví dụ yêu cầu xác nhận email.
         var message: String?
+        /// Thông báo lỗi validation hoặc lỗi trả về từ dịch vụ xác thực.
         var errorMessage: String?
 
         init(
@@ -50,32 +59,39 @@ struct AuthFeature {
             self.errorMessage = errorMessage
         }
 
+        /// Cho biết các nút xác thực phải bị vô hiệu hóa vì đang submit hoặc Supabase chưa sẵn sàng.
         var isActionDisabled: Bool {
             isSubmitting || isGoogleSubmitting || !isConfigured
         }
 
+        /// Nội dung mô tả thay đổi theo chế độ đăng nhập hoặc tạo tài khoản.
         var descriptionText: String {
             isSignUp
                 ? "Tạo tài khoản để đồng bộ hành trình của bạn."
                 : "Đăng nhập để lưu và đồng bộ hành trình của bạn."
         }
 
+        /// Tiêu đề nút submit tương ứng với chế độ hiện tại.
         var submitButtonTitle: String {
             isSignUp ? "TẠO TÀI KHOẢN" : "ĐĂNG NHẬP"
         }
 
+        /// Nhãn hành động dùng để hiện hoặc ẩn mật khẩu.
         var passwordToggleTitle: String {
             isPasswordVisible ? "ẨN" : "HIỆN"
         }
 
+        /// Phần văn bản thường trong lời nhắc chuyển đổi giữa đăng nhập và đăng ký.
         var modePromptPrefix: String {
             isSignUp ? "Đã có tài khoản? " : "Chưa có tài khoản? "
         }
 
+        /// Phần văn bản nhấn mạnh, có thể bấm để chuyển đổi giữa đăng nhập và đăng ký.
         var modePromptEmphasis: String {
             isSignUp ? "Đăng nhập" : "Tạo tài khoản"
         }
 
+        /// Cảnh báo cấu hình được hiển thị khi Supabase chưa sẵn sàng; `nil` khi đã cấu hình.
         var unconfiguredNotice: String? {
             isConfigured ? nil : AuthFeature.unconfiguredMessage
         }

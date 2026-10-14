@@ -4,16 +4,27 @@ import Foundation
 @Reducer
 struct ChatProfilePickerFeature {
     enum Mode: Equatable { case single, couple }
-    @ObservableState struct State: Equatable {
+    @ObservableState
+    struct State: Equatable {
+        /// Toàn bộ hồ sơ cục bộ có thể chọn hoặc xóa trong picker.
         var profiles: [UserProfile]
+        /// ID các hồ sơ đang chọn; tối đa một ID ở chế độ cá nhân và hai ID ở chế độ cặp đôi.
         var selectedIDs: [String]
+        /// Chế độ chọn một hồ sơ cá nhân hoặc hai hồ sơ để luận tương hợp.
         var mode: Mode
+        /// Điều khiển việc hiển thị form tạo hồ sơ mới ngay trong picker.
         var isAdding = false
+        /// Họ tên đang nhập cho hồ sơ mới.
         var newName = ""
+        /// Ngày sinh đang nhập cho hồ sơ mới theo định dạng lưu trữ `YYYY-MM-DD`.
         var newBirthDate = "2000-01-01"
+        /// Giờ sinh đang nhập cho hồ sơ mới theo định dạng `HH:mm`.
         var newBirthTime = "12:00"
+        /// Cho biết người dùng xác nhận có giờ sinh chính xác; nếu không, hồ sơ lưu giờ sinh là `nil`.
         var hasBirthTime = false
+        /// Giới tính đang chọn cho hồ sơ mới.
         var newGender = Gender.female
+        /// Lỗi tạo hồ sơ hoặc cảnh báo chưa chọn đủ hồ sơ để xác nhận.
         var errorMessage: String?
     }
     enum Action: Equatable {
@@ -70,9 +81,20 @@ struct ChatProfilePickerFeature {
 
 @Reducer
 struct ChatPlacePickerFeature {
-    @ObservableState struct State: Equatable {
-        var distance = 5.0; var budget = PlaceBudget.medium; var companion = PlaceCompanion.solo; var openNow = true
-        var isLocating = false; var errorMessage: String?
+    @ObservableState
+    struct State: Equatable {
+        /// Bán kính tìm kiếm tối đa tính bằng kilomet.
+        var distance = 5.0
+        /// Mức ngân sách dùng để lọc địa điểm phù hợp.
+        var budget = PlaceBudget.medium
+        /// Kiểu người đồng hành dùng để cá nhân hóa gợi ý địa điểm.
+        var companion = PlaceCompanion.solo
+        /// Quy định kết quả chỉ gồm các địa điểm đang mở cửa hay không.
+        var openNow = true
+        /// Cho biết feature đang xin/lấy vị trí hiện tại và tìm ngữ cảnh địa điểm.
+        var isLocating = false
+        /// Lỗi quyền vị trí hoặc lỗi định vị cần hiển thị trong picker.
+        var errorMessage: String?
     }
     enum Action: Equatable {
         case distanceChanged(Double), budgetChanged(PlaceBudget), companionChanged(PlaceCompanion), openNowToggled, useLocationTapped, cancelTapped
@@ -95,8 +117,22 @@ struct ChatPlacePickerFeature {
 @Reducer
 struct ChatReadingRitualFeature {
     enum Status: Equatable { case waiting, ready, revealed }
-    @ObservableState struct State: Equatable, Identifiable {
-        var id: String; var question: String; var cards: [DrawnTarotCard]; var revealedCount = 0; var status = Status.waiting; var replyText: String?
+    @ObservableState
+    struct State: Equatable, Identifiable {
+        /// ID của lượt trả lời đang thực hiện nghi thức, đồng thời liên kết với tin nhắn mascot tương ứng.
+        var id: String
+        /// Câu hỏi của người dùng được hiển thị trong nghi thức Tarot.
+        var question: String
+        /// Các lá Tarot đã rút cho kiểu trải bài của lượt hiện tại.
+        var cards: [DrawnTarotCard]
+        /// Số lá đã được người dùng lật, dùng để xác định lá kế tiếp và thời điểm hoàn tất nghi thức.
+        var revealedCount = 0
+        /// Giai đoạn nghi thức: chờ luận giải, luận giải đã sẵn sàng, hoặc đã lật đủ bài để hiển thị.
+        var status = Status.waiting
+        /// Nội dung luận giải trả về từ agent; có thể chưa có trong lúc người dùng đang lật bài.
+        var replyText: String?
+
+        /// Cho biết toàn bộ lá đã lật và luận giải đã được mở khóa để hiển thị/cho phép đóng.
         var canShowReading: Bool { revealedCount == cards.count && status == .revealed }
     }
     enum Action: Equatable { case revealNextTapped, closeTapped, delegate(Delegate); enum Delegate: Equatable { case revealedAll, close } }
@@ -116,7 +152,15 @@ struct ChatReadingRitualFeature {
 
 @Reducer
 struct ChatReadingDetailFeature {
-    @ObservableState struct State: Equatable, Identifiable { var message: ChatMessage; var question: String?; var id: String { message.id } }
+    @ObservableState
+    struct State: Equatable, Identifiable {
+        /// Tin nhắn trả lời của mascot đang được trình bày ở chế độ chi tiết.
+        var message: ChatMessage
+        /// Câu hỏi người dùng gần nhất đứng trước tin nhắn trả lời; `nil` nếu lịch sử không còn câu hỏi tương ứng.
+        var question: String?
+        /// Định danh ổn định của màn chi tiết, lấy trực tiếp từ ID tin nhắn.
+        var id: String { message.id }
+    }
     enum Action: Equatable { case closeTapped, mapTapped(String), delegate(Delegate); enum Delegate: Equatable { case close; case openMap(String) } }
     var body: some Reducer<State, Action> { Reduce { _, action in
         switch action { case .closeTapped: return .send(.delegate(.close)); case let .mapTapped(url): return .send(.delegate(.openMap(url))); case .delegate: return .none }
@@ -139,12 +183,38 @@ struct ChatFeature {
         case numerologyCards(NumerologyCardsFeature)
         case detail(ChatReadingDetailFeature)
     }
-    @ObservableState struct State: Equatable {
-        var ownerID = "guest"; var isHydrated = false; var messages: [ChatMessage] = []; var showAllHistory = false
-        var draft = ""; var selectedProfiles: [UserProfile] = []; var isLoading = false; var isListening = false
-        var errorMessage: String?; var pending: PendingTurn?; var mascotState = "idle"; var mascotCategory = "default"
+    @ObservableState
+    struct State: Equatable {
+        /// Chủ sở hữu lịch sử chat hiện tại: user ID của phiên đăng nhập hoặc `guest`.
+        var ownerID = "guest"
+        /// Cho biết hồ sơ và lịch sử của `ownerID` đã được nạp xong, cho phép gửi tin nhắn mới.
+        var isHydrated = false
+        /// Tối đa 100 tin nhắn gần nhất của chủ sở hữu hiện tại.
+        var messages: [ChatMessage] = []
+        /// Điều khiển việc hiển thị toàn bộ lịch sử thay vì chỉ lượt hội thoại gần nhất.
+        var showAllHistory = false
+        /// Nội dung đang soạn trong ô nhập chat.
+        var draft = ""
+        /// Hồ sơ dùng cho lượt chat: rỗng khi chưa chọn, một hồ sơ để luận cá nhân hoặc hai hồ sơ để luận tương hợp.
+        var selectedProfiles: [UserProfile] = []
+        /// Cho biết lượt chat hiện tại đang phân loại, tạo câu trả lời hoặc chờ hoàn tất nghi thức.
+        var isLoading = false
+        /// Cho biết dịch vụ nhận dạng giọng nói đang thu âm và phát transcript.
+        var isListening = false
+        /// Lỗi nhận dạng giọng nói hoặc lỗi nghiệp vụ cần hiển thị cho người dùng.
+        var errorMessage: String?
+        /// Ngữ cảnh trung gian của lượt đang xử lý, giữ quyết định agent và dữ liệu đã chuẩn bị cho request.
+        var pending: PendingTurn?
+        /// Khóa trạng thái animation của mascot, hiện dùng các giá trị `idle`, `thinking` và `answer`.
+        var mascotState = "idle"
+        /// Khóa biến thể hình ảnh mascot; hiện feature giữ giá trị `default` cho mọi lượt chat.
+        var mascotCategory = "default"
+        /// Token của lần hydrate đang chạy, dùng để bỏ qua response cũ sau khi owner hoặc lifecycle thay đổi.
         var hydrationID: UUID?
+        /// Presentation duy nhất đang mở trong Chat, như picker hồ sơ, vị trí, Tarot, thần số học hoặc chi tiết.
         @Presents var destination: Destination.State?
+
+        /// Danh sách tin nhắn View cần render theo chế độ lịch sử đầy đủ hoặc lượt gần nhất.
         var visibleMessages: [ChatMessage] { showAllHistory ? messages : Array(messages.suffix(messages.last?.sender == .mascot ? 2 : 1)) }
     }
     enum Action: Equatable {

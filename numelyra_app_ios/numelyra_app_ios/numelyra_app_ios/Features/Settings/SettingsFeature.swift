@@ -5,13 +5,20 @@ import Foundation
 struct SettingsFeature {
     @ObservableState
     struct State: Equatable {
+        /// Phiên xác thực hiện tại; `nil` nghĩa là người dùng đang dùng chế độ khách.
         var session: AuthSession?
+        /// Phản ánh Supabase đã được cấu hình để các thao tác tài khoản có thể hoạt động hay chưa.
         var isConfigured: Bool
+        /// Trạng thái bận dùng chung cho đồng bộ hồ sơ, đăng xuất và bắt đầu thanh toán.
         var isBusy: Bool
+        /// Nhà cung cấp thanh toán người dùng đang chọn cho thao tác nâng cấp Pro.
         var paymentMethod: BillingProvider
+        /// Trạng thái gói thuê bao gần nhất tải từ backend; `nil` khi chưa tải hoặc chưa đăng nhập.
         var billing: BillingStatus?
+        /// Thông báo lỗi gần nhất khi tải trạng thái gói hoặc bắt đầu checkout.
         var billingError: String?
 
+        /// Alert TCA đang được trình bày cho kết quả đồng bộ hoặc lỗi đăng xuất.
         @Presents var alert: AlertState<Action.Alert>?
 
         init(
@@ -32,22 +39,27 @@ struct SettingsFeature {
             self.alert = alert
         }
 
+        /// Cho biết có phiên đăng nhập để bật các thao tác tài khoản và billing.
         var isAuthenticated: Bool {
             session != nil
         }
 
+        /// Cho biết gói hiện tại là Pro dựa trên trạng thái billing đã tải.
         var isPro: Bool {
             billing?.plan == .pro
         }
 
+        /// Cho biết backend đang ghi nhận một checkout chưa hoàn tất.
         var isCheckoutPending: Bool {
             billing?.checkoutPending == true
         }
 
+        /// Tiêu đề tài khoản đã được định dạng từ phiên đăng nhập hiện tại.
         var accountTitle: String {
             SettingsEngine.accountTitle(session: session)
         }
 
+        /// Dòng mô tả trạng thái tài khoản, có xét cả đăng nhập và cấu hình Supabase.
         var accountHint: String {
             SettingsEngine.accountHint(
                 isAuthenticated: isAuthenticated,
@@ -55,22 +67,27 @@ struct SettingsFeature {
             )
         }
 
+        /// Nhãn hành động dành cho người dùng khách, phụ thuộc khả năng kết nối Supabase.
         var guestActionTitle: String {
             SettingsEngine.guestActionTitle(isConfigured: isConfigured)
         }
 
+        /// Tiêu đề khối giới thiệu Pro thay đổi theo gói hiện tại.
         var proHeadlineTitle: String {
             isPro ? "Bạn đang dùng Pro ✦" : "Mở khóa hành trình đầy đủ"
         }
 
+        /// Nhãn ngắn `PRO` hoặc `FREE` dùng trong badge của gói.
         var planBadgeTitle: String {
             isPro ? "PRO" : "FREE"
         }
 
+        /// Mô tả thời hạn và trạng thái thuê bao đã được định dạng để hiển thị.
         var proSubscriptionSummary: String {
             SettingsEngine.proSubscriptionSummary(billing: billing)
         }
 
+        /// Tiêu đề nút nâng cấp, phụ thuộc đăng nhập và phương thức thanh toán đang chọn.
         var upgradeButtonTitle: String {
             SettingsEngine.upgradeButtonTitle(
                 isAuthenticated: isAuthenticated,

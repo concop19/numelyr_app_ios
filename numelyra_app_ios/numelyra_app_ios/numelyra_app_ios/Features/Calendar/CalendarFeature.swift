@@ -5,18 +5,27 @@ import Foundation
 struct CalendarFeature {
     @ObservableState
     struct State: Equatable {
+        /// Ngày Dương lịch đang được chọn và làm đầu vào cho toàn bộ nội dung lịch.
         var selectedDate: Date
+        /// Hồ sơ đang hoạt động; ngày sinh của hồ sơ được dùng để cá nhân hóa snapshot lịch.
         var profile: UserProfile?
+        /// Kết quả Hoàng lịch/Âm lịch đã tính cho `selectedDate` và hồ sơ hiện tại.
         var snapshot: LunarDaySnapshot?
+        /// Câu ca dao được chọn theo ngày, tải bất đồng bộ từ cơ sở dữ liệu cục bộ.
         var caDao: CaDaoRecord?
+        /// Metadata tranh minh họa được chọn theo ngày Âm lịch hiện tại.
         var art: CalendarArtItem?
+        /// Dữ liệu ảnh tranh tải từ xa hoặc lấy từ cache; `nil` để View dùng ảnh fallback đi kèm app.
         var remoteArtData: Data?
+        /// Cho biết thao tác đọc ca dao cho ngày hiện tại đang diễn ra.
         var isLoadingCaDao = false
+        /// Dirty flag yêu cầu tính lại snapshot khi hồ sơ đổi trước lần xuất hiện kế tiếp của màn hình.
         var needsRefresh = false
 
+        /// State của sheet chọn ngày; có giá trị khi bộ chọn ngày đang được trình bày.
         @Presents
         var datePicker: CalendarDatePickerFeature.State?
-        // the hien nhieu man hinh trong. man hinh
+        /// State của sheet chi tiết Hoàng lịch hoặc văn hóa; có giá trị khi sheet đang được trình bày.
         @Presents
         var detail: CalendarDetailFeature.State?
 

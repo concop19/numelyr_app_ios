@@ -5,12 +5,19 @@ import Foundation
 struct BirthPlacePickerFeature {
     @ObservableState
     struct State: Equatable {
+        /// Chuỗi địa danh người dùng đang nhập để tìm kiếm.
         var query = ""
+        /// Tối đa năm gợi ý địa điểm gần nhất trả về cho `query` hiện tại.
         var suggestions: [BirthPlaceSuggestion] = []
+        /// Cho biết request autocomplete đang chạy sau khoảng debounce.
         var isSearching = false
+        /// Cho biết feature đang phân giải một gợi ý thành tọa độ và múi giờ đầy đủ.
         var isResolving = false
+        /// Lỗi tìm kiếm hoặc phân giải địa điểm cần hiển thị cho người dùng.
         var errorMessage: String?
+        /// Session tìm kiếm dùng để nhóm autocomplete và resolve cùng một phiên dịch vụ địa điểm.
         var session: BirthPlaceSearchSession?
+        /// Truy vấn gần nhất bị lỗi, được giữ lại để nút thử lại gửi đúng nội dung cũ.
         var lastFailedQuery: String?
     }
 
