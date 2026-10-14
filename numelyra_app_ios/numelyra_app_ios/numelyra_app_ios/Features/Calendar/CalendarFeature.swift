@@ -54,6 +54,7 @@ struct CalendarFeature {
     private nonisolated enum CancelID: Hashable, Sendable {
         case caDao
         case artImage
+        case prefetch
     }
 
     var body: some Reducer<State, Action> {
@@ -165,8 +166,13 @@ struct CalendarFeature {
         state.snapshot = snapshot
         state.art = art
         state.caDao = nil
-        state.remoteArtData = nil
         state.isLoadingCaDao = true
+
+        if let url = art.imageURL, let cached = calendarArtClient.cachedImage(url) {
+            state.remoteArtData = cached
+        } else {
+            state.remoteArtData = nil
+        }
 
         let caDaoEffect: Effect<Action> = .run { send in
             await send(.contentLoaded(date: date, caDao: caDaoClient.dailyCaDao(date)))
@@ -174,7 +180,9 @@ struct CalendarFeature {
         .cancellable(id: CancelID.caDao, cancelInFlight: true)
 
         let artEffect: Effect<Action>
-        if let url = art.imageURL {
+        if state.remoteArtData != nil {
+            artEffect = .none
+        } else if let url = art.imageURL {
             artEffect = .run { send in
                 let data = try? await calendarArtClient.loadImage(url)
                 await send(.artImageLoaded(artID: art.id, data))
@@ -184,7 +192,17 @@ struct CalendarFeature {
             artEffect = .none
         }
 
-        return .merge(caDaoEffect, artEffect)
+        let prefetchEffect: Effect<Action>
+        if art.imageURL != nil {
+            prefetchEffect = .run { [date] _ in
+                await calendarArtClient.prefetch(date)
+            }
+            .cancellable(id: CancelID.prefetch, cancelInFlight: true)
+        } else {
+            prefetchEffect = .none
+        }
+
+        return .merge(caDaoEffect, artEffect, prefetchEffect)
     }
 
     private func detailState(from state: State, mode: CalendarDetailFeature.Mode) -> CalendarDetailFeature.State? {

@@ -131,6 +131,67 @@ final class CalendarFeatureTests: XCTestCase {
         }
     }
 
+    func testOnAppearUsesCachedImageImmediatelyWhenAvailable() async {
+        let date = makeDate(2026, 2, 17)
+        let snapshot = LunarService.makeDaySnapshot(for: date, birthDateString: nil, currentHour: 9)
+        var art = CalendarArtEngine.item(for: snapshot.lunarDate)
+        let cachedData = Data("cached-art-data".utf8)
+        let testURL = URL(string: "https://assets.numelyra.online/spring/test.jpeg")!
+        art.imageURL = testURL
+
+        let caDao = CaDaoRecord(id: 1, title: "", content: "Lời ru", category: "Ca dao", url: "")
+
+        let store = TestStore(initialState: CalendarFeature.State(selectedDate: date)) {
+            CalendarFeature()
+        } withDependencies: {
+            $0.lunarClient.daySnapshot = { _, _, _ in snapshot }
+            $0.caDaoClient.dailyCaDao = { _ in caDao }
+            $0.calendarArtClient.item = { _ in art }
+            $0.calendarArtClient.cachedImage = { url in
+                url == testURL ? cachedData : nil
+            }
+            $0.calendarArtClient.prefetch = { _ in }
+            $0.hapticClient = .testValue
+        }
+
+        await store.send(.onAppear) {
+            $0.snapshot = snapshot
+            $0.art = art
+            $0.remoteArtData = cachedData
+            $0.isLoadingCaDao = true
+        }
+
+        await store.receive(\.contentLoaded) {
+            $0.caDao = caDao
+            $0.isLoadingCaDao = false
+        }
+    }
+
+    func testCalendarArtCacheRollingWindowActiveKeysAndPurge() {
+        let tempDir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("CalendarArtCacheTests-\(UUID().uuidString)")
+        let cache = CalendarArtCache(directoryURL: tempDir)
+        defer { cache.removeAll(); try? FileManager.default.removeItem(at: tempDir) }
+
+        let centerDate = makeDate(2026, 2, 17)
+        let activeKeys = cache.activeImageKeys(around: centerDate)
+
+        // Cửa sổ ±2 ngày quanh 17/02/2026: tối đa 5 ngày
+        XCTAssertLessThanOrEqual(activeKeys.count, 5)
+        XCTAssertGreaterThanOrEqual(activeKeys.count, 1)
+
+        // Lưu 1 file hợp lệ trong activeKeys và 1 file rác ngoài cửa sổ
+        let validURL = URL(string: "https://assets.numelyra.online/spring/\(activeKeys.first!)")!
+        let staleURL = URL(string: "https://assets.numelyra.online/spring/stale_image_outside_window.jpeg")!
+
+        cache.store(data: Data("valid".utf8), for: validURL, referenceDate: centerDate)
+        cache.store(data: Data("stale".utf8), for: staleURL, referenceDate: centerDate)
+
+        // Sau purge quanh centerDate, file hợp lệ còn tồn tại, file rác bị xoá
+        XCTAssertNotNil(cache.data(for: validURL))
+        XCTAssertNil(cache.data(for: staleURL))
+    }
+
     private func offlineArt(for lunarDate: LunarDate) -> CalendarArtItem {
         var item = CalendarArtEngine.item(for: lunarDate)
         item.imageURL = nil

@@ -5,6 +5,7 @@ import UIKit
 
 struct AstrologyView: View {
     @Bindable var store: StoreOf<AstrologyFeature>
+    // binadble để gửi dc giá trị $store để nó có thể gọi trực tiếp dismis để tắt bật cái th này
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 

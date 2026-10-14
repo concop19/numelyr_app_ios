@@ -337,7 +337,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Numelyra chuyển lời nói tiếng Việt của bạn thành nội dung câu hỏi.";
-				INFOPLIST_KEY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE";
+				INFOPLIST_KEY_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE;
 				INFOPLIST_KEY_SUPABASE_URL = "https://irtppxiappokjazczdai.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -374,7 +374,7 @@
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Numelyra chuyển lời nói tiếng Việt của bạn thành nội dung câu hỏi.";
-				INFOPLIST_KEY_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE";
+				INFOPLIST_KEY_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlydHBweGlhcHBva2phemN6ZGFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODczNTk2MjYsImV4cCI6MjEwMjkzNTYyNn0.NF2n5Dpd9ldG9rko09gpPmGotaaikC_waQqUNPB8BzE;
 				INFOPLIST_KEY_SUPABASE_URL = "https://irtppxiappokjazczdai.supabase.co";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

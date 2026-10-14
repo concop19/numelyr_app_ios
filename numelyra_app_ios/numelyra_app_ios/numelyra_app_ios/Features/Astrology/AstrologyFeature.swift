@@ -13,27 +13,44 @@ struct AstrologyFeature {
             self.message = message
         }
     }
+    // day la du lieu hien thi le man hinh boi vi no dc luu tru trong local nen moi co id
 
     @ObservableState
     struct State: Equatable {
         var currentDate: Date
         var profile: UserProfile?
         var fortune: AstroFortuneSlip?
+        // chinh là toàn bộ dư liệu
         var isLoading: Bool
+        // liệu có dag loading ko
+
         var errorMessage: String?
+       // message loi
+
         var symbol: ConstellationSymbolPreset
+    // đây biểu tượng gìg
         var geometry: ConstellationGeometry?
+        // vẽ dữ liệu
         var geometryErrorMessage: String?
+        // có lỗi khi vẽ ko
         var isScreenVisible: Bool
+        // màn hình có. dc ko. có thẻ nhìn dc ko
         var isAppActive: Bool
+        // app
         var reduceMotion: Bool
+            // có bị reduce motion ko
         var isVideoReady: Bool
+        // video sẵn sàng ch
         var hasVideoFailed: Bool
+        // video co loi ko
         var hasAppeared: Bool
+        // d xuat hien ch
         var needsRefresh: Bool
+        // co can refresh ko
         var sharePayload: SharePayload?
 
-        @Presents var insight: AstrologyInsightFeature.State?
+        @Presents
+        var insight: AstrologyInsightFeature.State?
 
         init(
             currentDate: Date = Date(),
