@@ -20,9 +20,9 @@ struct ChatView: View {
                 composer
             }
         }
-        .toolbar(isComposerFocused ? .hidden : .visible, for: .tabBar)
         .preferredColorScheme(.dark)
         .task { store.send(.onAppear) }
+        .onDisappear { isComposerFocused = false }
         .sheet(item: $store.scope(state: \.$destination, action: \.destination).profilePicker) { ChatProfilePickerView(store: $0) }
         .sheet(item: $store.scope(state: \.$destination, action: \.destination).placePicker) { ChatPlacePickerView(store: $0).presentationDetents([.large]) }
         .fullScreenCover(item: $store.scope(state: \.$destination, action: \.destination).ritual) { ChatReadingRitualView(store: $0) }
@@ -57,7 +57,12 @@ struct ChatView: View {
                         if message.sender == .user {
                             HStack { Spacer(minLength: 55); Text(message.text).font(AppTheme.Typography.body).foregroundStyle(.white).padding(.horizontal, 15).padding(.vertical, 11).background(LinearGradient(colors: [Color(hex: 0x4B2475), Color(hex: 0x7C42A6)], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: 18)) }
                         } else {
-                            AssistantPreview(message: message) { store.send(.messageTypingFinished(message.id)) } onOpen: { store.send(.messageTapped(message.id)) }
+                            AssistantPreview(message: message) {
+                                store.send(.messageTypingFinished(message.id))
+                            } onOpen: {
+                                isComposerFocused = false
+                                store.send(.messageTapped(message.id))
+                            }
                         }
                     }
                     Color.clear.frame(height: 218).id("bottom")
@@ -79,7 +84,7 @@ struct ChatView: View {
                         Text("Hi, I’m Numelyra").font(.title2.bold()).foregroundStyle(.white)
                         Text("Ask me anything\nor share how you feel.").multilineTextAlignment(.center).foregroundStyle(AppTheme.Colors.textSecondary)
                         Spacer()
-                        Button { store.send(.mascotTapped) } label: { FlameMascotView(state: store.isListening ? "thinking" : "idle", size: 175, reduceMotion: reduceMotion) }.buttonStyle(.plain).accessibilityLabel("Mở 24 lá bài Thần số học")
+                        Button { openNumerologyCards() } label: { FlameMascotView(state: store.isListening ? "thinking" : "idle", size: 175, reduceMotion: reduceMotion) }.buttonStyle(.plain).accessibilityLabel("Mở 24 lá bài Thần số học")
                     }
                 } else if store.isLoading {
                     VStack { Spacer(); FlameMascotView(state: "thinking", size: 175, reduceMotion: reduceMotion).accessibilityLabel("Tiểu Linh Miêu đang suy nghĩ") }
@@ -88,7 +93,7 @@ struct ChatView: View {
                 } else if !store.messages.isEmpty {
                     VStack {
                         Spacer()
-                        Button { store.send(.mascotTapped) } label: {
+                        Button { openNumerologyCards() } label: {
                             FlameMascotView(state: store.mascotState, size: 175, reduceMotion: reduceMotion)
                         }
                         .buttonStyle(.plain)
@@ -122,6 +127,11 @@ struct ChatView: View {
     private func sendDraft() {
         isComposerFocused = false
         store.send(.sendTapped)
+    }
+
+    private func openNumerologyCards() {
+        isComposerFocused = false
+        store.send(.mascotTapped)
     }
 }
 
