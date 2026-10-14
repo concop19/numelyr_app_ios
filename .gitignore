@@ -71,3 +71,8 @@ numelyra_app/
 # Environment variables
 .env
 .env*.local
+
+# Local agent instructions, migration notes and maintenance scripts
+AGENTS.md
+migration/
+scripts/
