@@ -90,6 +90,47 @@ final class CalendarFeatureTests: XCTestCase {
         XCTAssertEqual(spring, repeated)
     }
 
+    func testProfileUpdatedMarksNeedsRefreshAndReloadsOnAppear() async {
+        let date = makeDate(2026, 2, 17)
+        let oldProfile = UserProfile(id: "1", fullName: "Minh Anh", birthDate: "1998-10-20")
+        let newProfile = UserProfile(id: "2", fullName: "Bảo Ngọc", birthDate: "2000-01-15")
+        let snapshot1 = LunarService.makeDaySnapshot(for: date, birthDateString: "1998-10-20", currentHour: 9)
+        let snapshot2 = LunarService.makeDaySnapshot(for: date, birthDateString: "2000-01-15", currentHour: 9)
+        let art = offlineArt(for: snapshot1.lunarDate)
+        let caDao = CaDaoRecord(id: 1, title: "", content: "Lời ru", category: "Ca dao", url: "")
+
+        var state = CalendarFeature.State(selectedDate: date, profile: oldProfile)
+        state.snapshot = snapshot1
+        state.art = art
+
+        let store = TestStore(initialState: state) {
+            CalendarFeature()
+        } withDependencies: {
+            $0.lunarClient.daySnapshot = { _, birthDate, _ in
+                birthDate == "2000-01-15" ? snapshot2 : snapshot1
+            }
+            $0.caDaoClient.dailyCaDao = { _ in caDao }
+            $0.calendarArtClient.item = { _ in art }
+            $0.calendarArtClient.loadImage = { _ in throw CalendarArtClientError.invalidResponse }
+            $0.hapticClient = .testValue
+        }
+
+        await store.send(.profileUpdated(newProfile)) {
+            $0.profile = newProfile
+            $0.needsRefresh = true
+        }
+
+        await store.send(.onAppear) {
+            $0.needsRefresh = false
+            $0.snapshot = snapshot2
+            $0.isLoadingCaDao = true
+        }
+        await store.receive(\.contentLoaded) {
+            $0.caDao = caDao
+            $0.isLoadingCaDao = false
+        }
+    }
+
     private func offlineArt(for lunarDate: LunarDate) -> CalendarArtItem {
         var item = CalendarArtEngine.item(for: lunarDate)
         item.imageURL = nil

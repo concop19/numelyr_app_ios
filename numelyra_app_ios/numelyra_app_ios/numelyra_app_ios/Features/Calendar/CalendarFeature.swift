@@ -12,6 +12,7 @@ struct CalendarFeature {
         var art: CalendarArtItem?
         var remoteArtData: Data?
         var isLoadingCaDao = false
+        var needsRefresh = false
 
         @Presents
         var datePicker: CalendarDatePickerFeature.State?
@@ -19,14 +20,16 @@ struct CalendarFeature {
         @Presents
         var detail: CalendarDetailFeature.State?
 
-        init(selectedDate: Date = Date(), profile: UserProfile? = nil) {
+        init(selectedDate: Date = Date(), profile: UserProfile? = nil, needsRefresh: Bool = false) {
             self.selectedDate = selectedDate
             self.profile = profile
+            self.needsRefresh = needsRefresh
         }
     }
 
     enum Action: Equatable {
         case onAppear
+        case profileUpdated(UserProfile?)
         case previousDayTapped
         case nextDayTapped
         case todayTapped
@@ -57,8 +60,25 @@ struct CalendarFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-                guard state.snapshot == nil else { return .none }
+                guard state.snapshot == nil || state.needsRefresh else { return .none }
+                state.needsRefresh = false
                 return refresh(&state, date: state.selectedDate)
+
+            case let .profileUpdated(newProfile):
+                let oldBirthDate = state.profile?.birthDate
+                let newBirthDate = newProfile?.birthDate
+                let oldID = state.profile?.id
+                let newID = newProfile?.id
+                state.profile = newProfile
+
+                guard oldID != newID || oldBirthDate != newBirthDate else {
+                    return .none
+                }
+
+                if state.snapshot != nil {
+                    state.needsRefresh = true
+                }
+                return .none
 
             case .previousDayTapped:
                 let date = lunarClient.moveDate(state.selectedDate, -1, .day)

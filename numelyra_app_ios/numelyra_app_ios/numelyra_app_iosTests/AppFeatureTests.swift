@@ -25,12 +25,15 @@ final class AppFeatureTests: XCTestCase {
         await store.send(.onAppear)
         await store.receive(\.launchLoaded) {
             $0.launchFlow = .main
-            $0.calendar.profile = self.sampleProfile
             $0.wallpaper.profile = self.sampleProfile
             $0.chat.selectedProfiles = [self.sampleProfile]
         }
         await store.receive(\.astrology.profileUpdated) {
             $0.astrology.profile = self.sampleProfile
+            $0.astrology.needsRefresh = true
+        }
+        await store.receive(\.calendar.profileUpdated) {
+            $0.calendar.profile = self.sampleProfile
         }
     }
 
@@ -76,12 +79,15 @@ final class AppFeatureTests: XCTestCase {
         await store.send(.onboarding(.delegate(.didComplete(sampleProfile)))) {
             $0.launchFlow = .main
             $0.selectedTab = .chat
-            $0.calendar.profile = self.sampleProfile
             $0.wallpaper.profile = self.sampleProfile
             $0.chat.selectedProfiles = [self.sampleProfile]
         }
         await store.receive(\.astrology.profileUpdated) {
             $0.astrology.profile = self.sampleProfile
+            $0.astrology.needsRefresh = true
+        }
+        await store.receive(\.calendar.profileUpdated) {
+            $0.calendar.profile = self.sampleProfile
         }
         await store.receive(\.chat.onAppear)
     }
@@ -117,13 +123,16 @@ final class AppFeatureTests: XCTestCase {
         await store.send(
             .chat(.destination(.presented(.profilePicker(.delegate(.selected([sampleProfile]))))))
         ) {
-            $0.calendar.profile = self.sampleProfile
             $0.wallpaper.profile = self.sampleProfile
             $0.chat.selectedProfiles = [self.sampleProfile]
             $0.chat.destination = nil
         }
         await store.receive(\.astrology.profileUpdated) {
             $0.astrology.profile = self.sampleProfile
+            $0.astrology.needsRefresh = true
+        }
+        await store.receive(\.calendar.profileUpdated) {
+            $0.calendar.profile = self.sampleProfile
         }
     }
 

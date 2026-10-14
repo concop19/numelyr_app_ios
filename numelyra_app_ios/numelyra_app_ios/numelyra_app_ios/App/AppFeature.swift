@@ -217,15 +217,19 @@ struct AppFeature {
             OnboardingFeature()
         }
     }
+    // scope dùng khi state con luôn tồn tại
+    // ifself là option có thể tồn tại hoặc ko
 
     private func synchronizeActiveProfile(_ profile: UserProfile?, in state: inout State) -> Effect<Action> {
-        state.calendar.profile = profile
         state.wallpaper.profile = profile
-       
-    
+
         if let profile {
             state.chat.selectedProfiles = [profile]
         }
-        return .send(.astrology(.profileUpdated(profile)))
+
+        return .merge(
+            .send(.astrology(.profileUpdated(profile))),
+            .send(.calendar(.profileUpdated(profile)))
+        )
     }
 }

@@ -30,6 +30,7 @@ struct AstrologyFeature {
         var isVideoReady: Bool
         var hasVideoFailed: Bool
         var hasAppeared: Bool
+        var needsRefresh: Bool
         var sharePayload: SharePayload?
 
         @Presents var insight: AstrologyInsightFeature.State?
@@ -46,6 +47,7 @@ struct AstrologyFeature {
             isVideoReady: Bool = false,
             hasVideoFailed: Bool = false,
             hasAppeared: Bool = false,
+            needsRefresh: Bool = false,
             sharePayload: SharePayload? = nil,
             insight: AstrologyInsightFeature.State? = nil,
             calendar: Calendar = .current
@@ -61,6 +63,7 @@ struct AstrologyFeature {
             self.isVideoReady = isVideoReady
             self.hasVideoFailed = hasVideoFailed
             self.hasAppeared = hasAppeared
+            self.needsRefresh = needsRefresh
             self.sharePayload = sharePayload
             self.insight = insight
 
@@ -161,8 +164,9 @@ struct AstrologyFeature {
                 let isNewDay = AstrologyCacheKey.localDateKey(currentNow, calendar: calendar)
                     != AstrologyCacheKey.localDateKey(state.currentDate, calendar: calendar)
 
-                let shouldReload = !state.hasAppeared || isNewDay || (state.fortune == nil && !state.isLoading && state.errorMessage == nil)
+                let shouldReload = !state.hasAppeared || state.needsRefresh || isNewDay || (state.fortune == nil && !state.isLoading && state.errorMessage == nil)
                 state.hasAppeared = true
+                state.needsRefresh = false
 
                 if isNewDay {
                     state.currentDate = currentNow
@@ -234,9 +238,13 @@ struct AstrologyFeature {
                 guard oldFingerprint != newFingerprint || oldKey != newKey else {
                     return .none
                 }
-                refreshConstellation(&state)
-                guard state.hasAppeared else { return .none }
-                return fetchFortune(&state, allowCache: true, clearExisting: true)
+                if state.isScreenVisible {
+                    refreshConstellation(&state)
+                    return fetchFortune(&state, allowCache: true, clearExisting: true)
+                } else {
+                    state.needsRefresh = true
+                    return .none
+                }
 
             case .retryTapped:
                 return .merge(

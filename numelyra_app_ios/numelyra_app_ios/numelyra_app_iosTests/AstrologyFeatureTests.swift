@@ -446,4 +446,31 @@ final class AstrologyFeatureTests: XCTestCase {
         XCTAssertEqual(AstrologyInsightFeature.scorePercent(1.4), 100)
         XCTAssertEqual(AstrologyInsightFeature.scorePercent(-0.2), 0)
     }
+
+    func testProfileUpdatedWhenScreenNotVisibleSetsNeedsRefreshWithoutFetching() async throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Asia/Ho_Chi_Minh"))
+        let fixedDate = try XCTUnwrap(
+            calendar.date(from: DateComponents(year: 2026, month: 10, day: 7, hour: 14, minute: 30))
+        )
+        let profileA = UserProfile(id: "profile-1", fullName: "Nguyễn Văn An", birthDate: "1998-10-20")
+        let profileB = UserProfile(id: "profile-2", fullName: "Trần Thị Bình", birthDate: "1999-05-15")
+
+        let store = TestStore(
+            initialState: AstrologyFeature.State(
+                currentDate: fixedDate,
+                profile: profileA,
+                isScreenVisible: false,
+                hasAppeared: true,
+                calendar: calendar
+            )
+        ) {
+            AstrologyFeature()
+        }
+
+        await store.send(.profileUpdated(profileB)) {
+            $0.profile = profileB
+            $0.needsRefresh = true
+        }
+    }
 }
