@@ -322,7 +322,8 @@ struct ChatFeature {
                 switch result {
                 case let .success(value): output = value
                 case .failure:
-                    let local = ChatSynthesisEngine.make(prompt: pending.prompt, decision: pending.decision, profiles: state.selectedProfiles, indicators: pending.indicators1, cards: pending.cards, color: pending.color, ziWeiCompatibility: pending.ziWeiCompatibility)
+                    let compactIndicators = ChatNumerologyContextService.enrich(pending.indicators1)
+                    let local = ChatSynthesisEngine.make(prompt: pending.prompt, decision: pending.decision, profiles: state.selectedProfiles, indicators: compactIndicators, cards: pending.cards, color: pending.color, ziWeiCompatibility: pending.ziWeiCompatibility)
                     output = ChatAnswer(text: local.0, card: .agentSynthesis(local.1))
                 }
                 state.messages.append(.init(id: pending.id, sender: .mascot, text: output.text, time: time(now), card: output.card, isTypingCompleted: false))
@@ -433,7 +434,9 @@ struct ChatFeature {
         if pending.decision.intent == .colorGuidance, let card = pending.cards.first { pending.color = try? ColorGuidanceEngine.create(birthDate: p1.birthDate, card: card) }
         state.pending = pending
         if !pending.cards.isEmpty { state.destination = .ritual(.init(id: pending.id, question: pending.prompt, cards: pending.cards)) }
-        let request = ChatAgentRequest(message: pending.prompt, decision: pending.decision, timeZone: TimeZone.current.identifier, profiles: state.selectedProfiles, indicators: .init(profile1: pending.indicators1, profile2: pending.indicators2), tarotCards: pending.cards, colorGuidance: pending.color, tuViBazi: nil, ziWeiCompatibility: pending.ziWeiCompatibility, placeContext: pending.place)
+        let chatIndicators1 = ChatNumerologyContextService.enrich(pending.indicators1)
+        let chatIndicators2 = pending.indicators2.map(ChatNumerologyContextService.enrich)
+        let request = ChatAgentRequest(message: pending.prompt, decision: pending.decision, timeZone: TimeZone.current.identifier, profiles: state.selectedProfiles, indicators: .init(profile1: chatIndicators1, profile2: chatIndicators2), tarotCards: pending.cards, colorGuidance: pending.color, tuViBazi: nil, ziWeiCompatibility: pending.ziWeiCompatibility, placeContext: pending.place)
         return .run { send in
             do { let value = try await chatClient.answer(request); await send(.response(.success(ChatAnswer(text: value.0, card: value.1)))) }
             catch is CancellationError { }

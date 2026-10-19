@@ -424,7 +424,7 @@ API response phải có `success = true` cùng `fortune` hợp lệ: `title?`, `
 - Màn chính: ngày hiện tại, tên biểu tượng chòm sao, tiêu đề quẻ, thơ, nút chia sẻ và nút mở giải mã.
 - **Gương soi tâm trí (`mirror`)**: phần tự nhìn lại cảm xúc, phản ứng hoặc hoàn cảnh bên trong; nối lời quẻ với xu hướng chiêm tinh trong ngày. Đây là diễn giải gợi suy ngẫm, không phải một sự kiện chắc chắn sẽ xảy ra.
 - **Kế sách bỏ túi (`advice`)**: gợi ý hành động thực tế cho ngày đó. Nên cụ thể và làm được, ví dụ “rà lại một rủi ro trước khi chốt việc”, thay vì chỉ nhắc chung chung “hãy cố gắng”.
-- **Sheet “GIẢI MÃ CHIÊM TINH”**: sheet trượt lên khi nhấn `Xem giải mã`. Đây là phần giải thích đi kèm cùng lá thăm, không phải một lá thăm khác. Sheet luôn có hai thẻ văn bản trên; khi có metadata, nó bổ sung ngày/giờ sinh đã dùng, Mặt Trời và Mặt Trăng bản mệnh, khí chất nổi trội, Mặt Trăng quá cảnh, góc chiếu hàng đầu (hành tinh transit · tên góc · hành tinh natal, góc thực tế và sai số), ba thanh `Hài hòa`/`Thử thách`/`Hội tụ`, rồi ca dao neo quẻ.
+- **Sheet “GIẢI MÃ CHIÊM TINH”**: sheet trượt lên khi nhấn `Xem giải mã`. Đây là phần giải thích đi kèm cùng lá thăm, không phải một lá thăm khác. Sheet luôn có hai thẻ văn bản trên; khi có metadata, nó bổ sung ngày/giờ sinh đã dùng, Mặt Trời và Mặt Trăng bản mệnh, khí chất nổi trội, Mặt Trăng quá cảnh, góc chiếu hàng đầu (hành tinh transit · tên góc · hành tinh natal, góc thực tế và sai số), ba thanh `Hài hòa`/`Thử thách`/`Hội tụ`, request JSON xem trước ở chế độ cục bộ, rồi ca dao neo quẻ.
 
 **Ví dụ minh họa một kết quả:**
 
@@ -513,6 +513,6 @@ Catalog có 489 rule components:
 
 Rule dùng các payload template và `contentLibrary` tiếng Việt có thể tái sử dụng, thay vì lưu một đoạn văn lặp cho từng tổ hợp. Mỗi component ghi `epistemicTier`, tradition, `sourceRefs`, `contentRefs`, `templateBindings`, trạng thái biên tập và cờ `requiresNatalContext`. Ngưỡng cân bằng là giả định kỹ thuật `INFR`, không phải ngưỡng được coi là đồng thuận của một trường phái.
 
-`AstrologyRuleCatalog` giải mã, tải catalog từ bundle và kiểm tra phiên bản, tương thích engine, số lượng/độ phủ tổ hợp, ID trùng, điều kiện, template, content và nguồn tham chiếu. Đây mới là data catalog và validator; chưa có evaluator khớp rule, chưa nối API fortune, và cờ natal context là metadata để evaluator tương lai tuân thủ.
+`AstrologyRuleCatalog` giải mã, tải catalog từ bundle và kiểm tra phiên bản, tương thích engine, số lượng/độ phủ tổ hợp, ID trùng, điều kiện, template, content và nguồn tham chiếu. `AstrologyRuleEvaluator` đã được nối với chart facts do engine tính và lưu kết quả cục bộ trong metadata; UI dựng JSON preview riêng, không thêm `ruleContext` vào body `AstroFortuneRequest` hiện tại. House rules chỉ kích hoạt khi natal precision là `.complete`.
 
 Nguồn được lưu ở mức thư mục/ấn bản và đường dẫn kiểm tra. Trạng thái bibliographic verification không xác nhận từng nội dung theo trang; các đoạn văn đều là bản diễn đạt mới và cần biên tập/đối chiếu trước khi phát hành.
