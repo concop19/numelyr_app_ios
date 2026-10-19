@@ -39,6 +39,10 @@ struct AstrologyInsightSheetView: View {
                             transitSection(metadata: metadata)
                         }
 
+                        if let requestJSON = store.requestPreviewJSON {
+                            requestPreviewSection(json: requestJSON)
+                        }
+
                         if store.hasAnchorCaDao {
                             anchorCaDaoSection
                         }
@@ -144,6 +148,40 @@ struct AstrologyInsightSheetView: View {
                     AppTheme.Colors.Astrology.insightCardBorder.opacity(0.22),
                     lineWidth: 1
                 )
+        )
+    }
+
+    private func requestPreviewSection(json: String) -> some View {
+        DisclosureGroup {
+            ScrollView(.horizontal, showsIndicators: true) {
+                Text(json)
+                    .font(.system(size: 10, weight: .regular, design: .monospaced))
+                    .foregroundStyle(AppTheme.Colors.Astrology.insightBody)
+                    .textSelection(.enabled)
+                    .fixedSize(horizontal: true, vertical: true)
+                    .padding(12)
+            }
+            .frame(maxHeight: 280)
+            .background(Color.black.opacity(0.24), in: RoundedRectangle(cornerRadius: 12))
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Request data mới · xem trước")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(AppTheme.Colors.Astrology.sectionTitle)
+                Text("JSON cục bộ; không gửi API")
+                    .font(.system(size: 11))
+                    .foregroundStyle(AppTheme.Colors.Astrology.insightBody.opacity(0.78))
+            }
+        }
+        .tint(AppTheme.Colors.Astrology.accent)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(AppTheme.Colors.Astrology.insightCardBackground.opacity(0.58))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(AppTheme.Colors.Astrology.insightCardBorder.opacity(0.22), lineWidth: 1)
         )
     }
 

@@ -304,9 +304,19 @@ final class AstrologyServiceTests: XCTestCase {
         )
         let json = try XCTUnwrap(String(data: JSONEncoder().encode(request), encoding: .utf8))
         XCTAssertTrue(json.contains("ascendantSign"))
+        XCTAssertFalse(json.contains("ruleContext"), "Rule preview must stay out of the existing API request body")
         for forbidden in ["private-place-id", "placeID", "latitude", "longitude", "timeZone"] {
             XCTAssertFalse(json.contains(forbidden), forbidden)
         }
+
+        let preview = AstrologyClient.makeRequestPreview(
+            metadata: metadata,
+            anchor: .init(content: "Ca dao")
+        )
+        let previewJSON = try XCTUnwrap(String(data: preview.jsonData(), encoding: .utf8))
+        XCTAssertTrue(previewJSON.contains("ruleContext"))
+        XCTAssertTrue(previewJSON.contains("catalogId"))
+        XCTAssertLessThanOrEqual(preview.ruleContext?.topics.count ?? 0, 3)
     }
 
     func testBirthPlacePickerDebouncesCancelsAndResolvesSelection() async {

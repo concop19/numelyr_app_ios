@@ -41,6 +41,17 @@ struct AstrologyInsightFeature {
         var hasAnchorCaDao: Bool {
             !fortune.anchorCaDao.content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         }
+
+        /// JSON envelope for inspecting the API payload and local rule context; encoding does not send a request.
+        var requestPreviewJSON: String? {
+            guard let metadata else { return nil }
+            let preview = AstrologyClient.makeRequestPreview(
+                metadata: metadata,
+                anchor: fortune.anchorCaDao
+            )
+            guard let data = try? preview.jsonData() else { return nil }
+            return String(data: data, encoding: .utf8)
+        }
     }
 
     enum Action: Equatable, Sendable {

@@ -441,6 +441,38 @@ public nonisolated struct AstroFortuneRequest: Codable, Equatable, Sendable {
     public var userContext: String?
 }
 
+/// Local inspection envelope for the next rule-aware request. This wrapper is intentionally
+/// separate from `AstroFortuneRequest`, so rule context cannot leak into the current API body.
+public nonisolated struct AstrologyRuleRequestContext: Codable, Equatable, Sendable {
+    public var catalogId: String
+    public var schemaVersion: Int
+    public var topics: [AstrologyRuleTopic]
+    public var matchedRuleIds: [String]
+
+    public init(catalogId: String, schemaVersion: Int, topics: [AstrologyRuleTopic], matchedRuleIds: [String]) {
+        self.catalogId = catalogId
+        self.schemaVersion = schemaVersion
+        self.topics = Array(topics.prefix(3))
+        self.matchedRuleIds = Array(Set(matchedRuleIds)).sorted()
+    }
+}
+
+public nonisolated struct AstrologyRuleRequestPreview: Codable, Equatable, Sendable {
+    public var apiPayload: AstroFortuneRequest
+    public var ruleContext: AstrologyRuleRequestContext?
+
+    public init(apiPayload: AstroFortuneRequest, ruleContext: AstrologyRuleRequestContext?) {
+        self.apiPayload = apiPayload
+        self.ruleContext = ruleContext
+    }
+
+    public func jsonData() throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        return try encoder.encode(self)
+    }
+}
+
 /// Dữ liệu nội dung lá thăm chiêm tinh dân gian nhận về từ backend.
 public nonisolated struct AstroFortuneResponsePayload: Codable, Equatable, Sendable {
     /// Tiêu đề của lá thăm (tùy chọn do AI sinh).

@@ -30,7 +30,7 @@ extension AstrologyClient: DependencyKey {
             guard var cached = await cache.load(date: query.date, profile: query.profile) else {
                 return nil
             }
-            if cached.astroMetadata == nil {
+            if cached.astroMetadata?.ruleEvaluation == nil {
                 var resolvedLocation: ResolvedBirthLocation?
                 if query.profile?.effectiveBirthTimeAccuracy == .exact,
                    let placeID = query.profile?.birthLocation?.placeID
@@ -277,6 +277,31 @@ extension AstrologyClient {
             ),
             recentAdvice: recentAdvice.isEmpty ? nil : Array(recentAdvice.prefix(7)),
             userContext: userContext
+        )
+    }
+
+    /// Builds inspectable local JSON for the rule-aware request without invoking URLSession.
+    nonisolated static func makeRequestPreview(
+        metadata: AstroFeatureMetadata,
+        anchor: AnchorCaDao,
+        recentAdvice: [String] = [],
+        userContext: String? = nil
+    ) -> AstrologyRuleRequestPreview {
+        AstrologyRuleRequestPreview(
+            apiPayload: makeRequest(
+                metadata: metadata,
+                anchor: anchor,
+                recentAdvice: recentAdvice,
+                userContext: userContext
+            ),
+            ruleContext: metadata.ruleEvaluation.map { evaluation in
+                AstrologyRuleRequestContext(
+                    catalogId: evaluation.catalogId,
+                    schemaVersion: evaluation.schemaVersion,
+                    topics: evaluation.topTopics,
+                    matchedRuleIds: evaluation.topTopics.flatMap(\.matchedRuleIds)
+                )
+            }
         )
     }
 

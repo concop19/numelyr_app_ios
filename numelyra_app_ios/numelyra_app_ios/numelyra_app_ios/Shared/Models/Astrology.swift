@@ -554,6 +554,8 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
     public var birthDataPrecision: AstroBirthDataPrecision?
     public var natalContext: AstroNatalContext?
     public var dailyContext: AstroDailyContext?
+    /// Local-only output of the v1 rule evaluator; never serialized into the legacy fortune API request.
+    public var ruleEvaluation: AstrologyRuleEvaluation?
 
     public init(
         birthDate: String,
@@ -572,7 +574,8 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
         vibeSummary: String = "",
         birthDataPrecision: AstroBirthDataPrecision? = nil,
         natalContext: AstroNatalContext? = nil,
-        dailyContext: AstroDailyContext? = nil
+        dailyContext: AstroDailyContext? = nil,
+        ruleEvaluation: AstrologyRuleEvaluation? = nil
     ) {
         self.birthDate = birthDate
         self.birthTime = birthTime
@@ -591,6 +594,7 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
         self.birthDataPrecision = birthDataPrecision
         self.natalContext = natalContext
         self.dailyContext = dailyContext
+        self.ruleEvaluation = ruleEvaluation
     }
 }
 

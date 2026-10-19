@@ -3,6 +3,10 @@ import Foundation
 
 nonisolated enum AstrologyEngine {
     static let engineVersion = "astrology-v3-porphyry-1"
+    private static let ruleEvaluator: AstrologyRuleEvaluator? = {
+        guard let catalog = try? AstrologyRuleCatalog.bundled() else { return nil }
+        return try? AstrologyRuleEvaluator(catalog: catalog)
+    }()
 //thong bao phien ban
     enum EngineError: LocalizedError, Equatable {
         case invalidBirthDate(String)
@@ -644,6 +648,26 @@ nonisolated enum AstrologyEngine {
             harmony: aspectAnalysis.harmonyScore,
             conjunction: aspectAnalysis.conjunctionIntensity
         )
+        let ruleEvaluation: AstrologyRuleEvaluation? = {
+            guard let evaluator = ruleEvaluator else { return nil }
+            let ruleFacts = AstrologyRuleFacts(
+                temperament: [
+                    "temperament.fire": temperament.fire,
+                    "temperament.earth": temperament.earth,
+                    "temperament.air": temperament.air,
+                    "temperament.water": temperament.water,
+                    "temperament.cardinal": temperament.cardinal,
+                    "temperament.fixed": temperament.fixed,
+                    "temperament.mutable": temperament.mutable,
+                ],
+                natalSigns: natalChart.planets.mapValues(\.sign),
+                natalHouses: natalSnapshot.context?.planetHouses ?? [:],
+                transitHouses: dailyContext?.transitHouses ?? [:],
+                aspects: aspectAnalysis.aspects,
+                hasReliableNatalContext: natalSnapshot.context?.precision == .complete
+            )
+            return evaluator.evaluate(ruleFacts)
+        }()
         let summaries: [AstroDominantSignal: String] = [
             .tension: "Các góc ma sát đang trội hơn, phù hợp với việc rà soát rủi ro và giữ lời nói rõ ràng.",
             .harmony: "Các góc hỗ trợ đang trội hơn, thuận lợi để chủ động kết nối và triển khai việc quan trọng.",
@@ -678,7 +702,8 @@ nonisolated enum AstrologyEngine {
             birthDataPrecision: natalSnapshot.context?.precision
                 ?? (natalChart.isTimeEstimated ? .dateOnly : .timeWithoutLocation),
             natalContext: natalSnapshot.context,
-            dailyContext: dailyContext
+            dailyContext: dailyContext,
+            ruleEvaluation: ruleEvaluation
         )
         return AstroVectorResult(vector: vector, metadata: metadata)
     }
