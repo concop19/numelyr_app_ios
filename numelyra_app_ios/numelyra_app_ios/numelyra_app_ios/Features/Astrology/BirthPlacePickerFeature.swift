@@ -23,6 +23,7 @@ struct BirthPlacePickerFeature {
 
     enum Action: Equatable {
         case onAppear
+        case onDisappear
         case sessionCreated(BirthPlaceSearchSession)
         case queryChanged(String)
         case searchSucceeded([BirthPlaceSuggestion])
@@ -43,7 +44,7 @@ struct BirthPlacePickerFeature {
     @Dependency(\.birthLocationClient) var birthLocationClient
     @Dependency(\.continuousClock) var clock
 
-    private nonisolated enum CancelID: Hashable, Sendable { case search }
+    private nonisolated enum CancelID: Hashable, Sendable { case search, resolve }
 
     var body: some Reducer<State, Action> {
         Reduce { state, action in
@@ -53,6 +54,11 @@ struct BirthPlacePickerFeature {
                 return .run { send in
                     await send(.sessionCreated(birthLocationClient.makeSession()))
                 }
+
+            case .onDisappear:
+                state.isSearching = false
+                state.isResolving = false
+                return .merge(.cancel(id: CancelID.search), .cancel(id: CancelID.resolve))
 
             case let .sessionCreated(session):
                 state.session = session
@@ -99,6 +105,7 @@ struct BirthPlacePickerFeature {
                         await send(.resolveFailed(error.localizedDescription))
                     }
                 }
+                .cancellable(id: CancelID.resolve, cancelInFlight: true)
 
             case let .resolveSucceeded(location):
                 state.isResolving = false
@@ -138,7 +145,7 @@ struct BirthPlacePickerFeature {
     ) -> Effect<Action> {
         .run { send in
             do {
-                try await clock.sleep(for: .milliseconds(300))
+                try await clock.sleep(for: .milliseconds(500))
                 let suggestions = try await birthLocationClient.suggestions(query, session)
                 await send(.searchSucceeded(Array(suggestions.prefix(5))))
             } catch is CancellationError {

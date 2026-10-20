@@ -28,9 +28,22 @@
 		B300001130748B7A000D25BD /* numelyra_app_iosTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = numelyra_app_iosTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C300000130748B7A000D25BD /* Exceptions for "numelyra_app_ios" folder in "numelyra_app_ios" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 03C792D730748B7A000D25BD /* numelyra_app_ios */;
+		};
+	/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		03C792DA30748B7A000D25BD /* numelyra_app_ios */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C300000130748B7A000D25BD /* Exceptions for "numelyra_app_ios" folder in "numelyra_app_ios" target */,
+			);
 			path = numelyra_app_ios;
 			sourceTree = "<group>";
 		};
@@ -333,6 +346,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = numelyra_app_ios/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Numelyra dùng vị trí hiện tại để gợi ý địa điểm phù hợp ở gần bạn.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";
@@ -370,6 +384,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = numelyra_app_ios/Info.plist;
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Numelyra dùng vị trí hiện tại để gợi ý địa điểm phù hợp ở gần bạn.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Numelyra dùng micro để nhập câu hỏi bằng giọng nói.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Cho phép NUMELYRA lưu hình nền vào thư viện ảnh của bạn.";

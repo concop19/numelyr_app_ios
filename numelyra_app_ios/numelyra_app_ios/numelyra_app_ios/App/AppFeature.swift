@@ -179,6 +179,9 @@ struct AppFeature {
                 userProfileClient.setActiveProfileID(profile.id)
                 return synchronizeActiveProfile(profile, in: &state)
 
+            case let .astrology(.delegate(.profileChanged(profile))):
+                return synchronizeActiveProfile(profile, in: &state)
+
             case .chat, .calendar, .astrology, .wallpaper, .settings, .auth, .onboarding:
                 return .none
             }

@@ -56,6 +56,7 @@ final class AppFeatureTests: XCTestCase {
     func testAuthContinueAsGuestWithoutProfileTransitionsToOnboarding() async {
         var state = AppFeature.State()
         state.launchFlow = .auth
+        state.chat.ownerID = "new-account"
         let store = TestStore(initialState: state) {
             AppFeature()
         } withDependencies: {
@@ -67,6 +68,66 @@ final class AppFeatureTests: XCTestCase {
             $0.launchFlow = .onboarding
         }
         await store.receive(\.chat.ownerChanged)
+    }
+
+    func testAuthenticatedLaunchWithoutProfileTransitionsToOnboarding() async {
+        var state = AppFeature.State()
+        state.launchFlow = .auth
+        let session = AuthSession(
+            accessToken: "access-fixture",
+            refreshToken: "refresh-fixture",
+            userId: "new-account",
+            userEmail: "new@example.com"
+        )
+        let store = TestStore(initialState: state) {
+            AppFeature()
+        } withDependencies: {
+            $0.userProfileClient.hasProfile = { false }
+            $0.userProfileClient.activeProfile = { nil }
+        }
+
+        await store.send(.auth(.delegate(.didAuthenticate(session)))) {
+            $0.settings.session = session
+            $0.launchFlow = .onboarding
+        }
+        await store.receive(.chat(.ownerChanged(session.userId)))
+    }
+
+    func testSettingsAuthenticationDismissesAuthAndKeepsExistingProfileInMain() async {
+        var state = AppFeature.State(launchFlow: .main)
+        state.isAuthPresented = true
+        state.auth.allowGuest = false
+        state.chat.ownerID = "settings-user"
+        let session = AuthSession(
+            accessToken: "access-fixture",
+            refreshToken: "refresh-fixture",
+            userId: "settings-user",
+            userEmail: "settings@example.com"
+        )
+        let store = TestStore(initialState: state) {
+            AppFeature()
+        } withDependencies: {
+            $0.userProfileClient.hasProfile = { true }
+            $0.userProfileClient.activeProfile = { self.sampleProfile }
+            $0.userProfileClient.setActiveProfileID = { _ in }
+        }
+
+        await store.send(.auth(.delegate(.didAuthenticate(session)))) {
+            $0.settings.session = session
+            $0.isAuthPresented = false
+            $0.wallpaper.profile = self.sampleProfile
+            $0.chat.selectedProfiles = [self.sampleProfile]
+        }
+        await store.receive(\.astrology.profileUpdated) {
+            $0.astrology.profile = self.sampleProfile
+            $0.astrology.needsRefresh = true
+        }
+        await store.receive(\.calendar.profileUpdated) {
+            $0.calendar.profile = self.sampleProfile
+        }
+        await store.receive(.chat(.ownerChanged(session.userId)))
+        XCTAssertEqual(store.state.launchFlow, .main)
+        XCTAssertEqual(store.state.isAuthPresented, false)
     }
 
     func testOnboardingCompleteTransitionsToMainAndSyncsProfile() async {
@@ -110,6 +171,26 @@ final class AppFeatureTests: XCTestCase {
             $0.wallpaper.profile = self.sampleProfile
             $0.chat.selectedProfiles = [self.sampleProfile]
             $0.chat.destination = nil
+        }
+        await store.receive(\.astrology.profileUpdated) {
+            $0.astrology.profile = self.sampleProfile
+            $0.astrology.needsRefresh = true
+        }
+        await store.receive(\.calendar.profileUpdated) {
+            $0.calendar.profile = self.sampleProfile
+        }
+    }
+
+    func testAstrologyProfileChangeSynchronizesAppShell() async {
+        var state = AppFeature.State()
+        state.launchFlow = .main
+        let store = TestStore(initialState: state) {
+            AppFeature()
+        }
+
+        await store.send(.astrology(.delegate(.profileChanged(sampleProfile)))) {
+            $0.wallpaper.profile = self.sampleProfile
+            $0.chat.selectedProfiles = [self.sampleProfile]
         }
         await store.receive(\.astrology.profileUpdated) {
             $0.astrology.profile = self.sampleProfile

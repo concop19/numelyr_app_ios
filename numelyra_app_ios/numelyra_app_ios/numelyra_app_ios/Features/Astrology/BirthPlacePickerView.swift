@@ -62,6 +62,7 @@ struct BirthPlacePickerView: View {
             }
             .padding()
             .task { store.send(.onAppear) }
+            .onDisappear { store.send(.onDisappear) }
     }
 }
 

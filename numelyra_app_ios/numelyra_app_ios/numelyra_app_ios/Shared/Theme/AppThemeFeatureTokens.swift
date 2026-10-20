@@ -6,38 +6,35 @@ import SwiftUI
 
 extension AppTheme.Colors {
     enum Auth {
-        static let safeAreaBackground = Color(hex: 0x0E092B)
-        static let heroGlow = AppTheme.Colors.primary.opacity(0.24)
-        static let starOneColor = Color(hex: 0xF8B7FF)
-        static let starTwoColor = Color(hex: 0xFFE29A)
-        static let starThreeColor = Color(hex: 0xFFD779)
-        static let cardBorder = AppTheme.Colors.cardBorder
-        static let cardShadow = Color(hex: 0x1A063A, opacity: 0.88)
-        static let eyebrow = Color(hex: 0xFFD16D)
-        static let brand = AppTheme.Colors.textPrimary
-        static let brandGlow = AppTheme.Colors.primary.opacity(0.32)
-        static let tagline = AppTheme.Colors.accentPink
-        static let description = AppTheme.Colors.textSecondary
-        static let googleBorder = Color(hex: 0xFFD573, opacity: 0.55)
+        static let safeAreaBackground = Color(hex: 0xFFF4EC)
+        static let cardBackground = Color(hex: 0xFFFDFB)
+        static let cardBorder = Color.clear
+        static let cardShadow = Color(hex: 0xC65A35, opacity: 0.16)
+        static let eyebrow = Color(hex: 0xA54A3A)
+        static let brand = Color(hex: 0xF04435)
+        static let tagline = Color(hex: 0xCE633C)
+        static let description = Color(hex: 0x8E5E58)
+        static let googleBackground = Color.white
+        static let googleBorder = Color(hex: 0xE8D2CA)
         static let googleBadgeRed = Color(hex: 0xEA4335)
-        static let googleButtonText = Color(hex: 0xFCF5FF)
-        static let googleShadow = Color(hex: 0x2A0A57, opacity: 0.82)
-        static let dividerLine = AppTheme.Colors.divider
-        static let dividerText = Color(hex: 0xB8A8D8)
-        static let inputBackground = AppTheme.Colors.inputBackground
-        static let inputBorder = AppTheme.Colors.inputBorder
-        static let inputText = AppTheme.Colors.textPrimary
-        static let placeholder = AppTheme.Colors.inputPlaceholder
-        static let cursorTint = AppTheme.Colors.primary
-        static let showPasswordText = AppTheme.Colors.primaryBright
-        static let submitBorder = Color(hex: 0xFFF1AA, opacity: 0.80)
-        static let submitText = AppTheme.Colors.textOnPrimary
-        static let submitShadow = Color(hex: 0xE4A039, opacity: 0.48)
-        static let modeEmphasis = AppTheme.Colors.primaryBright
-        static let guestText = Color(hex: 0xC6BDD9)
-        static let warningText = AppTheme.Colors.warning
-        static let errorText = AppTheme.Colors.errorSoft
-        static let successText = AppTheme.Colors.success
+        static let googleButtonText = Color(hex: 0x3C4043)
+        static let googleShadow = Color(hex: 0xC65A35, opacity: 0.10)
+        static let dividerLine = Color(hex: 0xF1CFC7)
+        static let dividerText = Color(hex: 0xB68179)
+        static let inputBackground = Color(hex: 0xFFF9F5)
+        static let inputBorder = Color(hex: 0xF1CFC7)
+        static let inputText = Color(hex: 0x5B302B)
+        static let placeholder = Color(hex: 0xB68179)
+        static let cursorTint = Color(hex: 0xF04435)
+        static let showPasswordText = Color(hex: 0xD45B3B)
+        static let submitBackground = Color(hex: 0xF04A38)
+        static let submitText = Color(hex: 0xFFF9F5)
+        static let submitShadow = Color.clear
+        static let modeEmphasis = Color(hex: 0xEC4938)
+        static let guestText = Color(hex: 0xA54A3A)
+        static let warningText = Color(hex: 0xA33126)
+        static let errorText = Color(hex: 0xA33126)
+        static let successText = Color(hex: 0x3D7A50)
     }
 
     enum Calendar {
@@ -225,13 +222,6 @@ extension AppTheme.Colors {
 }
 
 extension AppTheme.Gradients {
-    enum Auth {
-        static let cardGradient = AppTheme.Gradients.cardElevated
-        static let cardOverlay = AppTheme.Gradients.cardOverlay
-        static let googleButtonGradient = AppTheme.Gradients.secondaryAction
-        static let submitGradient = AppTheme.Gradients.goldAction
-    }
-
     enum Calendar {
         static let goldGradient = AppTheme.Gradients.goldAction
         static let circleGradient = LinearGradient(

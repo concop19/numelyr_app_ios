@@ -234,6 +234,106 @@ final class AuthFeatureTests: XCTestCase {
         XCTAssertEqual(lightImpactCount.value, 1)
     }
 
+    func testGuestIsBlockedWhenCallerDisablesGuestMode() async {
+        let store = TestStore(initialState: AuthFeature.State(allowGuest: false)) {
+            AuthFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+        }
+
+        await store.send(.continueAsGuestTapped)
+        XCTAssertEqual(store.state.allowGuest, false)
+    }
+
+    func testGoogleCancellationIsSilentAtEntryAndDismissesSettingsPresentation() async {
+        let entryStore = TestStore(initialState: AuthFeature.State(isConfigured: true, allowGuest: true)) {
+            AuthFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+            $0.supabaseClient.signInWithGoogle = { throw AuthError.cancelled }
+        }
+
+        await entryStore.send(.googleSignInTapped) {
+            $0.isGoogleSubmitting = true
+        }
+        await entryStore.receive(.googleSignInResponse(.failure(.cancelled))) {
+            $0.isGoogleSubmitting = false
+        }
+        XCTAssertNil(entryStore.state.errorMessage)
+
+        let settingsStore = TestStore(initialState: AuthFeature.State(isConfigured: true, allowGuest: false)) {
+            AuthFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+            $0.supabaseClient.signInWithGoogle = { throw AuthError.cancelled }
+        }
+
+        await settingsStore.send(.googleSignInTapped) {
+            $0.isGoogleSubmitting = true
+        }
+        await settingsStore.receive(.googleSignInResponse(.failure(.cancelled))) {
+            $0.isGoogleSubmitting = false
+        }
+        await settingsStore.receive(.delegate(.didDismiss))
+        XCTAssertNil(settingsStore.state.errorMessage)
+    }
+
+    func testSignUpWithSessionEmitsAuthenticationDelegateAndUnlocksForm() async {
+        let session = AuthSession(
+            accessToken: "access-fixture",
+            refreshToken: "refresh-fixture",
+            userId: "signup-user",
+            userEmail: "signup@example.com"
+        )
+        var initialState = AuthFeature.State(isSignUp: true, isConfigured: true)
+        initialState.fullName = "Nguyễn An"
+        initialState.email = "signup@example.com"
+        initialState.password = "secret123"
+
+        let store = TestStore(initialState: initialState) {
+            AuthFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+            $0.supabaseClient.signUp = { _, _, _ in
+                AuthSignUpResult(needsEmailConfirmation: false, session: session, userId: session.userId)
+            }
+        }
+
+        await store.send(.submitTapped) {
+            $0.isSubmitting = true
+        }
+        await store.receive(
+            .signUpResponse(
+                .success(AuthSignUpResult(needsEmailConfirmation: false, session: session, userId: session.userId))
+            )
+        ) {
+            $0.isSubmitting = false
+        }
+        await store.receive(.delegate(.didAuthenticate(session)))
+    }
+
+    func testEmailSignInFailureClearsLoadingAndShowsServiceError() async {
+        var initialState = AuthFeature.State(isConfigured: true)
+        initialState.email = "an@example.com"
+        initialState.password = "secret123"
+        let serviceError = AuthError(message: "Thông tin đăng nhập không hợp lệ.")
+
+        let store = TestStore(initialState: initialState) {
+            AuthFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+            $0.supabaseClient.signIn = { _, _ in throw serviceError }
+        }
+
+        await store.send(.submitTapped) {
+            $0.isSubmitting = true
+        }
+        await store.receive(.signInResponse(.failure(serviceError))) {
+            $0.isSubmitting = false
+            $0.errorMessage = serviceError.message
+        }
+    }
+
     func testOAuthCallbackParsingSupportsPKCEImplicitAndErrorFlows() throws {
         let pkceURL = try XCTUnwrap(URL(string: "numelyra://auth-callback?code=pkce-auth-code-123"))
         XCTAssertEqual(AuthEngine.parseOAuthCallback(pkceURL), .pkceCode("pkce-auth-code-123"))

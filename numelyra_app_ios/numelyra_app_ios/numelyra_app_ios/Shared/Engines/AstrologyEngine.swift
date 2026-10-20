@@ -460,6 +460,42 @@ nonisolated enum AstrologyEngine {
             fastPlanetActivity: scores.fastPlanetActivity
         )
     }
+
+    /// Phân tích các góc chính ngay trong natal chart, mỗi cặp hành tinh chỉ xuất hiện một lần.
+    static func analyzeNatalAspects(_ chart: AstroPlanetaryChart) -> [NatalAstroAspect] {
+        var detected: [NatalAstroAspect] = []
+        for leftIndex in chart.planetList.indices {
+            guard leftIndex + 1 < chart.planetList.count else { continue }
+            let left = chart.planetList[leftIndex]
+            for rightIndex in (leftIndex + 1) ..< chart.planetList.count {
+                let right = chart.planetList[rightIndex]
+                let angle = shortestAngleDifference(left.longitude, right.longitude)
+                for definition in majorAspects {
+                    let orb = abs(angle - definition.targetAngle)
+                    guard orb <= definition.maxOrb else { continue }
+                    detected.append(
+                        NatalAstroAspect(
+                            planetA: left.name,
+                            planetB: right.name,
+                            type: definition.type,
+                            symbol: definition.symbol,
+                            nameVi: definition.nameVi,
+                            targetAngle: definition.targetAngle,
+                            actualAngle: rounded(angle, places: 2),
+                            orb: rounded(orb, places: 2),
+                            weight: rounded(definition.baseWeight * max(0, 1 - orb / definition.maxOrb)),
+                            nature: definition.nature
+                        )
+                    )
+                    break
+                }
+            }
+        }
+        return detected.sorted {
+            if $0.weight != $1.weight { return $0.weight > $1.weight }
+            return $0.orb < $1.orb
+        }
+    }
 /*aspects    Danh sách đã xếp hạng    Tất cả góc chiếu tìm được hôm nay, quan trọng nhất đứng đầu
  topAspect    aspects.first    Góc nổi bật nhất ngày hôm nay
  tensionScore    scores.tension    Mức căng thẳng, thử thách
@@ -601,6 +637,7 @@ nonisolated enum AstrologyEngine {
         let natalChart = natalSnapshot.chart
         let transitChart = try calculatePlanetaryChart(date: currentDate)
         let aspectAnalysis = analyzeAspects(transitChart: transitChart, natalChart: natalChart)
+        let natalAspects = analyzeNatalAspects(natalChart)
         let dailyContext = natalSnapshot.context.map {
             makeDailyContext(
                 transitChart: transitChart,
@@ -676,6 +713,7 @@ nonisolated enum AstrologyEngine {
         ]
         let formatter = ISO8601DateFormatter.appFormatter(.fractionalSeconds)
         let metadata = AstroFeatureMetadata(
+            engineVersion: engineVersion,
             birthDate: input.birthDate,
             birthTime: input.birthTime,
             hasExactTime: !natalChart.isTimeEstimated,
@@ -703,6 +741,11 @@ nonisolated enum AstrologyEngine {
                 ?? (natalChart.isTimeEstimated ? .dateOnly : .timeWithoutLocation),
             natalContext: natalSnapshot.context,
             dailyContext: dailyContext,
+            natalPlanets: natalChart.planetList,
+            transitPlanets: transitChart.planetList,
+            transitAspects: aspectAnalysis.aspects,
+            notableTransitAspects: Array(aspectAnalysis.aspects.prefix(8)),
+            natalAspects: natalAspects,
             ruleEvaluation: ruleEvaluation
         )
         return AstroVectorResult(vector: vector, metadata: metadata)

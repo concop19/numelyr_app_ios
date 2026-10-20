@@ -78,6 +78,61 @@ final class NumerologyCardsFeatureTests: XCTestCase {
         }
     }
 
+    func testOnAppearWithoutAnyProfileShowsEmptyStateInsteadOfCalculatingFallbackCards() async {
+        let store = TestStore(initialState: NumerologyCardsFeature.State()) {
+            NumerologyCardsFeature()
+        } withDependencies: {
+            $0.userProfileClient.activeProfile = { nil }
+            $0.hapticClient = .testValue
+        }
+
+        await store.send(.onAppear)
+        XCTAssertTrue(store.state.indicators.isEmpty)
+        XCTAssertNil(store.state.currentIndicator)
+        XCTAssertNil(store.state.representativeTriple)
+    }
+
+    func testActiveProfileChangeRecalculatesCardsAndClearsWhenProfileIsRemoved() async {
+        let firstProfile = UserProfile(fullName: "Nguyễn Văn An", birthDate: "1998-10-20")
+        let changedProfile = UserProfile(fullName: "Trần Minh Châu", birthDate: "1995-05-15")
+        let firstCards = NumerologyEngine.calculate24Cards(
+            fullName: firstProfile.fullName,
+            birthDate: firstProfile.birthDate,
+            referenceDate: referenceDate
+        )
+        let changedCards = NumerologyEngine.calculate24Cards(
+            fullName: changedProfile.fullName,
+            birthDate: changedProfile.birthDate,
+            referenceDate: referenceDate
+        )
+        let store = TestStore(
+            initialState: NumerologyCardsFeature.State(
+                activeProfile: firstProfile,
+                indicators: firstCards,
+                activeIndex: 23
+            )
+        ) {
+            NumerologyCardsFeature()
+        } withDependencies: {
+            $0.date.now = referenceDate
+            $0.numerologyClient = .liveValue
+        }
+
+        await store.send(.activeProfileUpdated(changedProfile)) {
+            $0.activeProfile = changedProfile
+            $0.indicators = changedCards
+        }
+        XCTAssertNotEqual(firstCards, store.state.indicators)
+        XCTAssertEqual(store.state.activeIndex, 23)
+
+        await store.send(.activeProfileUpdated(nil)) {
+            $0.activeProfile = nil
+            $0.indicators = []
+            $0.activeIndex = 0
+        }
+        XCTAssertNil(store.state.representativeTriple)
+    }
+
     func testCategorySelectionFiltersCardsAndFiresSelectionHapticOnlyOnChange() async {
         let profile = UserProfile(fullName: "Nguyễn Văn An", birthDate: "1998-10-20")
         let cards = NumerologyEngine.calculate24Cards(
@@ -90,7 +145,8 @@ final class NumerologyCardsFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: NumerologyCardsFeature.State(
                 activeProfile: profile,
-                indicators: cards
+                indicators: cards,
+                activeIndex: 4
             )
         ) {
             NumerologyCardsFeature()
@@ -102,6 +158,7 @@ final class NumerologyCardsFeatureTests: XCTestCase {
 
         await store.send(.categorySelected(.category(.core))) {
             $0.selectedCategory = .category(.core)
+            $0.activeIndex = 0
         }
         XCTAssertEqual(store.state.filteredIndicators.count, 5)
         XCTAssertEqual(selectionHapticCount.value, 1)
@@ -176,7 +233,7 @@ final class NumerologyCardsFeatureTests: XCTestCase {
             $0.numerologyClient.indicatorReading = { _, _, _ in sampleReading }
         }
 
-        await store.send(.cardTapped(firstCard)) {
+        await store.send(.cardTapped(index: 0, indicator: firstCard)) {
             $0.detail = IndicatorDetailFeature.State(indicator: firstCard)
         }
         XCTAssertEqual(lightImpactCount.value, 1)
@@ -196,6 +253,78 @@ final class NumerologyCardsFeatureTests: XCTestCase {
         }
         await store.send(.detail(.presented(.toggleFullArticleTapped))) {
             $0.detail?.isFullArticleExpanded = false
+        }
+    }
+
+    func testInactiveCardCentersBeforeSecondTapOpensDetail() async {
+        let cards = NumerologyEngine.calculate24Cards(
+            fullName: "Nguyễn Văn An",
+            birthDate: "1998-10-20",
+            referenceDate: referenceDate
+        )
+        let selectionCount = LockIsolated(0)
+        let impactCount = LockIsolated(0)
+        let store = TestStore(
+            initialState: NumerologyCardsFeature.State(indicators: cards)
+        ) {
+            NumerologyCardsFeature()
+        } withDependencies: {
+            $0.hapticClient.selection = { selectionCount.withValue { $0 += 1 } }
+            $0.hapticClient.lightImpact = { impactCount.withValue { $0 += 1 } }
+        }
+
+        await store.send(.cardTapped(index: 2, indicator: cards[2])) {
+            $0.activeIndex = 2
+        }
+        XCTAssertNil(store.state.detail)
+        XCTAssertEqual(selectionCount.value, 1)
+
+        await store.send(.cardTapped(index: 2, indicator: cards[2])) {
+            $0.detail = IndicatorDetailFeature.State(indicator: cards[2])
+        }
+        XCTAssertEqual(impactCount.value, 1)
+    }
+
+    func testSwipeUpdatesCurrentCardAndSummary() async {
+        let cards = NumerologyEngine.calculate24Cards(
+            fullName: "Nguyễn Văn An",
+            birthDate: "1998-10-20",
+            referenceDate: referenceDate
+        )
+        let store = TestStore(
+            initialState: NumerologyCardsFeature.State(indicators: cards)
+        ) {
+            NumerologyCardsFeature()
+        } withDependencies: {
+            $0.hapticClient.selection = {}
+        }
+
+        await store.send(.activeIndexChanged(1)) { $0.activeIndex = 1 }
+        XCTAssertEqual(store.state.currentIndicator?.definition.key, NumerologyIndicatorKey.mission.rawValue)
+        XCTAssertFalse(store.state.currentSummary.isEmpty)
+    }
+
+    func testFindFigurePresentsCoreTripleFromCalculatedCards() async {
+        let cards = NumerologyEngine.calculate24Cards(
+            fullName: "Nguyễn Văn An",
+            birthDate: "1998-10-20",
+            referenceDate: referenceDate
+        )
+        let expectedTriple = RepresentativeTriple(
+            lifePath: cards.first { $0.definition.key == NumerologyIndicatorKey.walksOfLife.rawValue }!.value.numberValue!,
+            expression: cards.first { $0.definition.key == NumerologyIndicatorKey.mission.rawValue }!.value.numberValue!,
+            soulUrge: cards.first { $0.definition.key == NumerologyIndicatorKey.soul.rawValue }!.value.numberValue!
+        )
+        let store = TestStore(
+            initialState: NumerologyCardsFeature.State(indicators: cards)
+        ) {
+            NumerologyCardsFeature()
+        } withDependencies: {
+            $0.hapticClient.mediumImpact = {}
+        }
+
+        await store.send(.findFigureTapped) {
+            $0.historicalFigure = HistoricalFigureFeature.State(triple: expectedTriple)
         }
     }
 }

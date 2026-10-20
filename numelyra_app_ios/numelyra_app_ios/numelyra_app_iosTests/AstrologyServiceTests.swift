@@ -349,7 +349,7 @@ final class AstrologyServiceTests: XCTestCase {
         await store.receive(\.sessionCreated) { $0.session = session }
         await store.send(.queryChanged("Han")) { $0.query = "Han"; $0.isSearching = true }
         await store.send(.queryChanged("Hanoi")) { $0.query = "Hanoi" }
-        await clock.advance(by: .milliseconds(300))
+        await clock.advance(by: .milliseconds(500))
         await store.receive(.searchSucceeded([hanoi])) {
             $0.isSearching = false
             $0.suggestions = [hanoi]
@@ -364,6 +364,64 @@ final class AstrologyServiceTests: XCTestCase {
                 )
             )
         )
+    }
+
+    func testCurrentMetadataExposesReactNativePlacementAndAspectContract() throws {
+        let date = try XCTUnwrap(ISO8601DateFormatter.appDate(from: "2026-10-11T12:00:00Z"))
+        let result = try AstrologyEngine.generateVector(
+            input: AstroBirthInput(birthDate: "1998-10-20", birthTime: "14:30"),
+            currentDate: date
+        )
+
+        XCTAssertEqual(result.metadata.engineVersion, AstrologyEngine.engineVersion)
+        XCTAssertEqual(result.metadata.natalPlanets?.map(\.name), ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto"])
+        XCTAssertEqual(result.metadata.transitPlanets?.count, 10)
+        XCTAssertEqual(result.metadata.notableTransitAspects, Array((result.metadata.transitAspects ?? []).prefix(8)))
+        XCTAssertTrue((result.metadata.natalAspects ?? []).allSatisfy { $0.planetA != $0.planetB })
+        XCTAssertEqual(
+            Set((result.metadata.natalAspects ?? []).map { [$0.planetA, $0.planetB].sorted().joined(separator: "|") }).count,
+            result.metadata.natalAspects?.count ?? 0
+        )
+    }
+
+    func testBirthPlacePickerErrorRetryAndSkip() async {
+        let clock = TestClock()
+        let session = BirthPlaceSearchSession(id: "retry-session")
+        let attempts = LockIsolated(0)
+        let store = TestStore(initialState: BirthPlacePickerFeature.State()) {
+            BirthPlacePickerFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+            $0.birthLocationClient = BirthLocationClient(
+                makeSession: { session },
+                suggestions: { _, _ in
+                    let attempt = attempts.withValue { value -> Int in value += 1; return value }
+                    if attempt == 1 { throw BirthLocationClientError.serviceUnavailable("Mạng tạm gián đoạn") }
+                    return []
+                },
+                resolve: { _, _ in throw BirthLocationClientError.invalidSelection },
+                refresh: { _ in throw BirthLocationClientError.invalidSelection }
+            )
+        }
+
+        await store.send(.onAppear)
+        await store.receive(.sessionCreated(session)) { $0.session = session }
+        await store.send(.queryChanged("Hanoi")) { $0.query = "Hanoi"; $0.isSearching = true }
+        await clock.advance(by: .milliseconds(500))
+        await store.receive(.searchFailed(query: "Hanoi", message: "Mạng tạm gián đoạn")) {
+            $0.isSearching = false
+            $0.errorMessage = "Mạng tạm gián đoạn"
+            $0.lastFailedQuery = "Hanoi"
+        }
+        await store.send(.retryTapped) { $0.isSearching = true; $0.errorMessage = nil }
+        await clock.advance(by: .milliseconds(500))
+        await store.receive(.searchSucceeded([])) {
+            $0.isSearching = false
+            $0.suggestions = []
+            $0.errorMessage = BirthLocationClientError.noResults.localizedDescription
+        }
+        await store.send(.skipTapped)
+        await store.receive(.delegate(.skipped))
     }
 
     private var utcCalendar: Calendar {

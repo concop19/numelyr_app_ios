@@ -7,14 +7,27 @@ struct SettingsView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            AppTheme.Colors.Settings.safeAreaBackground
+            Image(appAsset: .settingsSkyBackground)
+                .resizable()
+                .scaledToFill()
                 .ignoresSafeArea()
 
-            AppTheme.Gradients.Settings.screenGradient
+            LinearGradient(
+                colors: [
+                    Color(hex: 0x0C0850, opacity: 0.03),
+                    Color(hex: 0x1B0859, opacity: 0.20),
+                    Color(hex: 0x100542, opacity: 0.70)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
 
-            skyDecorations
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                groundBackground
+            }
                 .ignoresSafeArea()
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
@@ -28,6 +41,10 @@ struct SettingsView: View {
 
                     sectionGroupTitle("NUMELYRA PRO")
                     proCard
+
+                    sectionGroupTitle("CÀI ĐẶT CHUNG")
+                    informationCard
+                    recentActivityCard
                 }
                 .padding(.horizontal, 17)
                 .padding(.top, 12)
@@ -48,73 +65,106 @@ struct SettingsView: View {
         .alert($store.scope(state: \.alert, action: \.alert))
     }
 
-    // MARK: - Sky Decorative Layer (`SettingsScreen.tsx:121-127, 299-305`)
+    // MARK: - RN Artwork (`SettingsScreen.tsx:121-127`)
 
-    private var skyDecorations: some View {
+    private var groundBackground: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .topLeading) {
-                Ellipse()
-                    .stroke(AppTheme.Colors.Settings.orbitBorder, lineWidth: 1)
-                    .frame(width: 330, height: 250)
-                    .rotationEffect(.degrees(25))
-                    .position(
-                        x: proxy.size.width + 92 - 165,
-                        y: -105 + 125
-                    )
-
-                Text("☾")
-                    .font(.system(size: 86))
-                    .foregroundStyle(AppTheme.Colors.Settings.moonColor)
-                    .rotationEffect(.degrees(-18))
-                    .opacity(0.95)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.top, 12)
-                    .padding(.trailing, 22)
-
-                Text("✦")
-                    .font(.system(size: 16))
-                    .foregroundStyle(AppTheme.Colors.Settings.starOneColor)
-                    .padding(.top, 112)
-                    .padding(.leading, 26)
-
-                Text("✧")
-                    .font(.system(size: 12))
-                    .foregroundStyle(AppTheme.Colors.Settings.starTwoColor)
-                    .padding(.top, 76)
-                    .padding(.leading, 164)
-
-                Text("✦")
-                    .font(.system(size: 20))
-                    .foregroundStyle(AppTheme.Colors.Settings.starThreeColor)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.top, 188)
-                    .padding(.trailing, 52)
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
-            .clipped()
+            Image(appAsset: .settingsGroundBackground)
+                .resizable()
+                .scaledToFill()
+                .frame(width: proxy.size.width * 1.62, height: 340)
+                .offset(x: -proxy.size.width * 0.31)
+                .frame(width: proxy.size.width, height: 210, alignment: .bottomLeading)
+                .clipped()
         }
+        .frame(height: 210)
+        .opacity(0.88)
     }
 
-    // MARK: - Hero Header (`SettingsScreen.tsx:129-132`)
+    // MARK: - Hero Header (`SettingsScreen.tsx:129-253`)
 
     private var heroHeader: some View {
-        VStack(spacing: 5) {
-            Text("Cài đặt")
-                .font(.system(size: 35, weight: .black))
-                .kerning(0.2)
-                .foregroundStyle(AppTheme.Colors.Settings.titleText)
-                .multilineTextAlignment(.center)
+        ZStack(alignment: .bottom) {
+            heroDecorations
 
-            Text("Tùy chỉnh hành trình NUMELYRA theo cách của bạn")
-                .font(.system(size: 14))
-                .lineSpacing(3)
-                .foregroundStyle(AppTheme.Colors.Settings.subtitleText)
-                .multilineTextAlignment(.center)
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color(hex: 0xFFB6D7), Color(hex: 0xFFD98B), Color(hex: 0x9D6CFF)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 150, height: 150)
+
+                Circle()
+                    .fill(Color(hex: 0x321774, opacity: 0.94))
+                    .padding(4)
+
+                SettingsFlameMascot(size: 112)
+                    .clipShape(Circle())
+            }
+            .frame(width: 150, height: 150)
+            .shadow(color: Color(hex: 0xFF9CCB, opacity: 0.72), radius: 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.top, 20)
+
+            VStack(spacing: 2) {
+                Text("Cài đặt tài khoản")
+                    .font(.system(size: 28, weight: .black))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .shadow(color: Color(hex: 0x20085C, opacity: 0.8), radius: 5, x: 0, y: 2)
+
+                Text(store.accountHandle)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(Color(hex: 0xE8DFFC))
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 12)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 22)
-        .padding(.top, 9)
-        .padding(.bottom, 26)
+        .frame(height: 276)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var heroDecorations: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .topLeading) {
+                Capsule()
+                    .fill(Color(hex: 0xFFAFDD))
+                    .frame(width: 56, height: 1)
+                    .rotationEffect(.degrees(-38))
+                    .shadow(color: .white, radius: 4)
+                    .position(x: 104, y: 67)
+
+                Image(systemName: "sparkles")
+                    .font(.system(size: 19))
+                    .foregroundStyle(Color(hex: 0xFFE17D))
+                    .position(x: 36, y: 84)
+
+                Image(systemName: "sparkles")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color(hex: 0xFFF3A8))
+                    .position(x: proxy.size.width - 66, y: 90)
+
+                Text("☾")
+                    .font(.system(size: 56, weight: .medium))
+                    .foregroundStyle(AppTheme.Colors.Settings.moonColor)
+                    .rotationEffect(.degrees(-17))
+                    .shadow(color: Color(hex: 0xFFD75D, opacity: 0.75), radius: 13)
+                    .position(x: proxy.size.width - 58, y: 51)
+
+                SettingsHeroClouds()
+                    .frame(width: proxy.size.width, height: 58)
+                    .offset(y: 145)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 
     private func sectionGroupTitle(_ title: String) -> some View {
@@ -129,32 +179,36 @@ struct SettingsView: View {
     // MARK: - Account Card (`SettingsScreen.tsx:161-183`)
 
     private var accountCard: some View {
-        SettingsCardContainer {
+        SettingsCardContainer(isLight: true) {
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: 12) {
                     settingIconBadge(
                         systemName: store.isAuthenticated ? "person" : "person.badge.plus",
-                        iconColor: AppTheme.Colors.Settings.profileIconTint,
-                        backgroundColor: AppTheme.Colors.Settings.profileIconBackground,
-                        borderColor: AppTheme.Colors.Settings.profileIconBorder
+                        iconColor: Color(hex: 0x5D238B),
+                        backgroundColor: Color(hex: 0xFFEADB),
+                        borderColor: Color(hex: 0xF4D7C7)
                     )
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(store.accountTitle)
+                        Text("Thông tin cá nhân")
                             .font(.system(size: 16, weight: .heavy))
-                            .foregroundStyle(AppTheme.Colors.Settings.titleText)
+                            .foregroundStyle(Color(hex: 0x2E2052))
                             .lineLimit(1)
 
-                        Text(store.accountHint)
+                        Text(store.accountRowDetail)
                             .font(.system(size: 12))
                             .lineSpacing(2)
-                            .foregroundStyle(AppTheme.Colors.Settings.hintText)
+                            .foregroundStyle(Color(hex: 0x8D7D91))
+                            .lineLimit(1)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(minHeight: 58)
 
-                rowDivider
+                Rectangle()
+                    .fill(Color(hex: 0x5C3A69, opacity: 0.18))
+                    .frame(height: 0.5)
+                    .padding(.vertical, 14)
 
                 if store.isAuthenticated {
                     VStack(spacing: 0) {
@@ -405,14 +459,157 @@ struct SettingsView: View {
         }
     }
 
-    // MARK: - Subcomponents
+    // MARK: - Informational rows (`SettingsScreen.tsx:264-329`)
 
-    private var rowDivider: some View {
-        Rectangle()
-            .fill(AppTheme.Colors.Settings.rowDivider)
-            .frame(height: 1)
-            .padding(.vertical, 14)
+    private var informationCard: some View {
+        VStack(spacing: 0) {
+            informationRow(
+                .language,
+                icon: "globe",
+                label: "Ngôn ngữ",
+                detail: "Tiếng Việt",
+                iconColor: Color(hex: 0x5B35D2),
+                iconBackground: Color(hex: 0xFFD8E6)
+            )
+            informationDivider
+            informationRow(
+                .activity,
+                icon: "chart.bar.fill",
+                label: "Hoạt động của bạn",
+                detail: "Lịch sử trải bài, lịch sử hỏi AI",
+                iconColor: Color(hex: 0x6B32B2),
+                iconBackground: Color(hex: 0xFFDCE4)
+            )
+            informationDivider
+            informationRow(
+                .privacy,
+                icon: "lock.fill",
+                label: "Quyền riêng tư",
+                iconColor: Color(hex: 0x5D35C5),
+                iconBackground: Color(hex: 0xF1DBED)
+            )
+            informationDivider
+            informationRow(
+                .help,
+                icon: "questionmark.circle.fill",
+                label: "Trợ giúp",
+                iconColor: Color(hex: 0x6D218B),
+                iconBackground: Color(hex: 0xFBE1E4)
+            )
+        }
+        .padding(.horizontal, 17)
+        .padding(.vertical, 7)
+        .background(Color(hex: 0xFFF4E8))
+        .clipShape(RoundedRectangle(cornerRadius: 23, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 23, style: .continuous)
+                .stroke(Color(hex: 0xFFE7D5), lineWidth: 1)
+        }
+        .shadow(color: Color(hex: 0x130139, opacity: 0.36), radius: 18, x: 0, y: 10)
+        .padding(.bottom, 14)
     }
+
+    private func informationRow(
+        _ item: SettingsFeature.Action.InformationItem,
+        icon: String,
+        label: String,
+        detail: String? = nil,
+        iconColor: Color,
+        iconBackground: Color
+    ) -> some View {
+        Button {
+            store.send(.informationItemTapped(item))
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.system(size: 19, weight: .semibold))
+                    .foregroundStyle(iconColor)
+                    .frame(width: 42, height: 42)
+                    .background(iconBackground, in: Circle())
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(label)
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(Color(hex: 0x2E2052))
+                        .lineLimit(1)
+
+                    if let detail {
+                        Text(detail)
+                            .font(.system(size: 12.5))
+                            .foregroundStyle(Color(hex: 0x8D7D91))
+                            .lineLimit(1)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                Image(systemName: "chevron.forward")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(Color(hex: 0x736684))
+            }
+            .frame(minHeight: 58)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(detail.map { "\(label), \($0)" } ?? label)
+        .accessibilityAddTraits(.isButton)
+    }
+
+    private var informationDivider: some View {
+        Rectangle()
+            .fill(Color(hex: 0x5C3A69, opacity: 0.18))
+            .frame(height: 0.5)
+    }
+
+    private var recentActivityCard: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "diamond.fill")
+                .font(.system(size: 24))
+                .foregroundStyle(Color(hex: 0xF777E5))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Hoạt động gần đây")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundStyle(.white)
+                    .padding(.bottom, 4)
+
+                Text("•  12 lượt xem tarot tháng này")
+                Text("•  8 lần xem chiêm tinh")
+                Text("•  5 ngày mở lịch liên tiếp")
+            }
+            .font(.system(size: 14, weight: .semibold))
+            .foregroundStyle(Color(hex: 0xF5ECFF))
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .frame(maxWidth: .infinity, minHeight: 142, alignment: .topLeading)
+        .background {
+            LinearGradient(
+                colors: [Color(hex: 0x2D177C, opacity: 0.96), Color(hex: 0x341789, opacity: 0.93), Color(hex: 0x210E68, opacity: 0.98)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(Color(hex: 0xFF7CBE, opacity: 0.62), lineWidth: 1.5)
+        }
+        .shadow(color: Color(hex: 0x180343, opacity: 0.36), radius: 14, x: 0, y: 8)
+        .overlay(alignment: .topTrailing) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 18))
+                .foregroundStyle(Color(hex: 0xFFE473))
+                .padding(.top, 16)
+                .padding(.trailing, 26)
+                .accessibilityHidden(true)
+        }
+        .padding(.bottom, 14)
+        .accessibilityElement(children: .combine)
+    }
+
+    // MARK: - Subcomponents
 
     private func settingIconBadge(
         systemName: String,
@@ -576,6 +773,7 @@ struct SettingsView: View {
 
 private struct SettingsCardContainer<Content: View>: View {
     var isPro: Bool = false
+    var isLight: Bool = false
     @ViewBuilder var content: () -> Content
 
     var body: some View {
@@ -584,25 +782,94 @@ private struct SettingsCardContainer<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background {
                 ZStack {
-                    (isPro ? AppTheme.Gradients.Settings.proCardGradient : AppTheme.Gradients.Settings.standardCardGradient)
-                    AppTheme.Gradients.Settings.cardOverlayGradient
+                    if isPro {
+                        AppTheme.Gradients.Settings.proCardGradient
+                        AppTheme.Gradients.Settings.cardOverlayGradient
+                    } else if isLight {
+                        LinearGradient(
+                            colors: [Color(hex: 0xFFFDFB), Color(hex: 0xFFF4E8)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    } else {
+                        AppTheme.Gradients.Settings.standardCardGradient
+                        AppTheme.Gradients.Settings.cardOverlayGradient
+                    }
                 }
             }
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 24, style: .continuous)
                     .stroke(
-                        isPro ? AppTheme.Colors.Settings.proCardBorder : AppTheme.Colors.Settings.standardCardBorder,
+                        isPro
+                            ? AppTheme.Colors.Settings.proCardBorder
+                            : isLight ? Color(hex: 0xFFE7D5) : AppTheme.Colors.Settings.standardCardBorder,
                         lineWidth: 1
                     )
             }
             .shadow(
-                color: isPro ? AppTheme.Colors.Settings.proCardShadow : AppTheme.Colors.Settings.standardCardShadow,
+                color: isPro
+                    ? AppTheme.Colors.Settings.proCardShadow
+                    : isLight ? Color(hex: 0x130139, opacity: 0.36) : AppTheme.Colors.Settings.standardCardShadow,
                 radius: isPro ? 21 : 19,
                 x: 0,
                 y: 10
             )
             .padding(.bottom, 16)
+    }
+}
+
+private struct SettingsFlameMascot: View {
+    let size: CGFloat
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation(minimumInterval: reduceMotion ? 10 : 0.1)) { context in
+            let frame = reduceMotion
+                ? 0
+                : Int(context.date.timeIntervalSinceReferenceDate * 10) % 12
+
+            GeometryReader { _ in
+                Image(AppAsset.chatFlameIdleSprite.rawValue)
+                    .resizable()
+                    .interpolation(.high)
+                    .frame(width: size * 4, height: size * 3)
+                    .offset(
+                        x: -CGFloat(frame % 4) * size,
+                        y: -CGFloat(frame / 4) * size
+                    )
+            }
+            .frame(width: size, height: size)
+            .clipped()
+        }
+        .frame(width: size, height: size)
+        .shadow(color: Color(hex: 0xFFAE64, opacity: 0.45), radius: 20)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct SettingsHeroClouds: View {
+    var body: some View {
+        HStack(spacing: -34) {
+            cloud(width: 126, height: 71, color: Color(hex: 0xA245C5))
+                .offset(y: 18)
+            cloud(width: 132, height: 62, color: Color(hex: 0x7533AF))
+                .offset(y: 23)
+            cloud(width: 132, height: 70, color: Color(hex: 0x7E3AB7))
+                .offset(y: 17)
+            cloud(width: 126, height: 76, color: Color(hex: 0xB34DAF))
+                .offset(y: 14)
+        }
+        .frame(maxWidth: .infinity)
+        .clipped()
+    }
+
+    private func cloud(width: CGFloat, height: CGFloat, color: Color) -> some View {
+        Ellipse()
+            .fill(color)
+            .frame(width: width, height: height)
+            .shadow(color: Color(hex: 0xFF83BE, opacity: 0.6), radius: 8, x: 0, y: -7)
     }
 }
 

@@ -3,19 +3,18 @@ import SwiftUI
 
 struct AuthView: View {
     @Bindable var store: StoreOf<AuthFeature>
+    @FocusState private var focusedField: LoginField?
+
+    private enum LoginField: Hashable {
+        case fullName
+        case email
+        case password
+    }
 
     var body: some View {
         ZStack {
             AppTheme.Colors.Auth.safeAreaBackground
                 .ignoresSafeArea()
-
-            AppScreenBackground()
-                .allowsHitTesting(false)
-
-            skyDecorations
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-                .accessibilityHidden(true)
 
             GeometryReader { proxy in
                 ScrollView(showsIndicators: false) {
@@ -39,7 +38,7 @@ struct AuthView: View {
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.system(size: 28))
-                                .foregroundStyle(Color.white.opacity(0.6))
+                                .foregroundStyle(AppTheme.Colors.Auth.guestText.opacity(0.75))
                                 .padding(16)
                         }
                         .buttonStyle(.plain)
@@ -49,65 +48,27 @@ struct AuthView: View {
                 }
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(.light)
+        .onChange(of: store.isSignUp) { _, _ in
+            focusedField = nil
+        }
         .task {
             store.send(.onAppear)
-        }
-    }
-
-    // MARK: - Sky Decorative Layer
-
-    private var skyDecorations: some View {
-        GeometryReader { proxy in
-            ZStack(alignment: .topLeading) {
-                Text("✦")
-                    .font(.system(size: 16))
-                    .foregroundStyle(AppTheme.Colors.Auth.starOneColor)
-                    .padding(.top, 56)
-                    .padding(.leading, 30)
-
-                Text("✧")
-                    .font(.system(size: 13))
-                    .foregroundStyle(AppTheme.Colors.Auth.starTwoColor)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.top, 44)
-                    .padding(.trailing, 38)
-
-                Text("✦")
-                    .font(.system(size: 18))
-                    .foregroundStyle(AppTheme.Colors.Auth.starThreeColor)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-                    .padding(.top, 178)
-                    .padding(.trailing, 26)
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height, alignment: .topLeading)
-            .clipped()
         }
     }
 
     // MARK: - Hero Mascot
 
     private var heroSection: some View {
-        ZStack(alignment: .top) {
-            RadialGradient(
-                colors: [AppTheme.Colors.Auth.heroGlow, .clear],
-                center: .center,
-                startRadius: 8,
-                endRadius: 118
-            )
-            .frame(width: 236, height: 236)
-            .allowsHitTesting(false)
-
-            Image(appAsset: .authMascot)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 245, height: 270)
-                .padding(.top, -26)
-                .accessibilityHidden(true)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 230)
-        .clipped()
+        Image(appAsset: .authMascot)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 245, height: 270)
+            .padding(.top, -26)
+            .accessibilityHidden(true)
+            .frame(maxWidth: .infinity)
+            .frame(height: 230)
+            .clipped()
     }
 
     // MARK: - Auth Card
@@ -124,7 +85,6 @@ struct AuthView: View {
                 .font(.system(size: 34, weight: .black))
                 .kerning(0.4)
                 .foregroundStyle(AppTheme.Colors.Auth.brand)
-                .shadow(color: AppTheme.Colors.Auth.brandGlow, radius: 10, x: 0, y: 2)
                 .multilineTextAlignment(.center)
                 .padding(.top, 2)
 
@@ -161,12 +121,7 @@ struct AuthView: View {
         }
         .padding(22)
         .frame(maxWidth: .infinity)
-        .background {
-            ZStack {
-                AppTheme.Gradients.Auth.cardGradient
-                AppTheme.Gradients.Auth.cardOverlay
-            }
-        }
+        .background(AppTheme.Colors.Auth.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: 26, style: .continuous)
@@ -210,7 +165,7 @@ struct AuthView: View {
             }
             .frame(maxWidth: .infinity, minHeight: 50)
             .padding(.horizontal, 16)
-            .background(AppTheme.Gradients.Auth.googleButtonGradient)
+            .background(AppTheme.Colors.Auth.googleBackground)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -218,9 +173,9 @@ struct AuthView: View {
             }
             .shadow(
                 color: AppTheme.Colors.Auth.googleShadow,
-                radius: 9,
+                radius: 6,
                 x: 0,
-                y: 5
+                y: 3
             )
         }
         .buttonStyle(.plain)
@@ -267,6 +222,9 @@ struct AuthView: View {
                 )
                 .textInputAutocapitalization(.words)
                 .textContentType(.name)
+                .focused($focusedField, equals: .fullName)
+                .submitLabel(.next)
+                .onSubmit { focusedField = .email }
                 .font(.system(size: 15))
                 .foregroundStyle(AppTheme.Colors.Auth.inputText)
                 .tint(AppTheme.Colors.Auth.cursorTint)
@@ -294,6 +252,9 @@ struct AuthView: View {
             .autocorrectionDisabled()
             .keyboardType(.emailAddress)
             .textContentType(.emailAddress)
+            .focused($focusedField, equals: .email)
+            .submitLabel(.next)
+            .onSubmit { focusedField = .password }
             .font(.system(size: 15))
             .foregroundStyle(AppTheme.Colors.Auth.inputText)
             .tint(AppTheme.Colors.Auth.cursorTint)
@@ -333,6 +294,12 @@ struct AuthView: View {
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
                 .textContentType(store.isSignUp ? .newPassword : .password)
+                .focused($focusedField, equals: .password)
+                .submitLabel(.go)
+                .onSubmit {
+                    focusedField = nil
+                    store.send(.submitTapped)
+                }
                 .font(.system(size: 15))
                 .foregroundStyle(AppTheme.Colors.Auth.inputText)
                 .tint(AppTheme.Colors.Auth.cursorTint)
@@ -420,18 +387,8 @@ struct AuthView: View {
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 52)
-            .background(AppTheme.Gradients.Auth.submitGradient)
+            .background(AppTheme.Colors.Auth.submitBackground)
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 14, style: .continuous)
-                    .stroke(AppTheme.Colors.Auth.submitBorder, lineWidth: 1)
-            }
-            .shadow(
-                color: AppTheme.Colors.Auth.submitShadow,
-                radius: 12,
-                x: 0,
-                y: 6
-            )
         }
         .buttonStyle(.plain)
         .disabled(store.isActionDisabled)

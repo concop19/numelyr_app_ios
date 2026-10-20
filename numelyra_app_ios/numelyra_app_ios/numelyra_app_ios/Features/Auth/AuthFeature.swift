@@ -207,7 +207,6 @@ struct AuthFeature {
                             await send(.googleSignInResponse(.success(session)))
                         } catch is CancellationError {
                             return
-                            // catch này để làm khi ng dùng hủy dăng nhập bằng gg
                         } catch {
                             let authError = AuthError.from(
                                 error,
@@ -317,6 +316,10 @@ struct AuthFeature {
 
             case let .googleSignInResponse(.failure(error)):
                 state.isGoogleSubmitting = false
+                if error == .cancelled {
+                    state.errorMessage = nil
+                    return state.allowGuest ? .none : .send(.delegate(.didDismiss))
+                }
                 state.errorMessage = error.message
                 return .none
 

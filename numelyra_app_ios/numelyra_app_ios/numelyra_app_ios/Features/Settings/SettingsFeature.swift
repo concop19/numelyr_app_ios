@@ -59,6 +59,18 @@ struct SettingsFeature {
             SettingsEngine.accountTitle(session: session)
         }
 
+        /// Handle shown below the Settings hero title, matching the account email prefix in RN.
+        var accountHandle: String {
+            guard let email = session?.userEmail, !email.isEmpty else { return "@numelyra" }
+            let prefix = email.split(separator: "@", maxSplits: 1).first ?? Substring("numelyra")
+            return "@\(String(prefix))"
+        }
+
+        /// Detail shown in the personal-information row, matching the RN account/email copy.
+        var accountRowDetail: String {
+            session?.userEmail ?? (isConfigured ? "Đăng nhập để đồng bộ hồ sơ" : "Tài khoản khách")
+        }
+
         /// Dòng mô tả trạng thái tài khoản, có xét cả đăng nhập và cấu hình Supabase.
         var accountHint: String {
             SettingsEngine.accountHint(
@@ -101,6 +113,7 @@ struct SettingsFeature {
         case appDidBecomeActive
         case sessionLoaded(AuthSession?)
         case requestLoginTapped
+        case informationItemTapped(InformationItem)
         case syncProfilesTapped
         case syncProfilesCompleted
         case signOutTapped
@@ -117,6 +130,35 @@ struct SettingsFeature {
 
         enum Alert: Equatable, Sendable {
             case dismiss
+        }
+
+        enum InformationItem: Equatable, Sendable {
+            case language
+            case activity
+            case privacy
+            case help
+
+            var title: String {
+                switch self {
+                case .language: "Ngôn ngữ"
+                case .activity: "Hoạt động của bạn"
+                case .privacy: "Quyền riêng tư"
+                case .help: "Trợ giúp"
+                }
+            }
+
+            var message: String {
+                switch self {
+                case .language:
+                    "Ứng dụng hiện đang sử dụng Tiếng Việt."
+                case .activity:
+                    "12 lượt xem tarot tháng này\n8 lần xem chiêm tinh\n5 ngày mở lịch liên tiếp"
+                case .privacy:
+                    "Dữ liệu cá nhân của bạn được lưu và đồng bộ theo trạng thái tài khoản."
+                case .help:
+                    "Nếu bạn cần hỗ trợ, hãy gửi phản hồi từ trang NUMELYRA."
+                }
+            }
         }
 
         enum Delegate: Equatable, Sendable {
@@ -164,6 +206,10 @@ struct SettingsFeature {
 
             case .requestLoginTapped:
                 return .send(.delegate(.didRequestLogin))
+
+            case let .informationItemTapped(item):
+                state.alert = .information(item.title, item.message)
+                return .none
 
             case .syncProfilesTapped:
                 guard state.isAuthenticated, !state.isBusy else { return .none }
@@ -336,6 +382,18 @@ struct SettingsFeature {
 // MARK: - AlertState Factories (`SettingsScreen.tsx:62, 73, 109`)
 
 extension AlertState where Action == SettingsFeature.Action.Alert {
+    static func information(_ title: String, _ message: String) -> Self {
+        AlertState {
+            TextState(title)
+        } actions: {
+            ButtonState(action: .dismiss) {
+                TextState("Đóng")
+            }
+        } message: {
+            TextState(message)
+        }
+    }
+
     static func signOutFailed(_ message: String) -> Self {
         AlertState {
             TextState("Không thể đăng xuất")

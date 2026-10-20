@@ -5,7 +5,7 @@ import XCTest
 
 @MainActor
 final class AstrologyFeatureTests: XCTestCase {
-    func testOnAppearLoadsActiveProfileBuildsConstellationAndUsesCachedFortuneWithoutSuccessHaptic() async throws {
+    func testOnAppearLoadsActiveProfileAndUsesCachedFortuneWithoutSuccessHaptic() async throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(identifier: "Asia/Ho_Chi_Minh"))
         let fixedDate = try XCTUnwrap(
@@ -31,8 +31,7 @@ final class AstrologyFeatureTests: XCTestCase {
 
         let store = TestStore(
             initialState: AstrologyFeature.State(
-                currentDate: fixedDate,
-                calendar: calendar
+                currentDate: fixedDate
             )
         ) {
             AstrologyFeature()
@@ -59,20 +58,10 @@ final class AstrologyFeatureTests: XCTestCase {
             )
         }
 
-        let expectedSymbol = ConstellationEngine.dailySymbol(
-            date: fixedDate,
-            profileKey: AstrologyCacheKey.profileKey(activeProfile),
-            calendar: calendar
-        )
-        let expectedGeometry = try ConstellationEngine.buildGeometry(for: expectedSymbol)
-
         await store.send(.onAppear) {
             $0.isScreenVisible = true
             $0.hasAppeared = true
             $0.profile = activeProfile
-            $0.symbol = expectedSymbol
-            $0.geometry = expectedGeometry
-            $0.geometryErrorMessage = nil
             $0.isLoading = true
         }
 
@@ -123,8 +112,7 @@ final class AstrologyFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: AstrologyFeature.State(
                 currentDate: fixedDate,
-                profile: profile,
-                calendar: calendar
+                profile: profile
             )
         ) {
             AstrologyFeature()
@@ -193,8 +181,7 @@ final class AstrologyFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: AstrologyFeature.State(
                 currentDate: fixedDate,
-                profile: profile,
-                calendar: calendar
+                profile: profile
             )
         ) {
             AstrologyFeature()
@@ -337,8 +324,7 @@ final class AstrologyFeatureTests: XCTestCase {
         let store = TestStore(
             initialState: AstrologyFeature.State(
                 currentDate: day1,
-                profile: profile,
-                calendar: calendar
+                profile: profile
             )
         ) {
             AstrologyFeature()
@@ -365,19 +351,10 @@ final class AstrologyFeatureTests: XCTestCase {
         }
 
         currentNow.setValue(day2)
-        let expectedSymbolDay2 = ConstellationEngine.dailySymbol(
-            date: day2,
-            profileKey: AstrologyCacheKey.profileKey(profile),
-            calendar: calendar
-        )
-        let expectedGeometryDay2 = try ConstellationEngine.buildGeometry(for: expectedSymbolDay2)
-
         await clock.advance(by: .milliseconds(2_250))
 
         await store.receive(.midnightTick) {
             $0.currentDate = day2
-            $0.symbol = expectedSymbolDay2
-            $0.geometry = expectedGeometryDay2
             $0.fortune = nil
             $0.isLoading = true
         }
@@ -390,51 +367,6 @@ final class AstrologyFeatureTests: XCTestCase {
         await store.send(.onDisappear) {
             $0.isScreenVisible = false
         }
-    }
-
-    func testVideoPlaybackAndFallbackImageRules() async {
-        let store = TestStore(
-            initialState: AstrologyFeature.State(
-                isScreenVisible: true,
-                isAppActive: true,
-                reduceMotion: false,
-                isVideoReady: false,
-                hasVideoFailed: false,
-                hasAppeared: true
-            )
-        ) {
-            AstrologyFeature()
-        }
-
-        XCTAssertTrue(store.state.showVideoLayer)
-        XCTAssertTrue(store.state.shouldPlayVideo)
-        XCTAssertTrue(store.state.shouldShowFallbackImage)
-
-        await store.send(.videoReadyChanged(true)) {
-            $0.isVideoReady = true
-        }
-        XCTAssertFalse(store.state.shouldShowFallbackImage)
-
-        await store.send(.reduceMotionChanged(true)) {
-            $0.reduceMotion = true
-            $0.isVideoReady = false
-        }
-        XCTAssertFalse(store.state.showVideoLayer)
-        XCTAssertFalse(store.state.shouldPlayVideo)
-        XCTAssertTrue(store.state.shouldShowFallbackImage)
-
-        await store.send(.reduceMotionChanged(false)) {
-            $0.reduceMotion = false
-        }
-        await store.send(.videoReadyChanged(true)) {
-            $0.isVideoReady = true
-        }
-        await store.send(.videoPlaybackFailed) {
-            $0.hasVideoFailed = true
-            $0.isVideoReady = false
-        }
-        XCTAssertFalse(store.state.showVideoLayer)
-        XCTAssertTrue(store.state.shouldShowFallbackImage)
     }
 
     func testInsightLocalizationHelpersCoverZodiacPlanetsAndScores() {
@@ -461,8 +393,7 @@ final class AstrologyFeatureTests: XCTestCase {
                 currentDate: fixedDate,
                 profile: profileA,
                 isScreenVisible: false,
-                hasAppeared: true,
-                calendar: calendar
+                hasAppeared: true
             )
         ) {
             AstrologyFeature()
@@ -471,6 +402,62 @@ final class AstrologyFeatureTests: XCTestCase {
         await store.send(.profileUpdated(profileB)) {
             $0.profile = profileB
             $0.needsRefresh = true
+        }
+    }
+
+    func testBirthDataValidationNormalizesKnownTimeAndClearsUnknownTime() async {
+        let reference = BirthLocationReference(placeID: "hanoi", userLabel: "Hà Nội, Việt Nam")
+        let profile = UserProfile(
+            id: "profile-1",
+            fullName: "An Nguyễn",
+            birthDate: "1998-10-20",
+            birthTime: "14:30",
+            birthPlace: reference.userLabel,
+            birthLocation: reference,
+            birthTimeAccuracy: .exact
+        )
+        let store = TestStore(initialState: AstrologyBirthDataFeature.State(profile: profile)) {
+            AstrologyBirthDataFeature()
+        }
+
+        await store.send(.birthTimeChanged("9:05")) { $0.birthTime = "9:05"; $0.errorMessage = nil }
+        await store.send(.saveTapped)
+        var normalized = profile
+        normalized.birthTime = "09:05"
+        await store.receive(.delegate(.saved(normalized)))
+
+        await store.send(.knowsBirthTimeChanged(false)) { $0.knowsBirthTime = false; $0.errorMessage = nil }
+        await store.send(.saveTapped)
+        normalized.birthTime = nil
+        normalized.birthTimeAccuracy = .unknown
+        await store.receive(.delegate(.saved(normalized)))
+    }
+
+    func testBirthDataRejectsUnresolvedPlaceAndInvalidTime() async {
+        let profile = UserProfile(id: "profile-1", fullName: "An", birthDate: "1998-10-20")
+        let store = TestStore(initialState: AstrologyBirthDataFeature.State(profile: profile)) {
+            AstrologyBirthDataFeature()
+        }
+
+        await store.send(.placeChanged("HN")) { $0.place = "HN"; $0.errorMessage = nil; $0.selectedReference = nil }
+        await store.send(.saveTapped) { $0.errorMessage = "Vui lòng nhập thành phố hoặc khu vực nơi bạn sinh ra." }
+
+        await store.send(.placeChanged("Hà Nội")) { $0.place = "Hà Nội"; $0.errorMessage = nil; $0.selectedReference = nil }
+        await store.send(.saveTapped) { $0.errorMessage = "Vui lòng chọn một địa điểm từ danh sách đề xuất." }
+    }
+
+    func testTodayNatalAndDetailNavigationPreservePlanetMode() async {
+        let store = TestStore(initialState: AstrologyFeature.State(hasAppeared: true)) {
+            AstrologyFeature()
+        } withDependencies: {
+            $0.hapticClient = .testValue
+        }
+
+        await store.send(.natalTapped) {
+            $0.path.append(.natal(AstrologyNatalFeature.State()))
+        }
+        await store.send(.detailTapped(.planet(.moon), mode: .transit)) {
+            $0.path.append(.detail(AstrologyDetailFeature.State(target: .planet(.moon), mode: .transit)))
         }
     }
 }

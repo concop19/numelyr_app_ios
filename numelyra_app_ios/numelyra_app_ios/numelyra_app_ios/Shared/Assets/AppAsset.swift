@@ -3,7 +3,10 @@ import SwiftUI
 enum AppAsset: String, CaseIterable, Sendable {
     // MARK: - Auth
     case authMascot = "AuthMascot"
-    case authLoginPortal = "AuthLoginPortal"
+
+    // MARK: - Settings
+    case settingsSkyBackground = "SettingsSkyBackground"
+    case settingsGroundBackground = "SettingsGroundBackground"
 
     // MARK: - Tab Shell
     case tabChat = "TabChat"
@@ -60,16 +63,27 @@ enum AppAsset: String, CaseIterable, Sendable {
     case chatDetailBottomFlameRight06 = "ChatDetailBottomFlameRight06"
 
     // MARK: - Calendar
+    case calendarScreenBackground = "CalendarScreenBackground"
+    case calendarHourDirectionHero = "CalendarHourDirectionHero"
+    case calendarAnimalMouse = "CalendarAnimalMouse"
+    case calendarAnimalCow = "CalendarAnimalCow"
+    case calendarAnimalTiger = "CalendarAnimalTiger"
+    case calendarAnimalCat = "CalendarAnimalCat"
+    case calendarAnimalDragon = "CalendarAnimalDragon"
+    case calendarAnimalSnake = "CalendarAnimalSnake"
+    case calendarAnimalHorse = "CalendarAnimalHorse"
+    case calendarAnimalGoat = "CalendarAnimalGoat"
+    case calendarAnimalMonkey = "CalendarAnimalMonkey"
+    case calendarAnimalChicken = "CalendarAnimalChicken"
+    case calendarAnimalDog = "CalendarAnimalDog"
+    case calendarAnimalPig = "CalendarAnimalPig"
     case calendarHero = "CalendarHero"
     case calendarTopic = "CalendarTopic"
-    case calendarHeroAlt = "CalendarHeroAlt"
     case calendarSpringFallback = "CalendarSpringFallback"
     case calendarSummerFallback = "CalendarSummerFallback"
     case calendarAutumnFallback = "CalendarAutumnFallback"
     case calendarWinterFallback = "CalendarWinterFallback"
     case calendarMascotIdle = "CalendarMascotIdle"
-    case calendarMascot1 = "CalendarMascot1"
-    case calendarMascot2 = "CalendarMascot2"
 
     // MARK: - Wallpaper
     case wallpaperLandscapeBackground = "WallpaperLandscapeBackground"
@@ -83,15 +97,68 @@ enum AppAsset: String, CaseIterable, Sendable {
     case wallpaperMockCard4 = "WallpaperMockCard4"
 
     // MARK: - Astrology
-    case astrologyGalaxyBackground = "AstrologyGalaxyBackground"
-    case astrologyAuroraOverlay = "AstrologyAuroraOverlay"
+    case astrologyBackgroundToday = "AstrologyBackgroundToday"
+    case astrologyBackgroundNatal = "AstrologyBackgroundNatal"
+    case astrologyBackgroundDetail = "AstrologyBackgroundDetail"
+    case astrologyBackgroundPlanetDetail = "AstrologyBackgroundPlanetDetail"
 
-    /// URL to the bundled looping Aurora video for Astrology screen background.
-    static var astrologyAuroraVideoURL: URL? {
-        Bundle.main.url(forResource: "astrology-aurora", withExtension: "mp4")
-    }
+    case astrologyPlanetSunArtwork = "AstrologyPlanetSunArtwork"
+    case astrologyPlanetMoonArtwork = "AstrologyPlanetMoonArtwork"
+    case astrologyPlanetMercuryArtwork = "AstrologyPlanetMercuryArtwork"
+    case astrologyPlanetVenusArtwork = "AstrologyPlanetVenusArtwork"
+    case astrologyPlanetMarsArtwork = "AstrologyPlanetMarsArtwork"
+    case astrologyPlanetJupiterArtwork = "AstrologyPlanetJupiterArtwork"
+    case astrologyPlanetSaturnArtwork = "AstrologyPlanetSaturnArtwork"
+    case astrologyPlanetUranusArtwork = "AstrologyPlanetUranusArtwork"
+    case astrologyPlanetNeptuneArtwork = "AstrologyPlanetNeptuneArtwork"
+    case astrologyPlanetPlutoArtwork = "AstrologyPlanetPlutoArtwork"
+
+    case astrologyPlanetSunGlyph = "AstrologyPlanetSunGlyph"
+    case astrologyPlanetMoonGlyph = "AstrologyPlanetMoonGlyph"
+    case astrologyPlanetMercuryGlyph = "AstrologyPlanetMercuryGlyph"
+    case astrologyPlanetVenusGlyph = "AstrologyPlanetVenusGlyph"
+    case astrologyPlanetMarsGlyph = "AstrologyPlanetMarsGlyph"
+    case astrologyPlanetJupiterGlyph = "AstrologyPlanetJupiterGlyph"
+    case astrologyPlanetSaturnGlyph = "AstrologyPlanetSaturnGlyph"
+    case astrologyPlanetUranusGlyph = "AstrologyPlanetUranusGlyph"
+    case astrologyPlanetNeptuneGlyph = "AstrologyPlanetNeptuneGlyph"
+    case astrologyPlanetPlutoGlyph = "AstrologyPlanetPlutoGlyph"
+
+    case astrologyZodiacAries = "AstrologyZodiacAries"
+    case astrologyZodiacTaurus = "AstrologyZodiacTaurus"
+    case astrologyZodiacGemini = "AstrologyZodiacGemini"
+    case astrologyZodiacCancer = "AstrologyZodiacCancer"
+    case astrologyZodiacLeo = "AstrologyZodiacLeo"
+    case astrologyZodiacVirgo = "AstrologyZodiacVirgo"
+    case astrologyZodiacLibra = "AstrologyZodiacLibra"
+    case astrologyZodiacScorpio = "AstrologyZodiacScorpio"
+    case astrologyZodiacSagittarius = "AstrologyZodiacSagittarius"
+    case astrologyZodiacCapricorn = "AstrologyZodiacCapricorn"
+    case astrologyZodiacAquarius = "AstrologyZodiacAquarius"
+    case astrologyZodiacPisces = "AstrologyZodiacPisces"
+
+    case astrologyConstellationAries = "AstrologyConstellationAries"
+    case astrologyConstellationTaurus = "AstrologyConstellationTaurus"
+    case astrologyConstellationGemini = "AstrologyConstellationGemini"
+    case astrologyConstellationCancer = "AstrologyConstellationCancer"
+    case astrologyConstellationLeo = "AstrologyConstellationLeo"
+    case astrologyConstellationVirgo = "AstrologyConstellationVirgo"
+    case astrologyConstellationLibra = "AstrologyConstellationLibra"
+    case astrologyConstellationScorpio = "AstrologyConstellationScorpio"
+    case astrologyConstellationSagittarius = "AstrologyConstellationSagittarius"
+    case astrologyConstellationCapricorn = "AstrologyConstellationCapricorn"
+    case astrologyConstellationAquarius = "AstrologyConstellationAquarius"
+    case astrologyConstellationPisces = "AstrologyConstellationPisces"
+
+    case astrologyCalendarIcon = "AstrologyCalendarIcon"
+    case astrologyClockIcon = "AstrologyClockIcon"
+    case astrologyLocationIcon = "AstrologyLocationIcon"
+    case astrologyShareIcon = "AstrologyShareIcon"
+    case astrologyShootingStar = "AstrologyShootingStar"
+    case astrologyStarDust = "AstrologyStarDust"
 
     // MARK: - Numerology Cards
+    case numerologyBackground = "NumerologyBackground"
     case numerologyCard01WalksOfLife = "NumerologyCard01WalksOfLife"
     case numerologyCard02Mission = "NumerologyCard02Mission"
     case numerologyCard03Soul = "NumerologyCard03Soul"

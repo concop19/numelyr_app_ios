@@ -220,6 +220,44 @@ public nonisolated struct DetectedAstroAspect: Codable, Equatable, Sendable {
     }
 }
 
+/// Một góc chính giữa hai hành tinh trong lá số bản mệnh.
+public nonisolated struct NatalAstroAspect: Codable, Equatable, Sendable {
+    public var planetA: String
+    public var planetB: String
+    public var type: AstroAspectType
+    public var symbol: String
+    public var nameVi: String
+    public var targetAngle: Double
+    public var actualAngle: Double
+    public var orb: Double
+    public var weight: Double
+    public var nature: AstroAspectNature
+
+    public init(
+        planetA: String,
+        planetB: String,
+        type: AstroAspectType,
+        symbol: String,
+        nameVi: String,
+        targetAngle: Double,
+        actualAngle: Double,
+        orb: Double,
+        weight: Double,
+        nature: AstroAspectNature
+    ) {
+        self.planetA = planetA
+        self.planetB = planetB
+        self.type = type
+        self.symbol = symbol
+        self.nameVi = nameVi
+        self.targetAngle = targetAngle
+        self.actualAngle = actualAngle
+        self.orb = orb
+        self.weight = weight
+        self.nature = nature
+    }
+}
+
 public nonisolated enum AstroHouseSystem: String, Codable, Equatable, Sendable {
     case porphyry
 }
@@ -522,6 +560,8 @@ public nonisolated struct AstroAspectAnalysis: Codable, Equatable, Sendable {
 /// Toàn bộ siêu dữ liệu ngữ nghĩa (Semantic Metadata) của hệ thống chiêm tinh học.
 /// Đóng gói trọn vẹn thông tin ngày sinh, khí chất bản mệnh, góc chiếu và bầu không khí ngày.
 public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
+    /// Phiên bản engine tạo metadata; optional để cache cũ vẫn decode được.
+    public var engineVersion: String?
     /// Ngày sinh của người dùng (chuỗi định dạng 'YYYY-MM-DD' hoặc 'DD/MM/YYYY').
     public var birthDate: String
     /// Giờ sinh của người dùng (chuỗi định dạng 'HH:mm', nil nếu không rõ giờ sinh).
@@ -554,10 +594,17 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
     public var birthDataPrecision: AstroBirthDataPrecision?
     public var natalContext: AstroNatalContext?
     public var dailyContext: AstroDailyContext?
+    /// Full placement/aspect payload dùng cho Natal Chart và detail; optional để tương thích cache cũ.
+    public var natalPlanets: [AstroPlanetPosition]?
+    public var transitPlanets: [AstroPlanetPosition]?
+    public var transitAspects: [DetectedAstroAspect]?
+    public var notableTransitAspects: [DetectedAstroAspect]?
+    public var natalAspects: [NatalAstroAspect]?
     /// Local-only output of the v1 rule evaluator; never serialized into the legacy fortune API request.
     public var ruleEvaluation: AstrologyRuleEvaluation?
 
     public init(
+        engineVersion: String? = nil,
         birthDate: String,
         birthTime: String? = nil,
         hasExactTime: Bool = false,
@@ -575,8 +622,14 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
         birthDataPrecision: AstroBirthDataPrecision? = nil,
         natalContext: AstroNatalContext? = nil,
         dailyContext: AstroDailyContext? = nil,
+        natalPlanets: [AstroPlanetPosition]? = nil,
+        transitPlanets: [AstroPlanetPosition]? = nil,
+        transitAspects: [DetectedAstroAspect]? = nil,
+        notableTransitAspects: [DetectedAstroAspect]? = nil,
+        natalAspects: [NatalAstroAspect]? = nil,
         ruleEvaluation: AstrologyRuleEvaluation? = nil
     ) {
+        self.engineVersion = engineVersion
         self.birthDate = birthDate
         self.birthTime = birthTime
         self.hasExactTime = hasExactTime
@@ -594,6 +647,11 @@ public nonisolated struct AstroFeatureMetadata: Codable, Equatable, Sendable {
         self.birthDataPrecision = birthDataPrecision
         self.natalContext = natalContext
         self.dailyContext = dailyContext
+        self.natalPlanets = natalPlanets
+        self.transitPlanets = transitPlanets
+        self.transitAspects = transitAspects
+        self.notableTransitAspects = notableTransitAspects
+        self.natalAspects = natalAspects
         self.ruleEvaluation = ruleEvaluation
     }
 }

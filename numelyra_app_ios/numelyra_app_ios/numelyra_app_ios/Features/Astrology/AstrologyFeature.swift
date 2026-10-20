@@ -3,6 +3,18 @@ import Foundation
 
 @Reducer
 struct AstrologyFeature {
+    @Reducer
+    enum Path {
+        case natal(AstrologyNatalFeature)
+        case detail(AstrologyDetailFeature)
+    }
+
+    @Reducer
+    enum Destination {
+        case profilePicker(AstrologyProfilePickerFeature)
+        case birthData(AstrologyBirthDataFeature)
+    }
+
     struct SharePayload: Identifiable, Equatable, Sendable {
         var id: String { "\(title)|\(message)" }
         var title: String
@@ -15,38 +27,35 @@ struct AstrologyFeature {
     }
     @ObservableState
     struct State: Equatable {
-        /// Ngày địa phương đang được dùng để lấy quẻ và chọn biểu tượng chòm sao hằng ngày.
+        /// Ngày địa phương đang được dùng để lấy quẻ hằng ngày.
         var currentDate: Date
-        /// Hồ sơ đang được dùng để cá nhân hóa phép tính và khóa cache; `nil` dùng ngữ cảnh khách.
+        /// Hồ sơ đang được dùng để cá nhân hóa phép tính và khóa cache.
         var profile: UserProfile?
         /// Quẻ chiêm tinh của ngày hiện tại sau khi đọc cache hoặc tải từ dịch vụ.
         var fortune: AstroFortuneSlip?
+        /// Metadata tính cục bộ, không phụ thuộc fortune API nên Today/Natal vẫn hoạt động offline.
+        var localMetadata: AstroFeatureMetadata?
+        /// Lỗi tính metadata cục bộ; tách biệt với lỗi tải luận giải trực tuyến.
+        var calculationErrorMessage: String?
         /// Cho biết request lấy quẻ đang chạy.
         var isLoading: Bool
         /// Thông báo lỗi lấy quẻ cần hiển thị; được xóa khi bắt đầu thử lại hoặc tải thành công.
         var errorMessage: String?
-        /// Mẫu biểu tượng được chọn ổn định từ ngày hiện tại và khóa hồ sơ.
-        var symbol: ConstellationSymbolPreset
-        /// Hình học đã dựng từ `symbol` để canvas vẽ các điểm sao và đường nối.
-        var geometry: ConstellationGeometry?
-        /// Lỗi dựng hình học biểu tượng; dùng để chuyển UI sang trạng thái fallback.
-        var geometryErrorMessage: String?
         /// Cho biết tab Chiêm tinh đang thực sự hiển thị trên màn hình.
         var isScreenVisible: Bool
-        /// Cho biết scene của ứng dụng đang active, dùng để tạm dừng video khi app vào nền.
-        var isAppActive: Bool
-        /// Giá trị Reduce Motion của hệ thống; khi bật, video nền bị vô hiệu hóa.
-        var reduceMotion: Bool
-        /// Cho biết player đã có frame video sẵn sàng để thay ảnh nền fallback.
-        var isVideoReady: Bool
-        /// Ghi nhận video đã phát lỗi để không tiếp tục thử hiển thị video trong phiên hiện tại.
-        var hasVideoFailed: Bool
         /// Ghi nhận feature đã chạy `onAppear` ít nhất một lần để tránh tải lại không cần thiết.
         var hasAppeared: Bool
         /// Dirty flag yêu cầu tải lại quẻ khi hồ sơ đổi trong lúc màn hình không hiển thị.
         var needsRefresh: Bool
         /// Nội dung đang được đưa sang share sheet; `nil` nghĩa là share sheet đóng.
         var sharePayload: SharePayload?
+
+        /// Stack Today → Natal Chart → detail được điều khiển hoàn toàn bằng TCA state.
+        var path = StackState<Path.State>()
+
+        /// Profile picker hoặc birth-data sheet đang được trình bày.
+        @Presents
+        var destination: Destination.State?
 
         /// State của sheet giải mã chi tiết; có giá trị khi sheet đang được trình bày.
         @Presents
@@ -56,53 +65,32 @@ struct AstrologyFeature {
             currentDate: Date = Date(),
             profile: UserProfile? = nil,
             fortune: AstroFortuneSlip? = nil,
+            localMetadata: AstroFeatureMetadata? = nil,
+            calculationErrorMessage: String? = nil,
             isLoading: Bool = false,
             errorMessage: String? = nil,
             isScreenVisible: Bool = false,
-            isAppActive: Bool = true,
-            reduceMotion: Bool = false,
-            isVideoReady: Bool = false,
-            hasVideoFailed: Bool = false,
             hasAppeared: Bool = false,
             needsRefresh: Bool = false,
             sharePayload: SharePayload? = nil,
-            insight: AstrologyInsightFeature.State? = nil,
-            calendar: Calendar = .current
+            path: StackState<Path.State> = StackState<Path.State>(),
+            destination: Destination.State? = nil,
+            insight: AstrologyInsightFeature.State? = nil
         ) {
             self.currentDate = currentDate
             self.profile = profile
             self.fortune = fortune
+            self.localMetadata = localMetadata
+            self.calculationErrorMessage = calculationErrorMessage
             self.isLoading = isLoading
             self.errorMessage = errorMessage
             self.isScreenVisible = isScreenVisible
-            self.isAppActive = isAppActive
-            self.reduceMotion = reduceMotion
-            self.isVideoReady = isVideoReady
-            self.hasVideoFailed = hasVideoFailed
             self.hasAppeared = hasAppeared
             self.needsRefresh = needsRefresh
             self.sharePayload = sharePayload
+            self.path = path
+            self.destination = destination
             self.insight = insight
-
-            let profileKey = AstrologyCacheKey.profileKey(profile)
-            let initialSymbol = ConstellationEngine.dailySymbol(
-                date: currentDate,
-                profileKey: profileKey,
-                calendar: calendar
-            )
-            self.symbol = initialSymbol
-            do {
-                self.geometry = try ConstellationEngine.buildGeometry(for: initialSymbol)
-                self.geometryErrorMessage = nil
-            } catch {
-                self.geometry = nil
-                self.geometryErrorMessage = error.localizedDescription
-            }
-        }
-
-        /// Khóa ổn định đại diện cho hồ sơ, dùng cho cache và lựa chọn biểu tượng theo ngày.
-        var profileKey: String {
-            AstrologyCacheKey.profileKey(profile)
         }
 
         /// Ngày hiện tại được định dạng `DD.MM` cho phần tiêu đề.
@@ -115,11 +103,6 @@ struct AstrologyFeature {
             "Hôm nay • \(formattedShortDate)"
         }
 
-        /// Nhãn viết hoa của biểu tượng chòm sao được chọn cho hôm nay.
-        var symbolLabelText: String {
-            "BIỂU TƯỢNG HÔM NAY · \(symbol.title.uppercased())"
-        }
-
         /// Tiêu đề quẻ đã chuẩn hóa, có fallback khi backend không trả tiêu đề hợp lệ.
         var fortuneTitleText: String {
             AstrologyInsightFeature.normalizedTitle(fortune?.title)
@@ -127,41 +110,61 @@ struct AstrologyFeature {
 
         /// Metadata chiêm tinh đính kèm quẻ, dùng để hiển thị dữ liệu cá nhân hóa trong sheet chi tiết.
         var metadata: AstroFeatureMetadata? {
-            fortune?.astroMetadata
+            localMetadata ?? fortune?.astroMetadata
         }
 
-        /// Cho biết video nền có được gắn vào view hay phải bỏ hẳn vì Reduce Motion hoặc lỗi phát.
-        var showVideoLayer: Bool {
-            !reduceMotion && !hasVideoFailed
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.currentDate == rhs.currentDate
+                && lhs.profile == rhs.profile
+                && lhs.fortune == rhs.fortune
+                && lhs.localMetadata == rhs.localMetadata
+                && lhs.calculationErrorMessage == rhs.calculationErrorMessage
+                && lhs.isLoading == rhs.isLoading
+                && lhs.errorMessage == rhs.errorMessage
+                && lhs.isScreenVisible == rhs.isScreenVisible
+                && lhs.hasAppeared == rhs.hasAppeared
+                && lhs.needsRefresh == rhs.needsRefresh
+                && lhs.sharePayload == rhs.sharePayload
+                // TCA's navigation and presentation wrappers intentionally do not conform to Equatable.
+                && String(reflecting: lhs.path) == String(reflecting: rhs.path)
+                && String(reflecting: lhs.destination) == String(reflecting: rhs.destination)
+                && String(reflecting: lhs.insight) == String(reflecting: rhs.insight)
         }
 
-        /// Cho biết video nền nên phát ở thời điểm hiện tại dựa trên visibility và trạng thái app.
-        var shouldPlayVideo: Bool {
-            isScreenVisible && isAppActive && !reduceMotion && !hasVideoFailed
-        }
-
-        /// Cho biết ảnh nền tĩnh phải hiển thị trong lúc video bị tắt hoặc chưa sẵn sàng.
-        var shouldShowFallbackImage: Bool {
-            !showVideoLayer || !isVideoReady
-        }
     }
 
     enum Action: Equatable {
         case onAppear
         case onDisappear
         case scenePhaseChanged(isActive: Bool)
-        case reduceMotionChanged(Bool)
-        case videoReadyChanged(Bool)
-        case videoPlaybackFailed
         case midnightTick
         case profileUpdated(UserProfile?)
+        case profileTapped
+        case birthDataTapped
+        case natalTapped
+        case detailTapped(AstrologyDetailTarget, mode: AstrologyPlanetDetailMode)
         case retryTapped
         case openInsightTapped
         case shareTapped
         case shareSheetDismissed
         case fortuneLoaded(AstroFortuneSlip, fromCache: Bool)
         case fortuneFailed(String)
+        case metadataLoaded(AstroFeatureMetadata)
+        case metadataFailed(String)
+        case path(StackActionOf<Path>)
+        case destination(PresentationAction<Destination.Action>)
         case insight(PresentationAction<AstrologyInsightFeature.Action>)
+        case delegate(Delegate)
+
+        enum Delegate: Equatable {
+            case profileChanged(UserProfile)
+        }
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            // StackAction and PresentationAction are not Equatable in TCA. Their reflected values
+            // include the action case and payload, preserving useful TestStore comparisons.
+            String(reflecting: lhs) == String(reflecting: rhs)
+        }
     }
 
     @Dependency(\.astrologyClient) var astrologyClient
@@ -174,6 +177,7 @@ struct AstrologyFeature {
 
     private nonisolated enum CancelID: Hashable, Sendable {
         case fortune
+        case metadata
         case midnightTimer
     }
 
@@ -197,8 +201,6 @@ struct AstrologyFeature {
                 if isNewDay {
                     state.currentDate = currentNow
                 }
-                refreshConstellation(&state)
-
                 let midnightEffect = scheduleMidnightTimer(from: state.currentDate)
                 guard shouldReload else {
                     return midnightEffect
@@ -213,43 +215,20 @@ struct AstrologyFeature {
                 return .cancel(id: CancelID.midnightTimer)
 
             case let .scenePhaseChanged(isActive):
-                state.isAppActive = isActive
                 guard isActive else { return .none }
                 let currentNow = now
                 let isNewDay = AstrologyCacheKey.localDateKey(currentNow, calendar: calendar)
                     != AstrologyCacheKey.localDateKey(state.currentDate, calendar: calendar)
                 guard isNewDay else { return .none }
                 state.currentDate = currentNow
-                refreshConstellation(&state)
                 return .merge(
                     scheduleMidnightTimer(from: currentNow),
                     fetchFortune(&state, allowCache: true, clearExisting: true)
                 )
 
-            case let .reduceMotionChanged(enabled):
-                state.reduceMotion = enabled
-                if enabled {
-                    state.isVideoReady = false
-                }
-                return .none
-
-            case let .videoReadyChanged(ready):
-                if state.showVideoLayer {
-                    state.isVideoReady = ready
-                } else {
-                    state.isVideoReady = false
-                }
-                return .none
-
-            case .videoPlaybackFailed:
-                state.hasVideoFailed = true
-                state.isVideoReady = false
-                return .none
-
             case .midnightTick:
                 let currentNow = now
                 state.currentDate = currentNow
-                refreshConstellation(&state)
                 return .merge(
                     scheduleMidnightTimer(from: currentNow),
                     fetchFortune(&state, allowCache: true, clearExisting: true)
@@ -265,12 +244,33 @@ struct AstrologyFeature {
                     return .none
                 }
                 if state.isScreenVisible {
-                    refreshConstellation(&state)
                     return fetchFortune(&state, allowCache: true, clearExisting: true)
                 } else {
                     state.needsRefresh = true
                     return .none
                 }
+
+            case .profileTapped:
+                state.destination = .profilePicker(
+                    AstrologyProfilePickerFeature.State(
+                        profiles: userProfileClient.loadAllProfiles(),
+                        selectedID: state.profile?.id
+                    )
+                )
+                return .run { _ in await hapticClient.lightImpact() }
+
+            case .birthDataTapped:
+                guard let profile = state.profile else { return .none }
+                state.destination = .birthData(AstrologyBirthDataFeature.State(profile: profile))
+                return .run { _ in await hapticClient.lightImpact() }
+
+            case .natalTapped:
+                state.path.append(.natal(AstrologyNatalFeature.State()))
+                return .run { _ in await hapticClient.lightImpact() }
+
+            case let .detailTapped(target, mode):
+                state.path.append(.detail(AstrologyDetailFeature.State(target: target, mode: mode)))
+                return .run { _ in await hapticClient.lightImpact() }
 
             case .retryTapped:
                 return .merge(
@@ -282,7 +282,7 @@ struct AstrologyFeature {
                 guard let fortune = state.fortune else { return .none }
                 state.insight = AstrologyInsightFeature.State(
                     fortune: fortune,
-                    metadata: fortune.astroMetadata
+                    metadata: state.metadata
                 )
                 return .run { _ in await hapticClient.lightImpact() }
 
@@ -302,7 +302,7 @@ struct AstrologyFeature {
                 if let insight = state.insight {
                     state.insight = AstrologyInsightFeature.State(
                         fortune: fortune,
-                        metadata: fortune.astroMetadata ?? insight.metadata
+                        metadata: state.metadata ?? insight.metadata
                     )
                 }
                 guard !fromCache else { return .none }
@@ -318,6 +318,72 @@ struct AstrologyFeature {
                     : trimmed
                 return .none
 
+            case let .metadataLoaded(metadata):
+                state.localMetadata = metadata
+                state.calculationErrorMessage = nil
+                return .none
+
+            case let .metadataFailed(message):
+                state.localMetadata = nil
+                let trimmed = message.trimmingCharacters(in: .whitespacesAndNewlines)
+                state.calculationErrorMessage = trimmed.isEmpty
+                    ? "Không thể dựng dữ liệu lá số."
+                    : trimmed
+                return .none
+
+            case .path(.element(id: _, action: .natal(.backTapped))):
+                state.path.removeLast()
+                return .none
+
+            case .path(.element(id: _, action: .natal(.editBirthDataTapped))),
+                 .path(.element(id: _, action: .detail(.editBirthDataTapped))):
+                guard let profile = state.profile else { return .none }
+                state.destination = .birthData(AstrologyBirthDataFeature.State(profile: profile))
+                return .none
+
+            case let .path(.element(id: _, action: .natal(.detailTapped(target)))):
+                state.path.append(.detail(AstrologyDetailFeature.State(target: target, mode: .natal)))
+                return .none
+
+            case .path(.element(id: _, action: .detail(.backTapped))):
+                state.path.removeLast()
+                return .none
+
+            case let .destination(.presented(.profilePicker(.delegate(.selected(profile))))):
+                userProfileClient.setActiveProfileID(profile.id)
+                state.destination = nil
+                return .merge(
+                    .send(.profileUpdated(profile)),
+                    .send(.delegate(.profileChanged(profile)))
+                )
+
+            case .destination(.presented(.profilePicker(.delegate(.close)))):
+                state.destination = nil
+                return .none
+
+            case let .destination(.presented(.birthData(.delegate(.saved(profile))))):
+                var profiles = userProfileClient.loadAllProfiles()
+                if let index = profiles.firstIndex(where: { $0.id == profile.id }) {
+                    profiles[index] = profile
+                } else {
+                    profiles.append(profile)
+                }
+                userProfileClient.saveAllProfiles(profiles)
+                userProfileClient.setActiveProfileID(profile.id)
+                state.destination = nil
+                state.insight = nil
+                return .merge(
+                    .send(.profileUpdated(profile)),
+                    .send(.delegate(.profileChanged(profile)))
+                )
+
+            case .destination(.presented(.birthData(.delegate(.close)))):
+                state.destination = nil
+                return .none
+
+            case .path, .destination, .delegate:
+                return .none
+
             case .insight:
                 return .none
             }
@@ -325,25 +391,11 @@ struct AstrologyFeature {
         .ifLet(\.$insight, action: \.insight) {
             AstrologyInsightFeature()
         }
+        .ifLet(\.$destination, action: \.destination)
+        .forEach(\.path, action: \.path)
     }
 
     // MARK: - Private Helpers
-
-    private func refreshConstellation(_ state: inout State) {
-        let symbol = ConstellationEngine.dailySymbol(
-            date: state.currentDate,
-            profileKey: state.profileKey,
-            calendar: calendar
-        )
-        state.symbol = symbol
-        do {
-            state.geometry = try ConstellationEngine.buildGeometry(for: symbol)
-            state.geometryErrorMessage = nil
-        } catch {
-            state.geometry = nil
-            state.geometryErrorMessage = error.localizedDescription
-        }
-    }
 
     private func fetchFortune(
         _ state: inout State,
@@ -353,14 +405,40 @@ struct AstrologyFeature {
         if clearExisting {
             state.fortune = nil
             state.insight = nil
+            state.localMetadata = nil
+            state.calculationErrorMessage = nil
         }
         state.isLoading = true
         state.errorMessage = nil
 
         let targetDate = state.currentDate
         let targetProfile = state.profile
+        guard let targetProfile,
+              !targetProfile.fullName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              !targetProfile.birthDate.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            state.isLoading = false
+            state.localMetadata = nil
+            state.calculationErrorMessage = "Chưa có hồ sơ hợp lệ để dựng dữ liệu chiêm tinh."
+            return .merge(
+                .cancel(id: CancelID.metadata),
+                .cancel(id: CancelID.fortune)
+            )
+        }
 
-        return .run { send in
+        let metadataEffect = Effect<Action>.run { send in
+            let query = AstroDailyFortuneQuery(date: targetDate, profile: targetProfile)
+            do {
+                await send(.metadataLoaded(try await astrologyClient.localMetadata(query)))
+            } catch is CancellationError {
+                return
+            } catch {
+                await send(.metadataFailed(error.localizedDescription))
+            }
+        }
+        .cancellable(id: CancelID.metadata, cancelInFlight: true)
+
+        let fortuneEffect = Effect<Action>.run { send in
             let dailyCaDao = await caDaoClient.dailyCaDao(targetDate)
             let anchor = AstrologyClient.resolveAnchorCaDao(
                 explicit: nil,
@@ -390,6 +468,7 @@ struct AstrologyFeature {
             }
         }
         .cancellable(id: CancelID.fortune, cancelInFlight: true)
+        return .merge(metadataEffect, fortuneEffect)
     }
 
     private func scheduleMidnightTimer(from date: Date) -> Effect<Action> {

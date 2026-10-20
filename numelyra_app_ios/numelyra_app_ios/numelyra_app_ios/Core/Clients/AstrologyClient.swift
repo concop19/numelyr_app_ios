@@ -9,6 +9,10 @@ nonisolated struct AstrologyClient {
     
     // vector 32 chiều để thể hiện feature ai dánhd giá
     var natalContext: @Sendable (_ input: AstroBirthInput) async throws -> AstroNatalContext?
+    /// Tính metadata cục bộ độc lập với fortune API để Today/Natal vẫn hoạt động khi offline.
+    var localMetadata: @Sendable (_ query: AstroDailyFortuneQuery) async throws -> AstroFeatureMetadata = { _ in
+        throw CancellationError()
+    }
     var cachedDailyFortune: @Sendable (_ query: AstroDailyFortuneQuery) async -> AstroFortuneSlip? = { _ in nil }
     var dailyFortune: @Sendable (
         // dữ liệu lúc sinh của người dùng
@@ -30,7 +34,12 @@ extension AstrologyClient: DependencyKey {
             guard var cached = await cache.load(date: query.date, profile: query.profile) else {
                 return nil
             }
-            if cached.astroMetadata?.ruleEvaluation == nil {
+            if cached.astroMetadata?.ruleEvaluation == nil
+                || cached.astroMetadata?.engineVersion != AstrologyEngine.engineVersion
+                || cached.astroMetadata?.natalPlanets == nil
+                || cached.astroMetadata?.transitPlanets == nil
+                || cached.astroMetadata?.natalAspects == nil
+            {
                 var resolvedLocation: ResolvedBirthLocation?
                 if query.profile?.effectiveBirthTimeAccuracy == .exact,
                    let placeID = query.profile?.birthLocation?.placeID
@@ -55,6 +64,23 @@ extension AstrologyClient: DependencyKey {
             return cached
         }
 
+        @Sendable func makeLocalMetadata(_ query: AstroDailyFortuneQuery) async throws -> AstroFeatureMetadata {
+            var resolvedLocation: ResolvedBirthLocation?
+            if query.profile?.effectiveBirthTimeAccuracy == .exact,
+               let placeID = query.profile?.birthLocation?.placeID
+            {
+                resolvedLocation = try? await birthLocationClient.refresh(placeID)
+            }
+            let input = AstroBirthInput(
+                birthDate: query.profile?.birthDate ?? "1998-10-20",
+                birthTime: query.profile?.birthTime,
+                fullName: query.profile?.fullName ?? "Đương số",
+                birthTimeAccuracy: query.profile?.effectiveBirthTimeAccuracy ?? .unknown,
+                resolvedBirthLocation: resolvedLocation
+            )
+            return try AstrologyEngine.generateVector(input: input, currentDate: query.date).metadata
+        }
+
         return Self(
             generateVector: { input, currentDate in
                 try AstrologyEngine.generateVector(input: input, currentDate: currentDate)
@@ -62,6 +88,7 @@ extension AstrologyClient: DependencyKey {
             natalContext: { input in
                 try AstrologyEngine.makeNatalSnapshot(input: input, fingerprint: "direct").context
             },
+            localMetadata: { query in try await makeLocalMetadata(query) },
             cachedDailyFortune: { query in
                 await resolveCachedFortune(query)
             },
@@ -140,6 +167,15 @@ extension AstrologyClient: DependencyKey {
         },
         natalContext: { input in
             try AstrologyEngine.makeNatalSnapshot(input: input, fingerprint: "preview").context
+        },
+        localMetadata: { query in
+            let input = AstroBirthInput(
+                birthDate: query.profile?.birthDate ?? "1998-10-20",
+                birthTime: query.profile?.birthTime,
+                fullName: query.profile?.fullName ?? "Đương số",
+                birthTimeAccuracy: query.profile?.effectiveBirthTimeAccuracy ?? .unknown
+            )
+            return try AstrologyEngine.generateVector(input: input, currentDate: query.date).metadata
         },
         cachedDailyFortune: { _ in nil },
         dailyFortune: { query, _ in

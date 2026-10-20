@@ -150,6 +150,84 @@ final class SettingsFeatureTests: XCTestCase {
         await store.receive(.delegate(.didRequestLogin))
     }
 
+    func testUnconfiguredGuestStateUsesConfigurationGuidanceWithoutBillingRequest() async {
+        let billingRequestCount = LockIsolated(0)
+        let store = TestStore(initialState: SettingsFeature.State()) {
+            SettingsFeature()
+        } withDependencies: {
+            $0.supabaseClient.isConfigured = { false }
+            $0.supabaseClient.currentSession = { nil }
+            $0.billingClient.getBillingStatus = {
+                billingRequestCount.withValue { $0 += 1 }
+                return BillingStatus(authenticated: false, plan: .free)
+            }
+        }
+
+        await store.send(.onAppear) {
+            $0.isConfigured = false
+        }
+        await store.receive(.sessionLoaded(nil))
+
+        XCTAssertEqual(store.state.accountHint, "Dữ liệu hiện được lưu trên thiết bị này")
+        XCTAssertEqual(store.state.guestActionTitle, "Xem hướng dẫn cấu hình")
+        XCTAssertEqual(billingRequestCount.value, 0)
+    }
+
+    func testBillingFailureAndPendingStatusArePresentedInState() async {
+        let session = AuthSession(
+            accessToken: "",
+            refreshToken: "",
+            userId: "settings-test-user",
+            userEmail: "reader@example.test"
+        )
+        let pendingStatus = BillingStatus(
+            authenticated: true,
+            plan: .free,
+            checkoutPending: true
+        )
+        let store = TestStore(initialState: SettingsFeature.State(session: session)) {
+            SettingsFeature()
+        } withDependencies: {
+            $0.supabaseClient.isConfigured = { true }
+            $0.billingClient.getBillingStatus = {
+                throw BillingError(message: "Không thể tải trạng thái gói Pro.")
+            }
+        }
+
+        await store.send(.onAppear)
+        await store.receive(.billingResponse(.failure(BillingError(message: "Không thể tải trạng thái gói Pro.")))) {
+            $0.billingError = "Không thể tải trạng thái gói Pro."
+        }
+
+        await store.send(.billingResponse(.success(pendingStatus))) {
+            $0.billing = pendingStatus
+            $0.billingError = "Không thể tải trạng thái gói Pro."
+        }
+        XCTAssertTrue(store.state.isCheckoutPending)
+    }
+
+    func testInformationRowsUseRNAlertCopy() async {
+        let store = TestStore(initialState: SettingsFeature.State()) {
+            SettingsFeature()
+        }
+
+        let cases: [(SettingsFeature.Action.InformationItem, String, String)] = [
+            (.language, "Ngôn ngữ", "Ứng dụng hiện đang sử dụng Tiếng Việt."),
+            (.activity, "Hoạt động của bạn", "12 lượt xem tarot tháng này\n8 lần xem chiêm tinh\n5 ngày mở lịch liên tiếp"),
+            (.privacy, "Quyền riêng tư", "Dữ liệu cá nhân của bạn được lưu và đồng bộ theo trạng thái tài khoản."),
+            (.help, "Trợ giúp", "Nếu bạn cần hỗ trợ, hãy gửi phản hồi từ trang NUMELYRA.")
+        ]
+
+        for (item, title, message) in cases {
+            await store.send(.informationItemTapped(item)) {
+                $0.alert = .information(title, message)
+            }
+            await store.send(.alert(.dismiss)) {
+                $0.alert = nil
+            }
+        }
+    }
+
     func testAuthenticatedCheckoutSuccessAndAuthErrorHandling() async {
         let capturedProvider = LockIsolated<BillingProvider?>(nil)
         let checkoutError = LockIsolated<String?>(nil)
@@ -227,6 +305,17 @@ final class SettingsFeatureTests: XCTestCase {
     }
 
     func testSettingsEnginePureRules() {
+        let handleState = SettingsFeature.State(
+            session: AuthSession(
+                accessToken: "",
+                refreshToken: "",
+                userId: "settings-test-user",
+                userEmail: "an.nguyen@example.test"
+            )
+        )
+        XCTAssertEqual(handleState.accountHandle, "@an.nguyen")
+        XCTAssertEqual(SettingsFeature.State().accountHandle, "@numelyra")
+
         // 1. Vietnamese date formatting & Pro summary
         let vnTimeZone = TimeZone(secondsFromGMT: 7 * 3600)!
         let proBilling = BillingStatus(

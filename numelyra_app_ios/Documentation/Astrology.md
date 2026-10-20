@@ -2,6 +2,14 @@
 
 > Tài liệu này lấy model, engine và luồng TCA trong `numelyra_app_ios/` làm nội dung chính; mã React Native chỉ được dùng để đối chiếu hành vi migration. Phần Nhà/ASC/MC và vị trí sinh là phần mở rộng của engine Swift, không phải dữ liệu đã có trong pipeline vector React Native ban đầu.
 
+## Current screen flow (RN `950c0cb`, iOS slice 2026-10-20)
+
+Astrology dùng stack TCA `Today → Natal Chart → Detail` và hai presentation cho profile/birth data. Today mở detail hành tinh ở mode transit; Natal mở ở mode natal; detail cung không có mode. Chọn hoặc sửa hồ sơ lưu qua `UserProfileClient`, làm mới metadata/fortune và delegate lên `AppFeature` để đồng bộ profile đang hoạt động với các feature khác.
+
+Metadata cục bộ được tính độc lập với fortune API, nên Today/Natal vẫn hiển thị placements/aspects khi phần luận giải online lỗi. Birth editor nối `BirthPlacePickerFeature`: không dùng GPS, debounce 500 ms, cancel search/resolve, có retry/skip, bắt buộc lựa chọn place đã resolve và chuẩn hóa giờ 24-hour `HH:mm`; chọn không rõ giờ sẽ xóa giờ và lưu accuracy `unknown`.
+
+UI current-ref dùng 54 static asset có caller (4 background, 20 planet, 24 zodiac/constellation, 4 UI icon, 2 decoration). Aurora video và daily constellation canvas cũ đã được gỡ khỏi feature/resources vì không còn trong RN reachable flow. Rule catalog và request preview vẫn là diagnostic iOS-only; request `/api/astro/fortune` không nhận thêm `ruleContext`.
+
 ## 1. Chức năng chính
 
 Astrology tạo lá thăm chiêm tinh hằng ngày theo hồ sơ sinh. Màn hình kết hợp dữ liệu thiên văn tính trên thiết bị với nội dung diễn giải từ API:
@@ -23,7 +31,7 @@ Astrology tạo lá thăm chiêm tinh hằng ngày theo hồ sơ sinh. Màn hìn
 
    Chẳng hạn, `0.25` ở chiều Mặt Trời natal là kinh độ chuẩn hóa (`0.25 × 360° = 90°`); `0.30` ở tỷ lệ Lửa nghĩa là 3 trong 10 hành tinh natal thuộc cung nguyên tố Lửa; `0.60` ở điểm tension là điểm căng thẳng tổng hợp từ các góc transit–natal.
 4. Chọn một bài ca dao trong SQLite `cadao.db` làm chất liệu mẫu cho phần thơ. App gửi nội dung/nhóm ca dao cùng tóm tắt chiêm tinh, điểm số và tối đa 7 lời khuyên gần nhất tới `POST /api/astro/fortune`. Ca dao cung cấp mẫu tiếng Việt quen thuộc về nhịp, vần và sắc thái dân gian để AI dựa vào khi viết; nếu không có mẫu, AI thường dễ trả về văn xuôi hoặc câu thơ chưa tự nhiên. Đây là dữ liệu gợi ý cho backend, không phải bảo đảm rằng mọi câu AI sinh ra sẽ đúng niêm luật.
-5. Hiển thị lá thăm gồm tiêu đề và thơ; **Gương soi** diễn giải trạng thái/tâm thế có thể liên quan đến các dấu hiệu trong ngày, còn **Kế sách** đưa ra một việc hoặc cách ứng xử cụ thể. Nút **Xem giải mã** mở sheet giải thích lá thăm và cho xem các dữ liệu chiêm tinh làm ngữ cảnh: cung Mặt Trời/Mặt Trăng, khí chất, Mặt Trăng transit, góc nổi bật, điểm số và ca dao.
+5. Hiển thị Today bằng metadata cục bộ (tóm tắt, planet guidance và CTA Natal) song song với lá thăm online gồm tiêu đề, thơ, **Gương soi** và **Kế sách**. Nút **Xem giải mã** mở sheet giải thích lá thăm và cho xem cung Mặt Trời/Mặt Trăng, khí chất, Mặt Trăng transit, góc nổi bật, điểm số và ca dao.
 6. Cache kết quả theo ngày và hồ sơ; tự làm mới khi đổi hồ sơ/ngày hoặc qua nửa đêm. Hỗ trợ thử lại bỏ qua cache và chia sẻ nội dung.
 
 Đường đi TCA: `AstrologyView` → `AstrologyFeature` → `AstrologyClient` (`@Dependency`) → engine thuần `AstrologyEngine`; API, cache, hồ sơ, ca dao và haptic nằm ở client/dependency, không gọi side effect từ View.
@@ -185,6 +193,7 @@ classDiagram
       +topicVi: String
     }
     class AstroFeatureMetadata {
+      +engineVersion: String?
       +birthDate: String
       +birthTime: String?
       +hasExactTime: Bool
@@ -197,6 +206,11 @@ classDiagram
       +dominantSignal: AstroDominantSignal
       +natalContext: AstroNatalContext?
       +dailyContext: AstroDailyContext?
+      +natalPlanets: [AstroPlanetPosition]?
+      +transitPlanets: [AstroPlanetPosition]?
+      +transitAspects: [DetectedAstroAspect]?
+      +notableTransitAspects: [DetectedAstroAspect]?
+      +natalAspects: [NatalAstroAspect]?
     }
     class AstroVectorResult {
       +vector: [Double] // 32 phần tử
